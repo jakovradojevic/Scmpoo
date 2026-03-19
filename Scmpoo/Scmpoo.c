@@ -36,8 +36,8 @@ typedef struct windowinfo {
     BYTE padding[66]; /* Unused. */
 } windowinfo;
 
-int word_9CF0 = 245; /* Palette search maximum index (unused). */
-resourceinfo stru_9EE2[16] = { /* Resource list. */
+int paletteSearchMaxIndexUnused = 245; /* Palette search maximum index (unused). */
+resourceinfo resourceList[16] = { /* Resource list. */
     {101, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {102, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {103, 1, {{NULL, NULL}, 0, 0, 0, 0}},
@@ -50,8 +50,8 @@ resourceinfo stru_9EE2[16] = { /* Resource list. */
     {110, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {111, 1, {{NULL, NULL}, 0, 0, 0, 0}}
 };
-resourceinfo stru_9FE2[16] = {0}; /* Resource list storing flipped images. */
-WORD word_A15A[80] = { /* Normal action table (option "Gravity always on" disabled). */
+resourceinfo flippedResourceList[16] = {0}; /* Resource list storing flipped images. */
+WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "Gravity always on" disabled). */
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
@@ -73,7 +73,7 @@ WORD word_A15A[80] = { /* Normal action table (option "Gravity always on" disabl
     35, 53, 43, 47,
     45, 47, 49, 51
 };
-WORD word_A1FA[80] = { /* Normal action table (option "Gravity always on" enabled). */
+WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gravity always on" enabled). */
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
@@ -95,13 +95,17 @@ WORD word_A1FA[80] = { /* Normal action table (option "Gravity always on" enable
     35, 53, 43, 75,
     45, 47, 49, 51
 };
-WORD word_A29A[8] = { /* Special action table. */
+WORD specialActionTable[8] = { /* Special action table. */
     116, 121, 126, 147,
     128, 135, 142, 147
 };
-int word_A2AA = 1; /* Facing direction. 1 = left, -1 = right */
-int word_A2AC = 1; /* Facing direction (sub). 1 = left, -1 = right */
-WORD word_A2B4[6][8] = { /* Blink animations. */
+int facingDirection = 1; /* Facing direction. 1 = left, -1 = right */
+int facingDirectionSub = 1; /* Facing direction (sub). 1 = left, -1 = right */
+
+/* Backward-compatible aliases for decompiler-generated names. */
+#define facingDirection facingDirection
+#define facingDirectionSub facingDirectionSub
+WORD blinkAnimationFrames[6][8] = { /* Blink animations. */
     {7, 8, 7, 6, 7, 8, 7, 6},
     {32, 33, 32, 31, 32, 33, 32, 31},
     {74, 75, 74, 73, 74, 75, 74, 73},
@@ -109,276 +113,456 @@ WORD word_A2B4[6][8] = { /* Blink animations. */
     {82, 83, 82, 81, 82, 83, 82, 81},
     {35, 36, 35, 34, 35, 36, 35, 34}
 };
-WORD word_A314[2][4] = { /* Hang on window top edge animations. */
+WORD hangOnWindowTopEdgeAnimationFrames[2][4] = { /* Hang on window top edge animations. */
     {42, 43, 42, 44},
     {46, 47, 46, 47}
 };
-WORD word_A324[20] = { /* Collision animation with obsolete height offset. */
+WORD collisionAnimationFramesWithHeightOffset[20] = { /* Collision animation with obsolete height offset. */
     62, 63, 63, 64, 64, 65, 65, 66, 66, 66,
     0, 10, 17, 21, 22, 21, 17, 10, 0, 0
 };
-WORD word_A34C[11] = { /* Yawn animation. */
+WORD yawnAnimationFrames[11] = { /* Yawn animation. */
     37, 38, 39, 39, 39, 38, 37, 3, 37, 3, 0
 };
-WORD word_A362[8] = { /* Baa animation. */
+WORD baaAnimationFrames[8] = { /* Baa animation. */
     71, 72, 71, 72, 71, 72, 3, 0
 };
-WORD word_A372[13] = { /* Sneeze animation. */
+WORD sneezeAnimationFrames[13] = { /* Sneeze animation. */
     107, 108, 109, 109, 3, 3, 3, 110, 111, 110, 111, 3, 0
 };
-WORD word_A38C[6] = { /* Amazed animation. */
+WORD amazedAnimationFrames[6] = { /* Amazed animation. */
     50, 51, 50, 51, 3, 0
 };
-WORD word_A398[35] = { /* Eat animation. */
+WORD eatAnimationFrames[35] = { /* Eat animation. */
     58, 150, 60, 61, 60, 61, 60, 61, 58, 151, 60, 61, 60, 61, 60, 61, 2, 58, 152, 60, 61, 60, 61, 60, 61, 58, 153, 60, 61, 60, 61, 60, 61, 3, 0
 };
-WORD word_A3DE[34] = { /* Burn animation. */
+WORD burnAnimationFrames[34] = { /* Burn animation. */
     134, 134, 134, 134, 134, 134, 134, 134, 135, 136, 137, 138, 137, 138, 137, 138, 137, 138, 137, 138, 139, 140, 141, 142, 143, 144, 145, 144, 145, 144, 145, 144, 145, 0
 };
-WORD word_A422[13] = { /* Roll over animation (not used). */
+WORD rollOverAnimationFrames[13] = { /* Roll over animation (not used). */
     3, 93, 99, 100, 99, 100, 99, 100, 99, 100, 95, 3, 0
 };
-WORD word_A43C[8] = { /* Get up animation (left). */
+WORD getUpAnimationFramesLeft[8] = { /* Get up animation (left). */
     48, 48, 48, 49, 13, 12, 3, 0
 };
-WORD word_A44C[8] = { /* Get up animation (right). */
+WORD getUpAnimationFramesRight[8] = { /* Get up animation (right). */
     48, 48, 48, 49, 13, 14, 3, 0
 };
-WORD word_A45C[28] = { /* Merry 2 animation. */
+WORD merry2AnimationFrames[28] = { /* Merry 2 animation. */
     130, 130, 130, 130, 130, 129, 129, 128, 128, 127, 127, 127, 6, 6, 6, 6, 7, 8, 7, 6, 7, 8, 7, 6, 6, 6, 6, 0
 };
-WORD word_A494[5] = { /* Burn bathtub splash animation. */
+WORD burnBathtubSplashAnimationFrames[5] = { /* Burn bathtub splash animation. */
     147, 148, 147, 146, 0
 };
-WORD word_A49E[55] = { /* Burn get out of bathtub animation. */
+WORD burnGetOutOfBathtubAnimationFrames[55] = { /* Burn get out of bathtub animation. */
     169, 169, 169, 169, 169, 169, 169, 169, 170, 171, 170, 169, 170, 171, 170, 169, 169, 169, 169, 81, 81, 81, 81, 81, 81, 81, 81, 85, 85, 85, 85, 85, 85, 85, 85, 34, 34, 34, 34, 35, 36, 35, 34, 35, 36, 35, 34, 34, 34, 10, 10, 9, 9, 3, 0
 };
-WORD word_A50C[12] = { /* Blush animation. */
+WORD blushAnimationFrames[12] = { /* Blush animation. */
     3, 127, 128, 129, 130, 130, 130, 129, 128, 127, 127, 0
 };
-WORD word_A524[9] = { /* Roll animation. */
+WORD rollAnimationFrames[9] = { /* Roll animation. */
     119, 120, 121, 122, 123, 124, 125, 126, 0
 };
-WORD word_A536[8] = { /* Spin animation. 0-3: face, 4-7: back */
+WORD spinAnimationFrames[8] = { /* Spin animation. 0-3: face, 4-7: back */
     3, 9, 10, 11, 2, 14, 13, 12
 };
-WORD word_A798 = 0; /* Has cursor position changed in current timer period? */
-int word_A79A = 0; /* Cursor position with respect to screen, X-coordinate */
-int word_A79C = 0; /* Cursor position with respect to screen, Y-coordinate */
-WORD word_A79E = 0; /* Dragging Screen Mate window? */
-WORD word_A7A0 = 0; /* Destroy Screen Mate window by right double-click? */
-WORD word_A7A2 = 0; /* Unused. */
-RECT stru_A7A4 = {0, 0, 0, 0}; /* Screen Mate window rectangle. */
-WORD word_A7AC = 0; /* Not to clear window on WM_PAINT? */
-POINT stru_A7B0 = {0, 0}; /* Current cursor position. */
-WORD word_A7B4 = 0; /* Not to clear window on WM_PAINT? (sub) */
-HBITMAP word_A7B6[2] = {NULL, NULL}; /* Double buffer. */
-HBITMAP word_A7BA = NULL; /* Sprite render target. */
-HBITMAP word_A7BC = NULL; /* Sprite colour image for current frame. */
-HBITMAP word_A7BE = NULL; /* Sprite mask image for current frame. */
-int word_A7C0 = 0; /* Sprite X-coordinate on resource image for current frame. */
-int word_A7C2 = 0; /* Sprite Y-coordinate on resource image for current frame. */
-int word_A7C8 = 0; /* Sprite X-coordinate on resource image for previous frame. */
-int word_A7CA = 0; /* Sprite Y-coordinate on resource image for previous frame (unused). */
-WORD word_A7D0 = 0; /* Current framebuffer index. */
-WORD word_A7D2 = 0; /* 0 to render sprite; 1 to update window. */
-WORD word_A7D4 = 0; /* Unused. */
-HBITMAP word_A7D8 = NULL; /* Sprite colour image for previous frame. */
-int word_A7DA = 0; /* Screen X-coordinate for current frame. */
-int word_A7DC = 0; /* Screen Y-coordinate for current frame. */
-int word_A7DE = 0; /* Sprite width for current frame. */
-int word_A7E0 = 0; /* Sprite height for current frame. */
-int word_A7E2 = 0; /* Update area rectangle X-coordinate for current frame. */
-int word_A7E4 = 0; /* Update area rectangle Y-coordinate for current frame. */
-int word_A7E6 = 0; /* Update area rectangle width for current frame. */
-int word_A7E8 = 0; /* Update area rectangle height for current frame. */
-int word_A7EA = 0; /* Update area rectangle X-coordinate for previous frame. */
-int word_A7EC = 0; /* Update area rectangle Y-coordinate for previous frame. */
-int word_A7EE = 0; /* Update area rectangle width for previous frame. */
-int word_A7F0 = 0; /* Update area rectangle height for previous frame. */
-int word_A7F2 = 0; /* Screen X-coordinate for previous frame. */
-int word_A7F4 = 0; /* Screen Y-coordinate for previous frame. */
-int word_A7F6 = 0; /* Sprite width for previous frame. */
-int word_A7F8 = 0; /* Sprite height for previous frame. */
-WORD word_A7FA = 0; /* Current frame rectangle and previous frame rectangle have no intersecion? (unused) */
-WORD word_A7FC = 0; /* Is gravity enabled? */
-WORD word_A7FE = 0; /* Is collision with visible window enabled? */
-int word_A800 = 0; /* Current X-coordinate. */
-int word_A802 = 0; /* Current Y-coordinate. */
-int word_A804 = 0; /* Sprite index. */
-int word_A806 = 0; /* Vertical speed. */
-int word_A808 = 0; /* Horizontal speed. */
-int word_A80C = 0; /* Y-coordinate memory. */
-int word_A80E = 0; /* Current X-coordinate (sub). */
-int word_A810 = 0; /* Current Y-coordinate (sub). */
-int word_A812 = 0; /* Sprite index (sub). */
-HWND word_A81C = NULL; /* Active window or window to land on. */
-RECT stru_A81E = {0L, 0L, 0L, 0L}; /* Rectangle of active window or window to land on. */
-int word_A826 = 0; /* Animation frame counter. */
-int word_A828 = 0; /* Random duration period counter. */
-int word_A82A = 0; /* Random case number for action. */
-WORD word_A82C = 0; /* Unused. */
-HGLOBAL word_A82E = NULL; /* Global handle for holding WAVE resource in memory. */
-int word_A830 = 0; /* Current time hour. */
-int word_A832 = 0; /* Remaining times for chime. */
-DWORD dword_A834 = 0; /* Tick count. */
-int word_A838 = 0; /* Time check period counter. */
-int word_A83A = 0; /* Frame period counter. */
-int word_A83C = 0; /* Target X-coordinate for window edge attachment. */
-int word_A83E = 0; /* Target Y-coordinate for window edge attachment. */
-WORD word_A840 = 0; /* Bounce when falling? */
-int word_A842 = 0; /* Case number for fall action. */
-int word_A844 = 0; /* Collision vertical speed (unused). */
-int word_A846 = 0; /* Collision spin frame counter (unused). */
-WORD word_A848 = 0; /* Collision animation frame index. */
-int word_A84A = 0; /* Known instance list update period counter. */
-HBITMAP word_A850[2] = {NULL, NULL}; /* Double buffer (sub). */
-HBITMAP word_A854 = NULL; /* Sprite render target (sub). */
-HBITMAP word_A856 = NULL; /* Sprite colour image for current frame (sub). */
-HBITMAP word_A858 = NULL; /* Sprite mask image for current frame (sub). */
-HBITMAP word_A85A = NULL; /* Fade out processed colour image (sub). */
-HBITMAP word_A85C = NULL; /* Fade out processed mask image (sub). */
-int word_A85E = 0; /* Sprite X-coordinate on resource image for current frame (sub). */
-int word_A860 = 0; /* Sprite Y-coordinate on resource image for current frame (sub). */
-int word_A866 = 0; /* Sprite X-coordinate on resource image for previous frame (sub). */
-int word_A868 = 0; /* Sprite Y-coordinate on resource image for previous frame (sub) (unused). */
-WORD word_A86E = 0; /* Current framebuffer index (sub). */
-WORD word_A870 = 0; /* 0 to render sprite; 1 to update window (sub). */
-WORD word_A872 = 0; /* Unused. */
-HBITMAP word_A876 = NULL; /* Sprite colour image for previous frame (sub). */
-int word_A878 = 0; /* Screen X-coordinate for current frame (sub). */
-int word_A87A = 0; /* Screen Y-coordinate for current frame (sub). */
-int word_A87C = 0; /* Sprite width for current frame (sub). */
-int word_A87E = 0; /* Sprite height for current frame (sub). */
-int word_A880 = 0; /* Update area rectangle X-coordinate for current frame (sub). */
-int word_A882 = 0; /* Update area rectangle Y-coordinate for current frame (sub). */
-int word_A884 = 0; /* Update area rectangle width for current frame (sub). */
-int word_A886 = 0; /* Update area rectangle height for current frame (sub). */
-int word_A888 = 0; /* Update area rectangle X-coordinate for previous frame (sub). */
-int word_A88A = 0; /* Update area rectangle Y-coordinate for previous frame (sub). */
-int word_A88C = 0; /* Update area rectangle width for previous frame (sub). */
-int word_A88E = 0; /* Update area rectangle height for previous frame (sub). */
-int word_A890 = 0; /* Screen X-coordinate for previous frame (sub). */
-int word_A892 = 0; /* Screen Y-coordinate for previous frame (sub). */
-int word_A894 = 0; /* Sprite width for previous frame (sub). */
-int word_A896 = 0; /* Sprite height for previous frame (sub). */
-WORD word_A898 = 0; /* Current frame rectangle and previous frame rectangle have no intersecion? (sub) (unused) */
-WORD word_A8A0 = 0; /* State. */
-spriteinfo stru_A8A2[512] = {{{NULL, NULL}, 0, 0, 0, 0}}; /* Sprite list. First 256 for left-facing sprites, last 256 for right-facing sprites. */
-int word_C0A4 = 0; /* No mouse action consecutive period counter. */
-UINT word_C0AC = 0U; /* Configuration: Chime */
-WORD word_C0AE = 0; /* Screen Mate window on top of subwindow? (unused) */
-HWND word_C0B0 = NULL; /* Self instance window handle. */
-HBITMAP word_C0B2 = NULL; /* UFO beam render target. */
-HBRUSH word_C0B4 = NULL; /* UFO beam paint colour brush. */
-UINT word_C0B6 = 0U; /* Configuration: Always moving */
-HBITMAP word_C0B8 = NULL; /* UFO beam colour rectangle image. */
-WORD word_C0BA = 0; /* Remaining no-update periods after clearing windows. */
-windowinfo stru_C0BC[32] = {{NULL, {0, 0, 0, 0}, {0}}}; /* Currently visible window list. */
-WORD word_CA3C = 0; /* Prevent special actions? */
-WORD word_CA3E = 0; /* Always on top? (unused) */
-int word_CA40 = 0; /* Known instance count. */
-UINT word_CA42 = 0U; /* Configuration: Gravity always on */
-HBRUSH word_CA44 = NULL; /* UFO beam mask colour brush. */
-int word_CA46 = 0; /* Fade out frame counter. */
-int word_CA48 = 0; /* Unused. */
-HPALETTE word_CA4A = NULL; /* Palette being used by window. */
-int word_CA4C = 0; /* Unused. */
-int word_CA4E = 0; /* Unused. */
-int word_CA50 = 0; /* Screen width. */
-int word_CA52 = 0; /* Screen height. */
-WORD word_CA54 = 0; /* Temporarily holds sleep timeout action. */
-WORD word_CA56 = 0; /* Not to clear subwindow? */
-HINSTANCE word_CA58 = NULL; /* Current instance. */
-UINT word_CA5A = 0U; /* Configuration: Cry */
-int word_CA5C = 0; /* UFO beam height (sub). */
-WORD word_CA5E = 0; /* Unused. */
-HWND word_CA60[9] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}; /* Known instance list. When no other instance exists, [8] is used to store subwindow handle. */
-int word_CA72 = 0; /* UFO beam height. */
-int word_CA74 = 0; /* Number of currently visible windows. */
-WORD word_CA76 = 0; /* Sleeping after timeout? */
-WORD word_CA78 = 0; /* Unused. */
+/* Backward-compatible aliases for decompiler-generated names. */
+#define paletteSearchMaxIndexUnused paletteSearchMaxIndexUnused
+#define resourceList resourceList
+#define flippedResourceList flippedResourceList
+#define normalActionTableGravityAlwaysOff normalActionTableGravityAlwaysOff
+#define normalActionTableGravityAlwaysOn normalActionTableGravityAlwaysOn
+#define specialActionTable specialActionTable
+#define blinkAnimationFrames blinkAnimationFrames
+#define hangOnWindowTopEdgeAnimationFrames hangOnWindowTopEdgeAnimationFrames
+#define collisionAnimationFramesWithHeightOffset collisionAnimationFramesWithHeightOffset
+#define yawnAnimationFrames yawnAnimationFrames
+#define baaAnimationFrames baaAnimationFrames
+#define sneezeAnimationFrames sneezeAnimationFrames
+#define amazedAnimationFrames amazedAnimationFrames
+#define eatAnimationFrames eatAnimationFrames
+#define burnAnimationFrames burnAnimationFrames
+#define rollOverAnimationFrames rollOverAnimationFrames
+#define getUpAnimationFramesLeft getUpAnimationFramesLeft
+#define getUpAnimationFramesRight getUpAnimationFramesRight
+#define merry2AnimationFrames merry2AnimationFrames
+#define burnBathtubSplashAnimationFrames burnBathtubSplashAnimationFrames
+#define burnGetOutOfBathtubAnimationFrames burnGetOutOfBathtubAnimationFrames
+#define blushAnimationFrames blushAnimationFrames
+#define rollAnimationFrames rollAnimationFrames
+#define spinAnimationFrames spinAnimationFrames
+
+WORD cursorPositionChanged = 0; /* Has cursor position changed in current timer period? */
+int cursorScreenX = 0; /* Cursor position with respect to screen, X-coordinate */
+int cursorScreenY = 0; /* Cursor position with respect to screen, Y-coordinate */
+
+#define cursorPositionChanged cursorPositionChanged
+#define cursorScreenX cursorScreenX
+#define cursorScreenY cursorScreenY
+WORD draggingScreenMateWindow = 0; /* Dragging Screen Mate window? */
+WORD destroyScreenMateOnRightDoubleClick = 0; /* Destroy Screen Mate window by right double-click? */
+WORD unused_A7A2 = 0; /* Unused. */
+RECT screenMateWindowRect = {0, 0, 0, 0}; /* Screen Mate window rectangle. */
+WORD doNotClearWindowOnPaint = 0; /* Not to clear window on WM_PAINT? */
+POINT cursorPosition = {0, 0}; /* Current cursor position. */
+WORD doNotClearSubwindowOnPaint = 0; /* Not to clear window on WM_PAINT? (sub) */
+HBITMAP doubleBufferMain[2] = {NULL, NULL}; /* Double buffer. */
+HBITMAP spriteRenderTargetMain = NULL; /* Sprite render target. */
+HBITMAP spriteColourBitmapMain = NULL; /* Sprite colour image for current frame. */
+HBITMAP spriteMaskBitmapMain = NULL; /* Sprite mask image for current frame. */
+
+#define draggingScreenMateWindow draggingScreenMateWindow
+#define destroyScreenMateOnRightDoubleClick destroyScreenMateOnRightDoubleClick
+#define unused_A7A2 unused_A7A2
+#define screenMateWindowRect screenMateWindowRect
+#define doNotClearWindowOnPaint doNotClearWindowOnPaint
+#define cursorPosition cursorPosition
+#define doNotClearSubwindowOnPaint doNotClearSubwindowOnPaint
+#define doubleBufferMain doubleBufferMain
+#define spriteRenderTargetMain spriteRenderTargetMain
+#define spriteColourBitmapMain spriteColourBitmapMain
+#define spriteMaskBitmapMain spriteMaskBitmapMain
+int spriteXInResourceImageCurrentFrame = 0; /* Sprite X-coordinate on resource image for current frame. */
+int spriteYInResourceImageCurrentFrame = 0; /* Sprite Y-coordinate on resource image for current frame. */
+int spriteXInResourceImagePreviousFrame = 0; /* Sprite X-coordinate on resource image for previous frame. */
+int spriteYInResourceImagePreviousFrameUnused = 0; /* Sprite Y-coordinate on resource image for previous frame (unused). */
+WORD currentSpriteFramebufferIndex = 0; /* Current framebuffer index. */
+WORD renderOrUpdateWindowFlag = 0; /* 0 to render sprite; 1 to update window. */
+WORD unused_A7D4 = 0; /* Unused. */
+HBITMAP spriteColourBitmapPreviousFrame = NULL; /* Sprite colour image for previous frame. */
+int screenXCurrentFrame = 0; /* Screen X-coordinate for current frame. */
+int screenYCurrentFrame = 0; /* Screen Y-coordinate for current frame. */
+int spriteWidthCurrentFrame = 0; /* Sprite width for current frame. */
+int spriteHeightCurrentFrame = 0; /* Sprite height for current frame. */
+int updateAreaRectXCurrentFrame = 0; /* Update area rectangle X-coordinate for current frame. */
+int updateAreaRectYCurrentFrame = 0; /* Update area rectangle Y-coordinate for current frame. */
+int updateAreaRectWidthCurrentFrame = 0; /* Update area rectangle width for current frame. */
+int updateAreaRectHeightCurrentFrame = 0; /* Update area rectangle height for current frame. */
+int updateAreaRectXPreviousFrame = 0; /* Update area rectangle X-coordinate for previous frame. */
+int updateAreaRectYPreviousFrame = 0; /* Update area rectangle Y-coordinate for previous frame. */
+int updateAreaRectWidthPreviousFrame = 0; /* Update area rectangle width for previous frame. */
+int updateAreaRectHeightPreviousFrame = 0; /* Update area rectangle height for previous frame. */
+int screenXPreviousFrame = 0; /* Screen X-coordinate for previous frame. */
+int screenYPreviousFrame = 0; /* Screen Y-coordinate for previous frame. */
+int spriteWidthPreviousFrame = 0; /* Sprite width for previous frame. */
+int spriteHeightPreviousFrame = 0; /* Sprite height for previous frame. */
+WORD unused_A7FA = 0; /* Current frame rectangle and previous frame rectangle have no intersecion? (unused) */
+
+#define spriteXInResourceImageCurrentFrame spriteXInResourceImageCurrentFrame
+#define spriteYInResourceImageCurrentFrame spriteYInResourceImageCurrentFrame
+#define spriteXInResourceImagePreviousFrame spriteXInResourceImagePreviousFrame
+#define spriteYInResourceImagePreviousFrameUnused spriteYInResourceImagePreviousFrameUnused
+#define currentSpriteFramebufferIndex currentSpriteFramebufferIndex
+#define renderOrUpdateWindowFlag renderOrUpdateWindowFlag
+#define unused_A7D4 unused_A7D4
+#define spriteColourBitmapPreviousFrame spriteColourBitmapPreviousFrame
+#define screenXCurrentFrame screenXCurrentFrame
+#define screenYCurrentFrame screenYCurrentFrame
+#define spriteWidthCurrentFrame spriteWidthCurrentFrame
+#define spriteHeightCurrentFrame spriteHeightCurrentFrame
+#define updateAreaRectXCurrentFrame updateAreaRectXCurrentFrame
+#define updateAreaRectYCurrentFrame updateAreaRectYCurrentFrame
+#define updateAreaRectWidthCurrentFrame updateAreaRectWidthCurrentFrame
+#define updateAreaRectHeightCurrentFrame updateAreaRectHeightCurrentFrame
+#define updateAreaRectXPreviousFrame updateAreaRectXPreviousFrame
+#define updateAreaRectYPreviousFrame updateAreaRectYPreviousFrame
+#define updateAreaRectWidthPreviousFrame updateAreaRectWidthPreviousFrame
+#define updateAreaRectHeightPreviousFrame updateAreaRectHeightPreviousFrame
+#define screenXPreviousFrame screenXPreviousFrame
+#define screenYPreviousFrame screenYPreviousFrame
+#define spriteWidthPreviousFrame spriteWidthPreviousFrame
+#define spriteHeightPreviousFrame spriteHeightPreviousFrame
+#define unused_A7FA unused_A7FA
+WORD gravityEnabled = 0; /* Is gravity enabled? */
+WORD collisionEnabled = 0; /* Is collision with visible window enabled? */
+int spriteX = 0; /* Current X-coordinate. */
+int spriteY = 0; /* Current Y-coordinate. */
+
+#define spriteX spriteX
+#define spriteY spriteY
+int spriteIndex = 0; /* Sprite index. */
+int verticalSpeed = 0; /* Vertical speed. */
+int horizontalSpeed = 0; /* Horizontal speed. */
+int yCoordinateMemory = 0; /* Y-coordinate memory. */
+int spriteXSub = 0; /* Current X-coordinate (sub). */
+int spriteYSub = 0; /* Current Y-coordinate (sub). */
+int spriteIndexSub = 0; /* Sprite index (sub). */
+HWND landingTargetWindow = NULL; /* Active window or window to land on. */
+RECT landingTargetWindowRect = {0L, 0L, 0L, 0L}; /* Rectangle of active window or window to land on. */
+
+#define spriteIndex spriteIndex
+#define verticalSpeed verticalSpeed
+#define horizontalSpeed horizontalSpeed
+#define yCoordinateMemory yCoordinateMemory
+#define spriteXSub spriteXSub
+#define spriteYSub spriteYSub
+#define spriteIndexSub spriteIndexSub
+#define landingTargetWindow landingTargetWindow
+#define landingTargetWindowRect landingTargetWindowRect
+int animationFrameCounter = 0; /* Animation frame counter. */
+int randomDurationCounter = 0; /* Random duration period counter. */
+int randomCaseNumberForAction = 0; /* Random case number for action. */
+WORD unusedA82C = 0; /* Unused. */
+HGLOBAL waveResourceHandle = NULL; /* Global handle for holding WAVE resource in memory. */
+#define waveResourceHandle waveResourceHandle
+#define animationFrameCounter animationFrameCounter
+#define randomDurationCounter randomDurationCounter
+
+#define randomCaseNumberForAction randomCaseNumberForAction
+#define unusedA82C unusedA82C
+
+int currentTimeHour = 0; /* Current time hour. */
+int remainingChimeTimes = 0; /* Remaining times for chime. */
+DWORD tickCount = 0; /* Tick count. */
+
+#define currentTimeHour currentTimeHour
+#define remainingChimeTimes remainingChimeTimes
+#define dword_A834 tickCount
+int timeCheckPeriodCounter = 0; /* Time check period counter. */
+int framePeriodCounter = 0; /* Frame period counter. */
+int targetXWindowEdgeAttachment = 0; /* Target X-coordinate for window edge attachment. */
+int targetYWindowEdgeAttachment = 0; /* Target Y-coordinate for window edge attachment. */
+WORD bounceWhenFalling = 0; /* Bounce when falling? */
+int fallActionCaseNumber = 0; /* Case number for fall action. */
+int collisionVerticalSpeedUnused = 0; /* Collision vertical speed (unused). */
+int collisionSpinFrameCounterUnused = 0; /* Collision spin frame counter (unused). */
+WORD collisionAnimationFrameIndex = 0; /* Collision animation frame index. */
+int knownInstanceListUpdatePeriodCounter = 0; /* Known instance list update period counter. */
+
+HBITMAP doubleBufferSub[2] = {NULL, NULL}; /* Double buffer (sub). */
+HBITMAP spriteRenderTargetSub = NULL; /* Sprite render target (sub). */
+HBITMAP spriteColourBitmapSubCurrentFrame = NULL; /* Sprite colour image for current frame (sub). */
+HBITMAP spriteMaskBitmapSubCurrentFrame = NULL; /* Sprite mask image for current frame (sub). */
+HBITMAP fadeOutColourBitmapSub = NULL; /* Fade out processed colour image (sub). */
+HBITMAP fadeOutMaskBitmapSub = NULL; /* Fade out processed mask image (sub). */
+int spriteXInResourceImageSubCurrentFrame = 0; /* Sprite X-coordinate on resource image for current frame (sub). */
+int spriteYInResourceImageSubCurrentFrame = 0; /* Sprite Y-coordinate on resource image for current frame (sub). */
+int spriteXInResourceImageSubPreviousFrame = 0; /* Sprite X-coordinate on resource image for previous frame (sub). */
+int spriteYInResourceImageSubPreviousFrameUnused = 0; /* Sprite Y-coordinate on resource image for previous frame (sub) (unused). */
+WORD currentSpriteFramebufferIndexSub = 0; /* Current framebuffer index (sub). */
+WORD renderOrUpdateWindowFlagSub = 0; /* 0 to render sprite; 1 to update window (sub). */
+WORD unused_A872 = 0; /* Unused. */
+HBITMAP spriteColourBitmapSubPreviousFrame = NULL; /* Sprite colour image for previous frame (sub). */
+int screenXSubCurrentFrame = 0; /* Screen X-coordinate for current frame (sub). */
+int screenYSubCurrentFrame = 0; /* Screen Y-coordinate for current frame (sub). */
+int spriteWidthSubCurrentFrame = 0; /* Sprite width for current frame (sub). */
+int spriteHeightSubCurrentFrame = 0; /* Sprite height for current frame (sub). */
+int updateAreaRectXSubCurrentFrame = 0; /* Update area rectangle X-coordinate for current frame (sub). */
+int updateAreaRectYSubCurrentFrame = 0; /* Update area rectangle Y-coordinate for current frame (sub). */
+int updateAreaRectWidthSubCurrentFrame = 0; /* Update area rectangle width for current frame (sub). */
+int updateAreaRectHeightSubCurrentFrame = 0; /* Update area rectangle height for current frame (sub). */
+int updateAreaRectXSubPreviousFrame = 0; /* Update area rectangle X-coordinate for previous frame (sub). */
+int updateAreaRectYSubPreviousFrame = 0; /* Update area rectangle Y-coordinate for previous frame (sub). */
+int updateAreaRectWidthSubPreviousFrame = 0; /* Update area rectangle width for previous frame (sub). */
+int updateAreaRectHeightSubPreviousFrame = 0; /* Update area rectangle height for previous frame (sub). */
+int screenXSubPreviousFrame = 0; /* Screen X-coordinate for previous frame (sub). */
+int screenYSubPreviousFrame = 0; /* Screen Y-coordinate for previous frame (sub). */
+int spriteWidthSubPreviousFrame = 0; /* Sprite width for previous frame (sub). */
+int spriteHeightSubPreviousFrame = 0; /* Sprite height for previous frame (sub). */
+WORD unused_A898 = 0; /* Current frame rectangle and previous frame rectangle have no intersecion? (sub) (unused) */
+WORD subWindowState = 0; /* State. */
+spriteinfo spriteListSub[512] = {{{NULL, NULL}, 0, 0, 0, 0}}; /* Sprite list. First 256 for left-facing sprites, last 256 for right-facing sprites. */
+
+#define timeCheckPeriodCounter timeCheckPeriodCounter
+#define framePeriodCounter framePeriodCounter
+#define targetXWindowEdgeAttachment targetXWindowEdgeAttachment
+#define targetYWindowEdgeAttachment targetYWindowEdgeAttachment
+#define bounceWhenFalling bounceWhenFalling
+#define fallActionCaseNumber fallActionCaseNumber
+#define collisionVerticalSpeedUnused collisionVerticalSpeedUnused
+#define collisionSpinFrameCounterUnused collisionSpinFrameCounterUnused
+#define collisionAnimationFrameIndex collisionAnimationFrameIndex
+#define knownInstanceListUpdatePeriodCounter knownInstanceListUpdatePeriodCounter
+
+#define doubleBufferSub doubleBufferSub
+#define spriteRenderTargetSub spriteRenderTargetSub
+#define spriteColourBitmapSubCurrentFrame spriteColourBitmapSubCurrentFrame
+#define spriteMaskBitmapSubCurrentFrame spriteMaskBitmapSubCurrentFrame
+#define fadeOutColourBitmapSub fadeOutColourBitmapSub
+#define fadeOutMaskBitmapSub fadeOutMaskBitmapSub
+#define spriteXInResourceImageSubCurrentFrame spriteXInResourceImageSubCurrentFrame
+#define spriteYInResourceImageSubCurrentFrame spriteYInResourceImageSubCurrentFrame
+#define spriteXInResourceImageSubPreviousFrame spriteXInResourceImageSubPreviousFrame
+#define spriteYInResourceImageSubPreviousFrameUnused spriteYInResourceImageSubPreviousFrameUnused
+#define currentSpriteFramebufferIndexSub currentSpriteFramebufferIndexSub
+#define renderOrUpdateWindowFlagSub renderOrUpdateWindowFlagSub
+#define unused_A872 unused_A872
+#define spriteColourBitmapSubPreviousFrame spriteColourBitmapSubPreviousFrame
+#define screenXSubCurrentFrame screenXSubCurrentFrame
+#define screenYSubCurrentFrame screenYSubCurrentFrame
+#define spriteWidthSubCurrentFrame spriteWidthSubCurrentFrame
+#define spriteHeightSubCurrentFrame spriteHeightSubCurrentFrame
+#define updateAreaRectXSubCurrentFrame updateAreaRectXSubCurrentFrame
+#define updateAreaRectYSubCurrentFrame updateAreaRectYSubCurrentFrame
+#define updateAreaRectWidthSubCurrentFrame updateAreaRectWidthSubCurrentFrame
+#define updateAreaRectHeightSubCurrentFrame updateAreaRectHeightSubCurrentFrame
+#define updateAreaRectXSubPreviousFrame updateAreaRectXSubPreviousFrame
+#define updateAreaRectYSubPreviousFrame updateAreaRectYSubPreviousFrame
+#define updateAreaRectWidthSubPreviousFrame updateAreaRectWidthSubPreviousFrame
+#define updateAreaRectHeightSubPreviousFrame updateAreaRectHeightSubPreviousFrame
+#define screenXSubPreviousFrame screenXSubPreviousFrame
+#define screenYSubPreviousFrame screenYSubPreviousFrame
+#define spriteWidthSubPreviousFrame spriteWidthSubPreviousFrame
+#define spriteHeightSubPreviousFrame spriteHeightSubPreviousFrame
+#define unused_A898 unused_A898
+#define subWindowState subWindowState
+#define spriteListSub spriteListSub
+int noMouseActionConsecutivePeriodCount = 0; /* No mouse action consecutive period counter. */
+UINT chimeEnabled = 0U; /* Configuration: Chime */
+WORD screenMateOnTopOfSubwindow = 0; /* Screen Mate window on top of subwindow? (unused) */
+HWND selfInstanceWindowHandle = NULL; /* Self instance window handle. */
+HBITMAP ufoBeamRenderTarget = NULL; /* UFO beam render target. */
+HBRUSH ufoBeamPaintBrush = NULL; /* UFO beam paint colour brush. */
+UINT alwaysMovingEnabled = 0U; /* Configuration: Always moving */
+HBITMAP ufoBeamColorBitmap = NULL; /* UFO beam colour rectangle image. */
+WORD noUpdatePeriodsAfterClearing = 0; /* Remaining no-update periods after clearing windows. */
+windowinfo visibleWindowList[32] = {{NULL, {0, 0, 0, 0}, {0}}}; /* Currently visible window list. */
+
+#define visibleWindowList visibleWindowList
+WORD preventSpecialActions = 0; /* Prevent special actions? */
+WORD alwaysOnTopUnused = 0; /* Always on top? (unused) */
+int knownInstanceCount = 0; /* Known instance count. */
+UINT gravityAlwaysEnabled = 0U; /* Configuration: Gravity always on */
+HBRUSH ufoBeamMaskBrush = NULL; /* UFO beam mask colour brush. */
+int fadeOutFrameCounter = 0; /* Fade out frame counter. */
+int unusedCa48 = 0; /* Unused. */
+HPALETTE windowPaletteInUse = NULL; /* Palette being used by window. */
+int unusedCa4C = 0; /* Unused. */
+int unusedCa4E = 0; /* Unused. */
+int screenWidth = 0; /* Screen width. */
+int screenHeight = 0; /* Screen height. */
+
+#define screenWidth screenWidth
+#define screenHeight screenHeight
+WORD sleepTimeoutAction = 0; /* Temporarily holds sleep timeout action. */
+WORD keepSubwindowOnPaint = 0; /* Not to clear subwindow? */
+HINSTANCE currentInstance = NULL; /* Current instance. */
+UINT cryEnabled = 0U; /* Configuration: Cry */
+int ufoBeamHeightSub = 0; /* UFO beam height (sub). */
+WORD unusedCa5E = 0; /* Unused. */
+HWND knownInstanceWindows[9] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}; /* Known instance list. When no other instance exists, [8] is used to store subwindow handle. */
+int ufoBeamHeight = 0; /* UFO beam height. */
+int visibleWindowCount = 0; /* Number of currently visible windows. */
+WORD sleepingAfterTimeout = 0; /* Sleeping after timeout? */
+WORD unusedCa78 = 0; /* Unused. */
 #ifdef _WIN32
-HWND ownerwindow = NULL;
+HWND ownerWindowHandle = NULL;
+#define ownerWindowHandle ownerWindowHandle
 #endif
 
-void PASCAL sub_10(void FAR *, void FAR *);
-int PASCAL sub_114(void FAR *, void FAR *, int);
-void PASCAL sub_230(void FAR *, void FAR *);
+/* Backward-compatible aliases for decompiler-generated names. */
+#define noMouseActionConsecutivePeriodCount noMouseActionConsecutivePeriodCount
+#define chimeEnabled chimeEnabled
+#define screenMateOnTopOfSubwindow screenMateOnTopOfSubwindow
+#define selfInstanceWindowHandle selfInstanceWindowHandle
+#define ufoBeamRenderTarget ufoBeamRenderTarget
+#define ufoBeamPaintBrush ufoBeamPaintBrush
+#define alwaysMovingEnabled alwaysMovingEnabled
+#define ufoBeamColorBitmap ufoBeamColorBitmap
+#define noUpdatePeriodsAfterClearing noUpdatePeriodsAfterClearing
+
+#define preventSpecialActions preventSpecialActions
+#define knownInstanceCount knownInstanceCount
+#define gravityAlwaysEnabled gravityAlwaysEnabled
+#define ufoBeamMaskBrush ufoBeamMaskBrush
+#define fadeOutFrameCounter fadeOutFrameCounter
+
+#define ufoBeamHeight ufoBeamHeight
+#define visibleWindowCount visibleWindowCount
+#define sleepingAfterTimeout sleepingAfterTimeout
+
+#define alwaysOnTopUnused alwaysOnTopUnused
+#define unusedCa48 unusedCa48
+#define unusedCa4C unusedCa4C
+#define unusedCa4E unusedCa4E
+#define unusedCa5E unusedCa5E
+#define unusedCa78 unusedCa78
+
+#define sleepTimeoutAction sleepTimeoutAction
+#define keepSubwindowOnPaint keepSubwindowOnPaint
+#define currentInstance currentInstance
+#define cryEnabled cryEnabled
+#define ufoBeamHeightSub ufoBeamHeightSub
+#define knownInstanceWindows knownInstanceWindows
+#define windowPaletteInUse windowPaletteInUse
+
+void PASCAL CreateMaskBitmapFromFirstPixel(void FAR *, void FAR *);
+int PASCAL MakeMaskBitmapImageOutSpecificColourIndexPaletteSimulatingX86Assembly(void FAR *, void FAR *, int);
+void PASCAL DecompressBitmapImage(void FAR *, void FAR *);
 #define sub_414(p) ((((BITMAPINFOHEADER FAR *)p)->biClrUsed == 0) ? ((DWORD)1 << ((BITMAPINFOHEADER FAR *)p)->biBitCount) : (((BITMAPINFOHEADER FAR *)p)->biClrUsed))
-WORD sub_155A(void FAR *);
-WORD sub_15B4(void FAR *);
-HPALETTE sub_1658(HDC, void FAR *);
-HPALETTE sub_1791(HDC, BYTE, BYTE, BYTE);
-void sub_17FD(HDC, HPALETTE, HPALETTE, int);
-WORD sub_1945(void FAR *);
-void FAR * sub_19EC(void FAR *);
-void sub_1A16(void FAR *, void FAR *, UINT);
+WORD GetPaletteSize(void FAR *);
+WORD GetNumberColoursPalette(void FAR *);
+HPALETTE CreatePaletteBasedGivenBitmapImage(HDC, void FAR *);
+HPALETTE CreateMaskPaletteBasedGivenRgbValues(HDC, BYTE, BYTE, BYTE);
+void SetPaletteEntriesBasedAnotherPaletteNearestColours(HDC, HPALETTE, HPALETTE, int);
+WORD GetColourIndexFirstPixel(void FAR *);
+void FAR * GetPointerPixelBitsBitmapImage(void FAR *);
+void FlipBitmapImageArg8Contains1FlipHorizontallyArg8Contains2FlipVertically(void FAR *, void FAR *, UINT);
 int PASCAL WinMain(HINSTANCE, HINSTANCE, LPSTR, int);
-void sub_1DDC(void);
-LRESULT CALLBACK sub_1DF3(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK sub_2699(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK sub_27FF(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK sub_292A(HWND, UINT, WPARAM, LPARAM);
-void sub_2A21(void);
-void sub_2A96(void);
-void sub_2ABF(HWND);
-void sub_2B01(HWND, HWND);
-BOOL sub_2B30(HDC, spriteinfo *, int, int);
-void sub_2EEC(spriteinfo *);
-void sub_2F36(void);
-void sub_2FB7(LPCSTR, LPCSTR, UINT, LPCSTR);
-void sub_2FF8(void);
-BOOL sub_306A(HWND);
-void sub_3119();
-void sub_31A8(int, int, int);
-void sub_3237(HWND);
-void sub_3284(HWND);
-void sub_3717(HWND);
-void sub_399D(HWND, int, int, int, int);
-BOOL sub_39D6(HWND);
-int sub_3A36(int, int, int, int);
-void sub_3B4C(HWND);
-BOOL sub_3C20(HWND);
-void sub_3D12(HWND);
-void sub_3D5F(HWND);
-void sub_3DA7(HWND);
-void sub_3DF0(void);
-int sub_3E7C(HWND *, int, int, int, int);
-int sub_408C(HWND *, int, int, int, int);
-int sub_419E(HWND, int, int, int, int);
-void sub_4210(int, UINT, WORD);
-void sub_428E(void);
-void sub_42AA(LPCSTR);
-void sub_42C8(int, UINT, WORD);
-BOOL sub_42F3(HDC);
-void sub_44ED(void);
-void sub_4559(void);
-void sub_4614(BOOL);
-void sub_46D2(void);
-void sub_46F7(void);
-void sub_4807(int, int, int);
-void sub_488C(int, int, int);
-BOOL sub_48F3(HWND);
-void sub_491D(HWND, LPRECT);
-void sub_496F(int);
-void sub_4B3B(void);
-void sub_4C21(int, int, int);
-int sub_4C91(int, int);
-void sub_4CE1(void);
-void sub_4CF8(void);
-void sub_8FD7(int);
-void sub_904A(WPARAM);
-void sub_91CD(int, int);
-BOOL sub_9200(HWND);
-void sub_930F();
-void sub_9350(int, int, int);
-void sub_93DF(HWND);
-void sub_9438(HWND);
-BOOL sub_9A49(HWND);
+void SetCursorPositionChangedFlag(void);
+LRESULT CALLBACK ScreenMateMainWindowProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK ScreenMateSubWindowProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK ConfigDialogProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK DebugDialogProc(HWND, UINT, WPARAM, LPARAM);
+void CreateSubwindow(void);
+void DestroySubwindow(void);
+void PlaceWindowTopmostPosition(HWND);
+void PlaceWindowTopAnother(HWND, HWND);
+BOOL LoadSpriteImagesAndStoreHandles(HDC, spriteinfo *, int, int);
+void ReleaseSpriteImages(spriteinfo *);
+void ReadConfigurationFile(void);
+void SaveIndividualConfigurationFile(LPCSTR, LPCSTR, UINT, LPCSTR);
+void SaveConfigurationsFile(void);
+BOOL InitializeBitmapsMain(HWND);
+void ReleaseBitmaps();
+void UpdateWindowPositionSpriteBeActuallyUsed(int, int, int);
+void ClearWindow(HWND);
+void RenderSpriteDoubleBuffering(HWND);
+void RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(HWND);
+void Func(HWND, int, int, int, int);
+BOOL IsWindowInKnownInstanceList(HWND);
+int FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(int, int, int, int);
+void PopulateKnownInstanceListSearchingVisibleWindowsNameMatch(HWND);
+BOOL PopulateKnownInstanceListAndNotify(HWND);
+void NotifyOtherInstancesSelfDestruction(HWND);
+void AddWindowKnownInstanceList(HWND);
+void RemoveWindowKnownInstanceList(HWND);
+void PopulateKnownVisibleWindowList(void);
+int FindXCoordinatePossibleCollisionWhichVisibleWindow(HWND *, int, int, int, int);
+int FindYCoordinatePossibleLandingTopEdgeWhichVisibleWindow(HWND *, int, int, int, int);
+int GetWindowTopYCoordinateIfItIsPossibleLandWindow(HWND, int, int, int, int);
+void PlaySoundResourceIdAdditionalFlags(int, UINT, WORD);
+void StopPlayingSound(void);
+void PlaySoundName(LPCSTR);
+void PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(int, UINT, WORD);
+BOOL GenerateSpritesFromLoadedResourceImages(HDC);
+void ReleaseResourceImages(void);
+void TurnAroundWhenApproachingScreenBorderOtherwise120Probability(void);
+void FlagControlledCollisionTurnAround(BOOL);
+void SwitchToStandingSprite(void);
+void ProcessChime(void);
+void UpdateMainWindowSprite(int, int, int);
+void UpdateSubWindowSprite(int, int, int);
+BOOL IsNullOrValidWindow(HWND);
+void GetWindowRectOrScreenRect(HWND, LPRECT);
+void HandleOutOfViewOrTopPosition(int);
+void HandleClimbingSideOfWindow(void);
+void DetectCollisionOtherInstancesActionControlledFlag(int, int, int);
+int DetectCollisionOtherInstancesFindXCoordinate(int, int);
+void ResetSpriteState(void);
+void UpdateSpriteStateOnTimer(void);
+void ApplyEnvironmentActionChange(int);
+void ProcessDebugWindowActionChange(WPARAM);
+void MoveWindowOffset(int, int);
+BOOL InitializeBitmapsSub(HWND);
+void ReleaseBitmaps2();
+void UpdateWindowPositionSpriteBeActuallyUsed2(int, int, int);
+void ClearWindow2(HWND);
+void RenderSpriteDoubleBufferingFadeOutEffect(HWND);
+BOOL RenderUfoBeamAndPresentSubRenderTargets(HWND);
 
 /* Make mask bitmap image out of the first pixel (by simulating x86 assembly). */
-void PASCAL sub_10(void FAR * arg_4, void FAR * arg_0)
+void PASCAL CreateMaskBitmapFromFirstPixel(void FAR * arg_4, void FAR * arg_0)
 {
 #define ax (LOWORD(eax))
 #define cx (LOWORD(ecx))
@@ -507,7 +691,7 @@ void PASCAL sub_10(void FAR * arg_4, void FAR * arg_0)
 }
 
 /* Make mask bitmap image out of the specific colour index in the palette (by simulating x86 assembly) (unused). */
-int PASCAL sub_114(void FAR * arg_6, void FAR * arg_2, int arg_0)
+int PASCAL MakeMaskBitmapImageOutSpecificColourIndexPaletteSimulatingX86Assembly(void FAR * arg_6, void FAR * arg_2, int arg_0)
 {
 #define ax (LOWORD(eax))
 #define bl (LOBYTE(LOWORD(ebx)))
@@ -650,7 +834,7 @@ int PASCAL sub_114(void FAR * arg_6, void FAR * arg_2, int arg_0)
 }
 
 /* Decompress bitmap image. */
-void PASCAL sub_230(void FAR * arg_4, void FAR * arg_0)
+void PASCAL DecompressBitmapImage(void FAR * arg_4, void FAR * arg_0)
 {
     BYTE FAR * source = arg_0;
     BYTE FAR * destination = arg_4;
@@ -801,12 +985,12 @@ void PASCAL sub_230(void FAR * arg_4, void FAR * arg_0)
 }
 
 /* Get palette size. */
-WORD sub_155A(void FAR * arg_0)
+WORD GetPaletteSize(void FAR * arg_0)
 {
     DWORD FAR * var_4;
     WORD var_6;
     var_4 = arg_0;
-    var_6 = sub_15B4(var_4);
+    var_6 = GetNumberColoursPalette(var_4);
     if (*var_4 == 12) {
         return var_6 * sizeof(RGBTRIPLE);
     } else {
@@ -815,7 +999,7 @@ WORD sub_155A(void FAR * arg_0)
 }
 
 /* Get number of colours in palette. */
-WORD sub_15B4(void FAR * arg_0)
+WORD GetNumberColoursPalette(void FAR * arg_0)
 {
     WORD var_2;
     BITMAPINFOHEADER FAR * var_6;
@@ -843,7 +1027,7 @@ WORD sub_15B4(void FAR * arg_0)
 }
 
 /* Create palette based on given bitmap image. */
-HPALETTE sub_1658(HDC arg_0, void FAR * arg_2)
+HPALETTE CreatePaletteBasedGivenBitmapImage(HDC arg_0, void FAR * arg_2)
 {
     const BYTE FAR * var_4;
     HPALETTE var_6;
@@ -876,7 +1060,7 @@ HPALETTE sub_1658(HDC arg_0, void FAR * arg_2)
 }
 
 /* Create mask palette based on given RGB values. */
-HPALETTE sub_1791(HDC arg_0, BYTE arg_2, BYTE arg_3, BYTE arg_4)
+HPALETTE CreateMaskPaletteBasedGivenRgbValues(HDC arg_0, BYTE arg_2, BYTE arg_3, BYTE arg_4)
 {
     const BYTE FAR * var_4;
     HPALETTE var_6;
@@ -895,7 +1079,7 @@ HPALETTE sub_1791(HDC arg_0, BYTE arg_2, BYTE arg_3, BYTE arg_4)
 }
 
 /* Set palette entries based on another palette with nearest colours (unused). */
-void sub_17FD(HDC arg_0, HPALETTE arg_2, HPALETTE arg_4, int arg_6)
+void SetPaletteEntriesBasedAnotherPaletteNearestColours(HDC arg_0, HPALETTE arg_2, HPALETTE arg_4, int arg_6)
 {
     PALETTEENTRY * var_2;
     PALETTEENTRY * var_4;
@@ -920,11 +1104,11 @@ void sub_17FD(HDC arg_0, HPALETTE arg_2, HPALETTE arg_4, int arg_6)
         var_12 = GetNearestPaletteIndex(arg_2, var_C);
         var_10 = *(COLORREF *)&var_4[var_12];
         if (var_10 != var_C) {
-            if (var_12 < 10 || var_12 > word_9CF0) {
-                if (word_9CF0 < 10) {
+            if (var_12 < 10 || var_12 > paletteSearchMaxIndexUnused) {
+                if (paletteSearchMaxIndexUnused < 10) {
                     break;
                 } else {
-                    var_12 = word_9CF0--;
+                    var_12 = paletteSearchMaxIndexUnused--;
                 }
             }
             *(COLORREF *)&var_4[var_12] = var_C;
@@ -936,11 +1120,11 @@ void sub_17FD(HDC arg_0, HPALETTE arg_2, HPALETTE arg_4, int arg_6)
 }
 
 /* Get colour index of first pixel. */
-WORD sub_1945(void FAR * arg_0)
+WORD GetColourIndexFirstPixel(void FAR * arg_0)
 {
     BYTE FAR * var_4;
     BYTE var_6;
-    var_4 = sub_19EC(arg_0);
+    var_4 = GetPointerPixelBitsBitmapImage(arg_0);
     var_6 = *var_4++;
     switch (((BITMAPINFOHEADER FAR *)arg_0)->biCompression) {
     case BI_RGB:
@@ -967,13 +1151,13 @@ WORD sub_1945(void FAR * arg_0)
 }
 
 /* Get pointer to pixel bits in bitmap image. */
-void FAR * sub_19EC(void FAR * arg_0)
+void FAR * GetPointerPixelBitsBitmapImage(void FAR * arg_0)
 {
     return (void FAR *)((BYTE FAR *)arg_0 + *(WORD FAR *)arg_0 + ((BITMAPINFOHEADER FAR *)arg_0)->biClrUsed * sizeof(RGBQUAD));
 }
 
 /* Flip bitmap image. arg_8 contains 1: Flip horizontally, arg_8 contains 2: Flip vertically */
-void sub_1A16(void FAR * arg_0, void FAR * arg_4, UINT arg_8)
+void FlipBitmapImageArg8Contains1FlipHorizontallyArg8Contains2FlipVertically(void FAR * arg_0, void FAR * arg_4, UINT arg_8)
 {
     BYTE FAR * var_4;
     BYTE FAR * var_8;
@@ -985,7 +1169,7 @@ void sub_1A16(void FAR * arg_0, void FAR * arg_4, UINT arg_8)
     LONG var_18;
     var_4 = arg_0;
     var_8 = arg_4;
-    var_C = sub_19EC(arg_4);
+    var_C = GetPointerPixelBitsBitmapImage(arg_4);
     while (var_C > var_8) {
         *var_4++ = *var_8++;
     }
@@ -1036,7 +1220,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     WNDCLASS var_2E;
     if (hPrevInstance == NULL) {
         var_2E.style = CS_DBLCLKS;
-        var_2E.lpfnWndProc = sub_1DF3;
+        var_2E.lpfnWndProc = ScreenMateMainWindowProc;
         var_2E.cbClsExtra = 0;
         var_2E.cbWndExtra = 8;
         var_2E.hInstance = hInstance;
@@ -1051,7 +1235,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     if (hPrevInstance == NULL) {
         var_2E.style = CS_DBLCLKS;
-        var_2E.lpfnWndProc = sub_2699;
+        var_2E.lpfnWndProc = ScreenMateSubWindowProc;
         var_2E.cbClsExtra = 0;
         var_2E.cbWndExtra = 0;
         var_2E.hInstance = hInstance;
@@ -1064,9 +1248,9 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             return 0;
         }
     }
-    word_CA58 = hInstance;
+    currentInstance = hInstance;
     if (FindWindow("ScreenMatePoo", "Screen Mate") != NULL) {
-        word_CA3C = 1;
+        preventSpecialActions = 1;
     }
 #ifdef _WIN32
     /* In 32-bit Windows, popup window is now in the taskbar by default. Additional code is needed to hide the popup window from taskbar while keeping it in the Alt+Tab list. */
@@ -1084,12 +1268,12 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return 0;
     }
     /* Create a hidden owner top-level window to hide visible windows from taskbar. */
-    ownerwindow = CreateWindowEx(0L, "ScreenMatePooOwner", NULL, 0L, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
-    if (ownerwindow == NULL) {
+    ownerWindowHandle = CreateWindowEx(0L, "ScreenMatePooOwner", NULL, 0L, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
+    if (ownerWindowHandle == NULL) {
         return 0;
     }
     /* Set the visible window to be owned by the hidden top-level window. */
-    var_2 = CreateWindowEx(0L, "ScreenMatePoo", "Screen Mate", WS_POPUP, 0, 0, 0, 0, ownerwindow, NULL, hInstance, NULL);
+    var_2 = CreateWindowEx(0L, "ScreenMatePoo", "Screen Mate", WS_POPUP, 0, 0, 0, 0, ownerWindowHandle, NULL, hInstance, NULL);
 #else
     var_2 = CreateWindowEx(0L, "ScreenMatePoo", "Screen Mate", WS_POPUP, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
 #endif
@@ -1103,19 +1287,19 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         DispatchMessage(&var_14);
     }
 #ifdef _WIN32
-    DestroyWindow(ownerwindow);
+    DestroyWindow(ownerWindowHandle);
 #endif
     return (int)var_14.wParam;
 }
 
 /* Set cursor position changed flag (unused). */
-void sub_1DDC(void)
+void SetCursorPositionChangedFlag(void)
 {
-    word_A798 = 1;
+    cursorPositionChanged = 1;
 }
 
 /* Window procedure. */
-LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     HDC var_2;
     void FAR * var_6;
@@ -1136,8 +1320,8 @@ LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif
     switch (uMsg) {
     case WM_CREATE:
-        if (!sub_3C20(hWnd)) {
-            MessageBox(hWnd, "Screen Mate‚ÍÅ‘å‚WŒÂ‚Ü‚Å‚Å‚·", "Screen Mate", MB_ICONHAND | MB_OK);
+        if (!PopulateKnownInstanceListAndNotify(hWnd)) {
+            MessageBox(hWnd, "Screen Mate: maximum 8 instances", "Screen Mate", MB_ICONHAND | MB_OK);
             return -1;
         }
 #ifdef _WIN32
@@ -1153,37 +1337,37 @@ LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
 #endif
         DragAcceptFiles(hWnd, TRUE);
-        word_C0B0 = hWnd;
-        sub_2F36();
-        if (word_CA3E != 0) {
+        selfInstanceWindowHandle = hWnd;
+        ReadConfigurationFile();
+        if (alwaysOnTopUnused != 0) {
             SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
         }
         var_2 = GetDC(hWnd);
-        var_A = FindResource(word_CA58, MAKEINTRESOURCE(101), RT_BITMAP);
-        var_8 = LoadResource(word_CA58, var_A);
+        var_A = FindResource(currentInstance, MAKEINTRESOURCE(101), RT_BITMAP);
+        var_8 = LoadResource(currentInstance, var_A);
         var_6 = LockResource(var_8);
-        var_E = (void FAR *)((BYTE FAR *)var_6 + *(WORD FAR *)var_6 + sub_155A(var_6));
-        word_CA4A = sub_1658(var_2, var_6);
+        var_E = (void FAR *)((BYTE FAR *)var_6 + *(WORD FAR *)var_6 + GetPaletteSize(var_6));
+        windowPaletteInUse = CreatePaletteBasedGivenBitmapImage(var_2, var_6);
         FreeResource(var_8);
-        SelectPalette(var_2, word_CA4A, FALSE);
+        SelectPalette(var_2, windowPaletteInUse, FALSE);
         RealizePalette(var_2);
-        if (!sub_42F3(var_2)) {
-            MessageBox(hWnd, "ƒƒ‚ƒŠ‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·", "Screen Mate", MB_ICONHAND | MB_OK);
+        if (!GenerateSpritesFromLoadedResourceImages(var_2)) {
+            MessageBox(hWnd, "Not enough memory", "Screen Mate", MB_ICONHAND | MB_OK);
             ReleaseDC(hWnd, var_2);
             return -1;
         }
         ReleaseDC(hWnd, var_2);
-        if (!sub_306A(hWnd)) {
-            MessageBox(hWnd, "ƒƒ‚ƒŠ‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·", "Screen Mate", MB_ICONHAND | MB_OK);
+        if (!InitializeBitmapsMain(hWnd)) {
+            MessageBox(hWnd, "Not enough memory", "Screen Mate", MB_ICONHAND | MB_OK);
             return -1;
         }
         SetTimer(hWnd, 1U, 108U, NULL);
         break;
     case WM_DROPFILES:
-        if (word_CA60[8] == NULL) {
+        if (knownInstanceWindows[8] == NULL) {
             if (DragQueryFile((HDROP)wParam, 0U, var_122, 260U) != 0U) {
-                sub_42AA(var_122);
-                sub_8FD7(4);
+                PlaySoundName(var_122);
+                ApplyEnvironmentActionChange(4);
             }
         }
         DragFinish((HDROP)wParam);
@@ -1192,21 +1376,21 @@ LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         switch (lParam) {
         case 0x202:
         case 0x205:
-            if (word_C0AE != 0) {
-                if (word_CA60[8] != NULL) {
-                    sub_2ABF(word_CA60[8]);
+            if (screenMateOnTopOfSubwindow != 0) {
+                if (knownInstanceWindows[8] != NULL) {
+                    PlaceWindowTopmostPosition(knownInstanceWindows[8]);
                 }
-                sub_2ABF(hWnd);
+                PlaceWindowTopmostPosition(hWnd);
             } else {
-                sub_2ABF(hWnd);
-                if (word_CA60[8] != NULL) {
-                    sub_2ABF(word_CA60[8]);
+                PlaceWindowTopmostPosition(hWnd);
+                if (knownInstanceWindows[8] != NULL) {
+                    PlaceWindowTopmostPosition(knownInstanceWindows[8]);
                 }
             }
-            sub_2ABF(hWnd);
+            PlaceWindowTopmostPosition(hWnd);
             *(HMENU *)var_122 = CreatePopupMenu();
-            AppendMenu(*(HMENU *)var_122, 0U, 101U, "Screen Mate‚ÌÝ’è...");
-            AppendMenu(*(HMENU *)var_122, 0U, IDCANCEL, "Screen Mate‚ÌI—¹");
+            AppendMenu(*(HMENU *)var_122, 0U, 101U, "Screen Mate Settings...");
+            AppendMenu(*(HMENU *)var_122, 0U, IDCANCEL, "Screen Mate Exit");
             GetCursorPos(&var_126);
             TrackPopupMenu(*(HMENU *)var_122, 0U, var_126.x, var_126.y, 0, hWnd, NULL);
             DestroyMenu(*(HMENU *)var_122);
@@ -1217,74 +1401,74 @@ LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_WINDOWPOSCHANGING:
         windowpos = (LPWINDOWPOS)lParam;
-        if (word_A7A2 != 0) {
+        if (unused_A7A2 != 0) {
             windowpos = (LPWINDOWPOS)lParam;
         }
         windowpos->flags |= SWP_NOCOPYBITS;
-        word_A7AC = 1;
+        doNotClearWindowOnPaint = 1;
         return 0;
     case WM_WINDOWPOSCHANGED:
         return 0;
     case WM_TIMER:
-        if (word_C0BA != 0) {
-            word_C0BA -= 1;
+        if (noUpdatePeriodsAfterClearing != 0) {
+            noUpdatePeriodsAfterClearing -= 1;
             return 0;
         }
-        if (word_C0B6 == 0) {
+        if (alwaysMovingEnabled == 0) {
             GetCursorPos(&var_1E);
-            if (stru_A7B0.x != var_1E.x || stru_A7B0.y != var_1E.y) {
-                stru_A7B0.x = var_1E.x;
-                stru_A7B0.y = var_1E.y;
-                word_A798 = 1;
+            if (cursorPosition.x != var_1E.x || cursorPosition.y != var_1E.y) {
+                cursorPosition.x = var_1E.x;
+                cursorPosition.y = var_1E.y;
+                cursorPositionChanged = 1;
             }
-            if (word_CA76 != 0) {
-                if (word_A798 != 0) {
-                    word_CA76 = 0;
-                    word_C0A4 = 0;
-                    sub_8FD7(0);
+            if (sleepingAfterTimeout != 0) {
+                if (cursorPositionChanged != 0) {
+                    sleepingAfterTimeout = 0;
+                    noMouseActionConsecutivePeriodCount = 0;
+                    ApplyEnvironmentActionChange(0);
                 }
             } else {
-                if (word_A798 != 0) {
-                    word_A798 = 0;
-                    word_C0A4 = 0;
+                if (cursorPositionChanged != 0) {
+                    cursorPositionChanged = 0;
+                    noMouseActionConsecutivePeriodCount = 0;
                 } else {
-                    if (word_C0A4++ > 300) {
-                        sub_8FD7(3);
+                    if (noMouseActionConsecutivePeriodCount++ > 300) {
+                        ApplyEnvironmentActionChange(3);
                     }
                 }
             }
         }
-        word_A7AC = 0;
-        word_C0B0 = hWnd;
-        sub_4CF8();
-        sub_3284(hWnd);
-        sub_3717(hWnd);
-        word_A7A2 = 1;
+        doNotClearWindowOnPaint = 0;
+        selfInstanceWindowHandle = hWnd;
+        UpdateSpriteStateOnTimer();
+        RenderSpriteDoubleBuffering(hWnd);
+        RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(hWnd);
+        unused_A7A2 = 1;
         return 0;
     case WM_USER:
         if (wParam == 1) {
-            sub_3D5F((HWND)lParam);
+            AddWindowKnownInstanceList((HWND)lParam);
         }
         if (wParam == 2) {
-            sub_3DA7((HWND)lParam);
+            RemoveWindowKnownInstanceList((HWND)lParam);
         }
         return 0;
     case WM_PAINT:
-        if (word_A7AC != 0) {
-            word_A7AC = 0;
+        if (doNotClearWindowOnPaint != 0) {
+            doNotClearWindowOnPaint = 0;
             ValidateRect(hWnd, NULL);
             return 0;
         }
-        sub_3237(hWnd);
+        ClearWindow(hWnd);
         ValidateRect(hWnd, NULL);
         return 0;
         GetWindowRect(hWnd, &var_1A);
-        if (stru_A7A4.top == var_1A.top && stru_A7A4.bottom == var_1A.bottom && stru_A7A4.left == var_1A.left && stru_A7A4.right == var_1A.right) {
-            sub_3237(hWnd);
+        if (screenMateWindowRect.top == var_1A.top && screenMateWindowRect.bottom == var_1A.bottom && screenMateWindowRect.left == var_1A.left && screenMateWindowRect.right == var_1A.right) {
+            ClearWindow(hWnd);
             ValidateRect(hWnd, NULL);
             return 0;
         }
-        GetWindowRect(hWnd, &stru_A7A4);
+        GetWindowRect(hWnd, &screenMateWindowRect);
         ValidateRect(hWnd, NULL);
         return 0;
         break;
@@ -1305,96 +1489,96 @@ LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         break;
     case WM_LBUTTONDOWN:
     case WM_RBUTTONDOWN:
-        if (word_CA60[8] != NULL) {
+        if (knownInstanceWindows[8] != NULL) {
             break;
         }
-        if (word_A79E != 0) {
+        if (draggingScreenMateWindow != 0) {
             break;
         }
         SetCapture(hWnd);
         GetWindowRect(hWnd, &var_1A);
-        word_A79A = (short)LOWORD(lParam) + var_1A.left;
-        word_A79C = (short)HIWORD(lParam) + var_1A.top;
-        word_A79E = 1;
-        sub_8FD7(1);
-        sub_3284(hWnd);
-        sub_3717(hWnd);
+        cursorScreenX = (short)LOWORD(lParam) + var_1A.left;
+        cursorScreenY = (short)HIWORD(lParam) + var_1A.top;
+        draggingScreenMateWindow = 1;
+        ApplyEnvironmentActionChange(1);
+        RenderSpriteDoubleBuffering(hWnd);
+        RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(hWnd);
         break;
     case WM_MOUSEMOVE:
-        if (word_A79E == 0) {
+        if (draggingScreenMateWindow == 0) {
             break;
         }
         GetWindowRect(hWnd, &var_1A);
         var_10 = (short)LOWORD(lParam) + var_1A.left;
         var_12 = (short)HIWORD(lParam) + var_1A.top;
-        if (word_A79A == var_10 && word_A79C == var_12) {
+        if (cursorScreenX == var_10 && cursorScreenY == var_12) {
             break;
         }
-        sub_91CD(var_10 - word_A79A, var_12 - word_A79C);
-        word_A79A = var_10;
-        word_A79C = var_12;
-        sub_3284(hWnd);
-        sub_3717(hWnd);
+        MoveWindowOffset(var_10 - cursorScreenX, var_12 - cursorScreenY);
+        cursorScreenX = var_10;
+        cursorScreenY = var_12;
+        RenderSpriteDoubleBuffering(hWnd);
+        RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(hWnd);
         break;
     case WM_RBUTTONUP:
-        if (word_A7A0 != 0) {
+        if (destroyScreenMateOnRightDoubleClick != 0) {
             DestroyWindow(hWnd);
             break;
         }
     case WM_LBUTTONUP:
-        if (word_A79E != 0) {
+        if (draggingScreenMateWindow != 0) {
             GetWindowRect(hWnd, &var_1A);
             var_10 = (short)LOWORD(lParam) + var_1A.left;
             var_12 = (short)HIWORD(lParam) + var_1A.top;
-            sub_91CD(var_10 - word_A79A, var_12 - word_A79C);
-            sub_8FD7(0);
+            MoveWindowOffset(var_10 - cursorScreenX, var_12 - cursorScreenY);
+            ApplyEnvironmentActionChange(0);
             if (uMsg == WM_RBUTTONUP) {
-                sub_8FD7(2);
+                ApplyEnvironmentActionChange(2);
             }
-            sub_3284(hWnd);
-            sub_3717(hWnd);
+            RenderSpriteDoubleBuffering(hWnd);
+            RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(hWnd);
             ReleaseCapture();
-            word_A79E = 0;
+            draggingScreenMateWindow = 0;
         }
         break;
     case WM_RBUTTONDBLCLK:
-        word_A7A0 = 1;
+        destroyScreenMateOnRightDoubleClick = 1;
         break;
     case WM_LBUTTONDBLCLK:
     case WM_USER + 2:
-        *(WORD *)var_122 = word_CA3E;
-        var_128 = word_CA42;
-        word_C0B0 = hWnd;
+        *(WORD *)var_122 = alwaysOnTopUnused;
+        var_128 = gravityAlwaysEnabled;
+        selfInstanceWindowHandle = hWnd;
         if ((HIBYTE(GetKeyState(VK_SHIFT)) & 0x80) != 0 && (HIBYTE(GetKeyState(VK_CONTROL)) & 0x80) != 0) {
-            proc = MakeProcInstance((FARPROC)sub_292A, word_CA58);
-            DialogBox(word_CA58, MAKEINTRESOURCE(108), hWnd, (DLGPROC)proc);
+            proc = MakeProcInstance((FARPROC)DebugDialogProc, currentInstance);
+            DialogBox(currentInstance, MAKEINTRESOURCE(108), hWnd, (DLGPROC)proc);
         } else {
-            proc = MakeProcInstance((FARPROC)sub_27FF, word_CA58);
-            DialogBox(word_CA58, MAKEINTRESOURCE(107), hWnd, (DLGPROC)proc);
+            proc = MakeProcInstance((FARPROC)ConfigDialogProc, currentInstance);
+            DialogBox(currentInstance, MAKEINTRESOURCE(107), hWnd, (DLGPROC)proc);
         }
         FreeProcInstance(proc);
-        sub_3237(hWnd);
-        if (*(WORD *)var_122 != word_CA3E) {
-            if (word_CA3E != 0) {
+        ClearWindow(hWnd);
+        if (*(WORD *)var_122 != alwaysOnTopUnused) {
+            if (alwaysOnTopUnused != 0) {
                 SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
             } else {
                 SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
             }
         }
-        if (var_128 != word_CA42 && word_CA42 != 0) {
-            sub_8FD7(2);
+        if (var_128 != gravityAlwaysEnabled && gravityAlwaysEnabled != 0) {
+            ApplyEnvironmentActionChange(2);
         }
         break;
     case WM_DESTROY:
-        sub_3D12(hWnd);
-        if (word_CA60[8] != NULL) {
-            sub_2A96();
+        NotifyOtherInstancesSelfDestruction(hWnd);
+        if (knownInstanceWindows[8] != NULL) {
+            DestroySubwindow();
         }
         KillTimer(hWnd, 1U);
-        sub_428E();
-        sub_3119((WORD)0);
-        sub_44ED();
-        DeleteObject(word_CA4A);
+        StopPlayingSound();
+        ReleaseBitmaps((WORD)0);
+        ReleaseResourceImages();
+        DeleteObject(windowPaletteInUse);
         DragAcceptFiles(hWnd, FALSE);
         PostQuitMessage(0);
         break;
@@ -1405,12 +1589,12 @@ LRESULT CALLBACK sub_1DF3(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 /* Window procedure (sub). */
-LRESULT CALLBACK sub_2699(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ScreenMateSubWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     LPWINDOWPOS var_4;
     switch (uMsg) {
     case WM_CREATE:
-        if (!sub_9200(hWnd)) {
+        if (!InitializeBitmapsSub(hWnd)) {
             DestroyWindow(hWnd);
             return 1;
         }
@@ -1419,31 +1603,31 @@ LRESULT CALLBACK sub_2699(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_WINDOWPOSCHANGING:
         var_4 = (LPWINDOWPOS)lParam;
         var_4->flags |= SWP_NOCOPYBITS;
-        word_A7B4 = 1;
+        doNotClearSubwindowOnPaint = 1;
         return 0;
     case WM_WINDOWPOSCHANGED:
         return 0;
     case WM_TIMER:
-        word_A7B4 = 0;
-        sub_9438(hWnd);
-        if (!sub_9A49(hWnd)) {
-            word_CA3C = 1;
-            sub_4CE1();
+        doNotClearSubwindowOnPaint = 0;
+        RenderSpriteDoubleBufferingFadeOutEffect(hWnd);
+        if (!RenderUfoBeamAndPresentSubRenderTargets(hWnd)) {
+            preventSpecialActions = 1;
+            ResetSpriteState();
         }
         return 0;
     case WM_PAINT:
-        if (word_A7B4 != 0) {
-            word_A7B4 = 0;
+        if (doNotClearSubwindowOnPaint != 0) {
+            doNotClearSubwindowOnPaint = 0;
             ValidateRect(hWnd, NULL);
             return 0;
         }
-        sub_93DF(hWnd);
+        ClearWindow2(hWnd);
         ValidateRect(hWnd, NULL);
         return 0;
     case WM_ERASEBKGND:
         return 0;
     case WM_DESTROY:
-        sub_930F(0);
+        ReleaseBitmaps2(0);
         KillTimer(hWnd, 1U);
         break;
     default:
@@ -1453,14 +1637,14 @@ LRESULT CALLBACK sub_2699(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 /* Configuration window callback. */
-BOOL CALLBACK sub_27FF(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK ConfigDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
     case WM_INITDIALOG:
-        SendDlgItemMessage(hDlg, 1001, BM_SETCHECK, (WPARAM)word_C0AC, 0);
-        SendDlgItemMessage(hDlg, 1002, BM_SETCHECK, (WPARAM)word_CA5A, 0);
-        SendDlgItemMessage(hDlg, 1003, BM_SETCHECK, (WPARAM)word_C0B6, 0);
-        SendDlgItemMessage(hDlg, 1004, BM_SETCHECK, (WPARAM)word_CA42, 0);
+        SendDlgItemMessage(hDlg, 1001, BM_SETCHECK, (WPARAM)chimeEnabled, 0);
+        SendDlgItemMessage(hDlg, 1002, BM_SETCHECK, (WPARAM)cryEnabled, 0);
+        SendDlgItemMessage(hDlg, 1003, BM_SETCHECK, (WPARAM)alwaysMovingEnabled, 0);
+        SendDlgItemMessage(hDlg, 1004, BM_SETCHECK, (WPARAM)gravityAlwaysEnabled, 0);
         return TRUE;
     case WM_COMMAND:
         if (wParam == IDRETRY) {
@@ -1468,14 +1652,14 @@ BOOL CALLBACK sub_27FF(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return TRUE;
         }
         if (wParam == IDOK) {
-            word_C0AC = IsDlgButtonChecked(hDlg, 1001);
-            word_CA5A = IsDlgButtonChecked(hDlg, 1002);
-            word_C0B6 = IsDlgButtonChecked(hDlg, 1003);
-            word_CA42 = IsDlgButtonChecked(hDlg, 1004);
-            sub_2FF8();
+            chimeEnabled = IsDlgButtonChecked(hDlg, 1001);
+            cryEnabled = IsDlgButtonChecked(hDlg, 1002);
+            alwaysMovingEnabled = IsDlgButtonChecked(hDlg, 1003);
+            gravityAlwaysEnabled = IsDlgButtonChecked(hDlg, 1004);
+            SaveConfigurationsFile();
         }
         if (wParam == IDABORT) {
-            DestroyWindow(word_C0B0);
+            DestroyWindow(selfInstanceWindowHandle);
         }
         if (wParam == IDOK || wParam == IDCANCEL || wParam == IDABORT) {
             EndDialog(hDlg, (int)wParam);
@@ -1488,7 +1672,7 @@ BOOL CALLBACK sub_27FF(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 /* Debug window callback. */
-BOOL CALLBACK sub_292A(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK DebugDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
     case WM_INITDIALOG:
@@ -1499,20 +1683,20 @@ BOOL CALLBACK sub_292A(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
             EndDialog(hDlg, (int)wParam);
         }
         if (wParam >= 1002 && wParam <= 1031 && IsDlgButtonChecked(hDlg, (int)wParam) != 0U) {
-            sub_904A(wParam - 1002);
+            ProcessDebugWindowActionChange(wParam - 1002);
         }
         switch (wParam) {
         case 1032:
-            sub_91CD(0, -20);
+            MoveWindowOffset(0, -20);
             break;
         case 1033:
-            sub_91CD(0, 20);
+            MoveWindowOffset(0, 20);
             break;
         case 1034:
-            sub_91CD(-20, 0);
+            MoveWindowOffset(-20, 0);
             break;
         case 1035:
-            sub_91CD(20, 0);
+            MoveWindowOffset(20, 0);
             break;
         default:
             break;
@@ -1525,54 +1709,54 @@ BOOL CALLBACK sub_292A(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 /* Create subwindow. */
-void sub_2A21(void)
+void CreateSubwindow(void)
 {
-    if (word_CA60[8] != NULL) {
+    if (knownInstanceWindows[8] != NULL) {
         return;
     }
 #ifdef _WIN32
     /* Set the visible window to be owned by the hidden top-level window. */
-    word_CA60[8] = CreateWindowEx(0L, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, ownerwindow, NULL, word_CA58, NULL);
+    knownInstanceWindows[8] = CreateWindowEx(0L, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, ownerWindowHandle, NULL, currentInstance, NULL);
 #else
-    word_CA60[8] = CreateWindowEx(0L, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, NULL, NULL, word_CA58, NULL);
+    knownInstanceWindows[8] = CreateWindowEx(0L, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, NULL, NULL, currentInstance, NULL);
 #endif
-    if (word_CA60[8] != NULL) {
-        ShowWindow(word_CA60[8], SW_SHOWNA);
-        UpdateWindow(word_CA60[8]);
+    if (knownInstanceWindows[8] != NULL) {
+        ShowWindow(knownInstanceWindows[8], SW_SHOWNA);
+        UpdateWindow(knownInstanceWindows[8]);
     } else {
-        word_CA3C = 1;
-        sub_4CE1();
+        preventSpecialActions = 1;
+        ResetSpriteState();
     }
 }
 
 /* Destroy subwindow. */
-void sub_2A96(void)
+void DestroySubwindow(void)
 {
-    if (word_CA60[8] != NULL) {
-        DestroyWindow(word_CA60[8]);
-        word_CA60[8] = NULL;
+    if (knownInstanceWindows[8] != NULL) {
+        DestroyWindow(knownInstanceWindows[8]);
+        knownInstanceWindows[8] = NULL;
     }
 }
 
 /* Place window to topmost position. */
-void sub_2ABF(HWND arg_0)
+void PlaceWindowTopmostPosition(HWND arg_0)
 {
-    if (word_CA3E == 0) {
+    if (alwaysOnTopUnused == 0) {
         SetWindowPos(arg_0, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
         SetWindowPos(arg_0, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
     }
 }
 
 /* Place a window on top of another. */
-void sub_2B01(HWND arg_0, HWND arg_2)
+void PlaceWindowTopAnother(HWND arg_0, HWND arg_2)
 {
-    if (word_CA3E == 0) {
+    if (alwaysOnTopUnused == 0) {
         SetWindowPos(arg_0, arg_2, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
     }
 }
 
 /* Load resource image, generate (flipped) colour and mask images, store handles into sprite info structure. */
-BOOL sub_2B30(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
+BOOL LoadSpriteImagesAndStoreHandles(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
 {
     void FAR * var_4;
     void FAR * var_8;
@@ -1585,7 +1769,7 @@ BOOL sub_2B30(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
     var_16 = NULL;
     var_18 = NULL;
     var_1A = NULL;
-    var_16 = LoadResource(word_CA58, FindResource(word_CA58, MAKEINTRESOURCE(arg_4), RT_BITMAP));
+    var_16 = LoadResource(currentInstance, FindResource(currentInstance, MAKEINTRESOURCE(arg_4), RT_BITMAP));
     var_C = LockResource(var_16);
     if (var_16 == NULL) {
         return FALSE;
@@ -1606,26 +1790,26 @@ BOOL sub_2B30(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
                 goto loc_2EB2;
             }
             var_14 = GlobalLock(var_1A);
-            sub_230(var_14, var_C);
+            DecompressBitmapImage(var_14, var_C);
             if (arg_6 == -2) {
-                sub_1A16(var_10, var_14, 2U);
+                FlipBitmapImageArg8Contains1FlipHorizontallyArg8Contains2FlipVertically(var_10, var_14, 2U);
             } else {
-                sub_1A16(var_10, var_14, 1U);
+                FlipBitmapImageArg8Contains1FlipHorizontallyArg8Contains2FlipVertically(var_10, var_14, 1U);
             }
             GlobalFree(var_1A);
             var_1A = NULL;
         } else {
-            sub_230(var_10, var_C);
+            DecompressBitmapImage(var_10, var_C);
         }
-        var_4 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + sub_155A(var_10));
-        var_8 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + sub_1945(var_10) * sizeof(RGBQUAD));
+        var_4 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + GetPaletteSize(var_10));
+        var_8 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + GetColourIndexFirstPixel(var_10) * sizeof(RGBQUAD));
         *(DWORD FAR *)var_8 = 0;
         arg_2->bitmaps[0] = CreateDIBitmap(arg_0, var_10, CBM_INIT, var_4, var_10, DIB_RGB_COLORS);
         if (arg_2->bitmaps[0] == NULL) {
             goto loc_2EB2;
         }
-        sub_10(var_10, var_10);
-        var_4 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + sub_155A(var_10));
+        CreateMaskBitmapFromFirstPixel(var_10, var_10);
+        var_4 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + GetPaletteSize(var_10));
         arg_2->bitmaps[1] = CreateDIBitmap(arg_0, var_10, CBM_INIT, var_4, var_10, DIB_RGB_COLORS);
         if (arg_2->bitmaps[1] == NULL) {
             goto loc_2EB2;
@@ -1636,7 +1820,7 @@ BOOL sub_2B30(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
         var_18 = NULL;
         return TRUE;
     } else {
-        var_4 = (void FAR *)((BYTE FAR *)var_C + *(WORD FAR *)var_C + sub_155A(var_C));
+        var_4 = (void FAR *)((BYTE FAR *)var_C + *(WORD FAR *)var_C + GetPaletteSize(var_C));
         arg_2->bitmaps[0] = CreateDIBitmap(arg_0, var_C, CBM_INIT, var_4, var_C, DIB_RGB_COLORS);
         if (arg_2->bitmaps[0] == NULL) {
             goto loc_2EB2;
@@ -1647,7 +1831,7 @@ BOOL sub_2B30(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
             arg_2->bitmaps[1] = NULL;
             return TRUE;
         }
-        var_16 = LoadResource(word_CA58, FindResource(word_CA58, MAKEINTRESOURCE(arg_6), RT_BITMAP));
+        var_16 = LoadResource(currentInstance, FindResource(currentInstance, MAKEINTRESOURCE(arg_6), RT_BITMAP));
         var_C = LockResource(var_16);
         if (var_16 == NULL) {
             goto loc_2EB2;
@@ -1656,7 +1840,7 @@ BOOL sub_2B30(HDC arg_0, spriteinfo * arg_2, int arg_4, int arg_6)
         arg_2->y = 0;
         arg_2->width = *(int FAR *)((BYTE FAR *)var_C + 4);
         arg_2->height = *(int FAR *)((BYTE FAR *)var_C + 8);
-        var_4 = (void FAR *)((BYTE FAR *)var_C + *(WORD FAR *)var_C + sub_155A(var_C));
+        var_4 = (void FAR *)((BYTE FAR *)var_C + *(WORD FAR *)var_C + GetPaletteSize(var_C));
         arg_2->bitmaps[1] = CreateDIBitmap(arg_0, var_C, CBM_INIT, var_4, var_C, DIB_RGB_COLORS);
         if (arg_2->bitmaps[1] == NULL) {
             goto loc_2EB2;
@@ -1678,7 +1862,7 @@ loc_2EB2:
 }
 
 /* Release sprite images. */
-void sub_2EEC(spriteinfo * arg_0)
+void ReleaseSpriteImages(spriteinfo * arg_0)
 {
     if (arg_0->bitmaps[0] != NULL) {
         DeleteObject(arg_0->bitmaps[0]);
@@ -1691,20 +1875,20 @@ void sub_2EEC(spriteinfo * arg_0)
 }
 
 /* Read configuration from file. */
-void sub_2F36(void)
+void ReadConfigurationFile(void)
 {
-    word_CA78 = 1;
-    word_CA3E = 0;
-    word_C0AC = 0U;
-    word_CA5A = 0U;
-    word_CA5A = GetPrivateProfileInt("Stray", "Sound", 0, "scmate.ini");
-    word_C0AC = GetPrivateProfileInt("Stray", "Alarm", 0, "scmate.ini");
-    word_C0B6 = GetPrivateProfileInt("Stray", "NoSleep", 0, "scmate.ini");
-    word_CA42 = GetPrivateProfileInt("Stray", "GForce", 1, "scmate.ini");
+    unusedCa78 = 1;
+    alwaysOnTopUnused = 0;
+    chimeEnabled = 0U;
+    cryEnabled = 0U;
+    cryEnabled = GetPrivateProfileInt("Stray", "Sound", 0, "scmate.ini");
+    chimeEnabled = GetPrivateProfileInt("Stray", "Alarm", 0, "scmate.ini");
+    alwaysMovingEnabled = GetPrivateProfileInt("Stray", "NoSleep", 0, "scmate.ini");
+    gravityAlwaysEnabled = GetPrivateProfileInt("Stray", "GForce", 1, "scmate.ini");
 }
 
 /* Save individual configuration to file. */
-void sub_2FB7(LPCSTR arg_0, LPCSTR arg_4, UINT arg_8, LPCSTR arg_A)
+void SaveIndividualConfigurationFile(LPCSTR arg_0, LPCSTR arg_4, UINT arg_8, LPCSTR arg_A)
 {
     char var_28[40];
     wsprintf(var_28, "%u", arg_8);
@@ -1712,35 +1896,35 @@ void sub_2FB7(LPCSTR arg_0, LPCSTR arg_4, UINT arg_8, LPCSTR arg_A)
 }
 
 /* Save configurations to file. */
-void sub_2FF8(void)
+void SaveConfigurationsFile(void)
 {
-    sub_2FB7("Stray", "Sound", word_CA5A, "scmate.ini");
-    sub_2FB7("Stray", "Alarm", word_C0AC, "scmate.ini");
-    sub_2FB7("Stray", "NoSleep", word_C0B6, "scmate.ini");
-    sub_2FB7("Stray", "GForce", word_CA42, "scmate.ini");
+    SaveIndividualConfigurationFile("Stray", "Sound", cryEnabled, "scmate.ini");
+    SaveIndividualConfigurationFile("Stray", "Alarm", chimeEnabled, "scmate.ini");
+    SaveIndividualConfigurationFile("Stray", "NoSleep", alwaysMovingEnabled, "scmate.ini");
+    SaveIndividualConfigurationFile("Stray", "GForce", gravityAlwaysEnabled, "scmate.ini");
 }
 
 /* Initialize bitmaps. */
-BOOL sub_306A(HWND arg_0)
+BOOL InitializeBitmapsMain(HWND arg_0)
 {
     HDC var_2;
     var_2 = GetDC(arg_0);
-    word_A7B6[0] = CreateCompatibleBitmap(var_2, 100, 100);
-    if (word_A7B6[0] == NULL) {
+    doubleBufferMain[0] = CreateCompatibleBitmap(var_2, 100, 100);
+    if (doubleBufferMain[0] == NULL) {
         goto loc_3104;
     }
-    word_A7B6[1] = CreateCompatibleBitmap(var_2, 100, 100);
-    if (word_A7B6[1] == NULL) {
+    doubleBufferMain[1] = CreateCompatibleBitmap(var_2, 100, 100);
+    if (doubleBufferMain[1] == NULL) {
         goto loc_3104;
     }
-    word_A7BA = CreateCompatibleBitmap(var_2, 100, 100);
-    if (word_A7BA == NULL) {
+    spriteRenderTargetMain = CreateCompatibleBitmap(var_2, 100, 100);
+    if (spriteRenderTargetMain == NULL) {
         goto loc_3104;
     }
-    word_CA4C = 0;
-    word_CA4E = 0;
-    word_CA50 = GetSystemMetrics(SM_CXSCREEN);
-    word_CA52 = GetSystemMetrics(SM_CYSCREEN);
+    unusedCa4C = 0;
+    unusedCa4E = 0;
+    screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    screenHeight = GetSystemMetrics(SM_CYSCREEN);
     ReleaseDC(arg_0, var_2);
     return TRUE;
 loc_3104:
@@ -1749,57 +1933,57 @@ loc_3104:
 }
 
 /* Release bitmaps. */
-void sub_3119()
+void ReleaseBitmaps()
 {
-    DeleteObject(word_A7B6[0]);
-    DeleteObject(word_A7B6[1]);
-    DeleteObject(word_A7BA);
-    if (word_C0B4 != NULL) {
-        DeleteObject(word_C0B4);
-        word_C0B4 = NULL;
+    DeleteObject(doubleBufferMain[0]);
+    DeleteObject(doubleBufferMain[1]);
+    DeleteObject(spriteRenderTargetMain);
+    if (ufoBeamPaintBrush != NULL) {
+        DeleteObject(ufoBeamPaintBrush);
+        ufoBeamPaintBrush = NULL;
     }
-    if (word_CA44 != NULL) {
-        DeleteObject(word_CA44);
-        word_CA44 = NULL;
+    if (ufoBeamMaskBrush != NULL) {
+        DeleteObject(ufoBeamMaskBrush);
+        ufoBeamMaskBrush = NULL;
     }
-    if (word_C0B2 != NULL) {
-        DeleteObject(word_C0B2);
-        word_C0B2 = NULL;
+    if (ufoBeamRenderTarget != NULL) {
+        DeleteObject(ufoBeamRenderTarget);
+        ufoBeamRenderTarget = NULL;
     }
-    if (word_C0B8 != NULL) {
-        DeleteObject(word_C0B8);
-        word_C0B8 = NULL;
+    if (ufoBeamColorBitmap != NULL) {
+        DeleteObject(ufoBeamColorBitmap);
+        ufoBeamColorBitmap = NULL;
     }
 }
 
 /* Update window position and sprite to be actually used. */
-void sub_31A8(int arg_0, int arg_2, int arg_4)
+void UpdateWindowPositionSpriteBeActuallyUsed(int arg_0, int arg_2, int arg_4)
 {
-    word_A7DA = arg_0;
-    word_A7DC = arg_2;
-    word_A7BC = stru_A8A2[arg_4].bitmaps[0];
-    word_A7BE = stru_A8A2[arg_4].bitmaps[1];
-    word_A7C0 = stru_A8A2[arg_4].x;
-    word_A7C2 = stru_A8A2[arg_4].y;
-    word_A7DE = stru_A8A2[arg_4].width;
-    word_A7E0 = stru_A8A2[arg_4].height;
+    screenXCurrentFrame = arg_0;
+    screenYCurrentFrame = arg_2;
+    spriteColourBitmapMain = spriteListSub[arg_4].bitmaps[0];
+    spriteMaskBitmapMain = spriteListSub[arg_4].bitmaps[1];
+    spriteXInResourceImageCurrentFrame = spriteListSub[arg_4].x;
+    spriteYInResourceImageCurrentFrame = spriteListSub[arg_4].y;
+    spriteWidthCurrentFrame = spriteListSub[arg_4].width;
+    spriteHeightCurrentFrame = spriteListSub[arg_4].height;
 }
 
 /* Clear window. */
-void sub_3237(HWND arg_0)
+void ClearWindow(HWND arg_0)
 {
-    word_A7F2 = 0;
-    word_A7F4 = 0;
-    word_A7F6 = 0;
-    word_A7F8 = 0;
+    screenXPreviousFrame = 0;
+    screenYPreviousFrame = 0;
+    spriteWidthPreviousFrame = 0;
+    spriteHeightPreviousFrame = 0;
     MoveWindow(arg_0, 0, 0, 0, 0, TRUE);
-    word_A7D4 = 1;
-    word_C0BA = 1;
-    word_A7D8 = NULL;
+    unused_A7D4 = 1;
+    noUpdatePeriodsAfterClearing = 1;
+    spriteColourBitmapPreviousFrame = NULL;
 }
 
 /* Render sprite with double buffering. */
-void sub_3284(HWND arg_0)
+void RenderSpriteDoubleBuffering(HWND arg_0)
 {
     HDC var_2;
     HDC var_4;
@@ -1814,92 +1998,92 @@ void sub_3284(HWND arg_0)
     int var_1A;
     int var_1C;
     int var_1E;
-    if (word_A7D2 != 0) {
+    if (renderOrUpdateWindowFlag != 0) {
         return;
     }
-    if (word_A7F2 == word_A7DA && word_A7F4 == word_A7DC && word_A7D8 == word_A7BC && word_A7C8 == word_A7C0 && word_CA72 == 0) {
+    if (screenXPreviousFrame == screenXCurrentFrame && screenYPreviousFrame == screenYCurrentFrame && spriteColourBitmapPreviousFrame == spriteColourBitmapMain && spriteXInResourceImagePreviousFrame == spriteXInResourceImageCurrentFrame && ufoBeamHeight == 0) {
         return;
     }
-    word_A7D0 ^= 1;
+    currentSpriteFramebufferIndex ^= 1;
     var_2 = GetDC(NULL);
-    SelectPalette(var_2, word_CA4A, FALSE);
+    SelectPalette(var_2, windowPaletteInUse, FALSE);
     var_4 = CreateCompatibleDC(var_2);
     var_6 = CreateCompatibleDC(var_2);
-    SelectPalette(var_6, word_CA4A, FALSE);
-    SelectPalette(var_4, word_CA4A, FALSE);
-    var_16 = max(word_A7DA, word_A7F2);
-    var_14 = max(word_A7DC, word_A7F4);
-    var_12 = min(word_A7DE + word_A7DA, word_A7F6 + word_A7F2) - var_16;
-    var_10 = min(word_A7DC + word_A7E0, word_A7F4 + word_A7F8) - var_14;
+    SelectPalette(var_6, windowPaletteInUse, FALSE);
+    SelectPalette(var_4, windowPaletteInUse, FALSE);
+    var_16 = max(screenXCurrentFrame, screenXPreviousFrame);
+    var_14 = max(screenYCurrentFrame, screenYPreviousFrame);
+    var_12 = min(spriteWidthCurrentFrame + screenXCurrentFrame, spriteWidthPreviousFrame + screenXPreviousFrame) - var_16;
+    var_10 = min(screenYCurrentFrame + spriteHeightCurrentFrame, screenYPreviousFrame + spriteHeightPreviousFrame) - var_14;
     if (var_12 <= 0 || var_10 <= 0) {
-        word_A7FA = 1;
-        if (word_A7D4 != 0) {
-            word_A7D4 = 0;
+        unused_A7FA = 1;
+        if (unused_A7D4 != 0) {
+            unused_A7D4 = 0;
         }
-        word_A7E2 = word_A7DA;
-        word_A7E4 = word_A7DC;
-        word_A7E6 = word_A7DE;
-        word_A7E8 = word_A7E0;
-        SelectObject(var_4, word_A7B6[word_A7D0]);
-        BitBlt(var_4, 0, 0, word_A7E6, word_A7E8, var_2, word_A7E2, word_A7E4, SRCCOPY);
+        updateAreaRectXCurrentFrame = screenXCurrentFrame;
+        updateAreaRectYCurrentFrame = screenYCurrentFrame;
+        updateAreaRectWidthCurrentFrame = spriteWidthCurrentFrame;
+        updateAreaRectHeightCurrentFrame = spriteHeightCurrentFrame;
+        SelectObject(var_4, doubleBufferMain[currentSpriteFramebufferIndex]);
+        BitBlt(var_4, 0, 0, updateAreaRectWidthCurrentFrame, updateAreaRectHeightCurrentFrame, var_2, updateAreaRectXCurrentFrame, updateAreaRectYCurrentFrame, SRCCOPY);
     } else {
-        word_A7FA = 0;
-        word_A7E2 = min(word_A7DA, word_A7F2);
-        word_A7E4 = min(word_A7DC, word_A7F4);
-        word_A7E6 = max(word_A7DE + word_A7DA, word_A7F6 + word_A7F2) - word_A7E2;
-        word_A7E8 = max(word_A7DC + word_A7E0, word_A7F4 + word_A7F8) - word_A7E4;
-        SelectObject(var_4, word_A7B6[word_A7D0]);
-        BitBlt(var_4, 0, 0, word_A7E6, word_A7E8, var_2, word_A7E2, word_A7E4, SRCCOPY);
-        var_1E = max(word_A7E2, word_A7EA);
-        var_1C = max(word_A7E4, word_A7EC);
-        var_1A = min(word_A7E6 + word_A7E2, word_A7EE + word_A7EA) - var_1E;
-        var_18 = min(word_A7E4 + word_A7E8, word_A7EC + word_A7F0) - var_1C;
-        var_16 = max(0, var_1E - word_A7E2);
-        var_14 = max(0, var_1C - word_A7E4);
-        var_E = max(0, var_1E - word_A7EA);
-        var_C = max(0, var_1C - word_A7EC);
+        unused_A7FA = 0;
+        updateAreaRectXCurrentFrame = min(screenXCurrentFrame, screenXPreviousFrame);
+        updateAreaRectYCurrentFrame = min(screenYCurrentFrame, screenYPreviousFrame);
+        updateAreaRectWidthCurrentFrame = max(spriteWidthCurrentFrame + screenXCurrentFrame, spriteWidthPreviousFrame + screenXPreviousFrame) - updateAreaRectXCurrentFrame;
+        updateAreaRectHeightCurrentFrame = max(screenYCurrentFrame + spriteHeightCurrentFrame, screenYPreviousFrame + spriteHeightPreviousFrame) - updateAreaRectYCurrentFrame;
+        SelectObject(var_4, doubleBufferMain[currentSpriteFramebufferIndex]);
+        BitBlt(var_4, 0, 0, updateAreaRectWidthCurrentFrame, updateAreaRectHeightCurrentFrame, var_2, updateAreaRectXCurrentFrame, updateAreaRectYCurrentFrame, SRCCOPY);
+        var_1E = max(updateAreaRectXCurrentFrame, updateAreaRectXPreviousFrame);
+        var_1C = max(updateAreaRectYCurrentFrame, updateAreaRectYPreviousFrame);
+        var_1A = min(updateAreaRectWidthCurrentFrame + updateAreaRectXCurrentFrame, updateAreaRectWidthPreviousFrame + updateAreaRectXPreviousFrame) - var_1E;
+        var_18 = min(updateAreaRectYCurrentFrame + updateAreaRectHeightCurrentFrame, updateAreaRectYPreviousFrame + updateAreaRectHeightPreviousFrame) - var_1C;
+        var_16 = max(0, var_1E - updateAreaRectXCurrentFrame);
+        var_14 = max(0, var_1C - updateAreaRectYCurrentFrame);
+        var_E = max(0, var_1E - updateAreaRectXPreviousFrame);
+        var_C = max(0, var_1C - updateAreaRectYPreviousFrame);
         if (var_1A > 0 && var_18 > 0) {
-            SelectObject(var_6, word_A7B6[LOBYTE(word_A7D0) - 0xFF & 1]);
+            SelectObject(var_6, doubleBufferMain[LOBYTE(currentSpriteFramebufferIndex) - 0xFF & 1]);
             BitBlt(var_4, var_16, var_14, var_1A, var_18, var_6, var_E, var_C, SRCCOPY);
         }
     }
-    if (word_A7BC != NULL) {
-        SelectObject(var_6, word_A7BA);
-        BitBlt(var_6, 0, 0, word_A7E6, word_A7E8, var_4, 0, 0, SRCCOPY);
-        var_16 = max(0, word_A7DA - word_A7E2);
-        var_14 = max(0, word_A7DC - word_A7E4);
-        if (word_A7BE != NULL) {
-            SelectObject(var_4, word_A7BE);
-            BitBlt(var_6, var_16, var_14, word_A7DE, word_A7E0, var_4, word_A7C0, word_A7C2, SRCAND);
-            SelectObject(var_4, word_A7BC);
-            BitBlt(var_6, var_16, var_14, word_A7DE, word_A7E0, var_4, word_A7C0, word_A7C2, SRCPAINT);
+    if (spriteColourBitmapMain != NULL) {
+        SelectObject(var_6, spriteRenderTargetMain);
+        BitBlt(var_6, 0, 0, updateAreaRectWidthCurrentFrame, updateAreaRectHeightCurrentFrame, var_4, 0, 0, SRCCOPY);
+        var_16 = max(0, screenXCurrentFrame - updateAreaRectXCurrentFrame);
+        var_14 = max(0, screenYCurrentFrame - updateAreaRectYCurrentFrame);
+        if (spriteMaskBitmapMain != NULL) {
+            SelectObject(var_4, spriteMaskBitmapMain);
+            BitBlt(var_6, var_16, var_14, spriteWidthCurrentFrame, spriteHeightCurrentFrame, var_4, spriteXInResourceImageCurrentFrame, spriteYInResourceImageCurrentFrame, SRCAND);
+            SelectObject(var_4, spriteColourBitmapMain);
+            BitBlt(var_6, var_16, var_14, spriteWidthCurrentFrame, spriteHeightCurrentFrame, var_4, spriteXInResourceImageCurrentFrame, spriteYInResourceImageCurrentFrame, SRCPAINT);
         } else {
-            SelectObject(var_4, word_A7BC);
-            BitBlt(var_6, var_16, var_14, word_A7DE, word_A7E0, var_4, word_A7C0, word_A7C2, SRCCOPY);
+            SelectObject(var_4, spriteColourBitmapMain);
+            BitBlt(var_6, var_16, var_14, spriteWidthCurrentFrame, spriteHeightCurrentFrame, var_4, spriteXInResourceImageCurrentFrame, spriteYInResourceImageCurrentFrame, SRCCOPY);
         }
-        word_A7D2 = 1;
-        word_CA5E = 1;
-        MoveWindow(arg_0, word_A7E2, word_A7E4, word_A7E6, word_A7E8 + word_CA72, TRUE);
-        word_CA5E = 0;
+        renderOrUpdateWindowFlag = 1;
+        unusedCa5E = 1;
+        MoveWindow(arg_0, updateAreaRectXCurrentFrame, updateAreaRectYCurrentFrame, updateAreaRectWidthCurrentFrame, updateAreaRectHeightCurrentFrame + ufoBeamHeight, TRUE);
+        unusedCa5E = 0;
     }
     DeleteDC(var_4);
     DeleteDC(var_6);
-    word_A7EA = word_A7E2;
-    word_A7EC = word_A7E4;
-    word_A7EE = word_A7E6;
-    word_A7F0 = word_A7E8;
-    word_A7F2 = word_A7DA;
-    word_A7F4 = word_A7DC;
-    word_A7F6 = word_A7DE;
-    word_A7F8 = word_A7E0;
-    word_A7D8 = word_A7BC;
-    word_A7C8 = word_A7C0;
-    word_A7CA = word_A7C2;
+    updateAreaRectXPreviousFrame = updateAreaRectXCurrentFrame;
+    updateAreaRectYPreviousFrame = updateAreaRectYCurrentFrame;
+    updateAreaRectWidthPreviousFrame = updateAreaRectWidthCurrentFrame;
+    updateAreaRectHeightPreviousFrame = updateAreaRectHeightCurrentFrame;
+    screenXPreviousFrame = screenXCurrentFrame;
+    screenYPreviousFrame = screenYCurrentFrame;
+    spriteWidthPreviousFrame = spriteWidthCurrentFrame;
+    spriteHeightPreviousFrame = spriteHeightCurrentFrame;
+    spriteColourBitmapPreviousFrame = spriteColourBitmapMain;
+    spriteXInResourceImagePreviousFrame = spriteXInResourceImageCurrentFrame;
+    spriteYInResourceImagePreviousFrameUnused = spriteYInResourceImageCurrentFrame;
     ReleaseDC(NULL, var_2);
 }
 
 /* Render UFO beam (if any) and present render targets onto window. */
-void sub_3717(HWND arg_0)
+void RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(HWND arg_0)
 {
     HDC var_2;
     HDC var_4;
@@ -1908,74 +2092,74 @@ void sub_3717(HWND arg_0)
 #ifdef WIN32
     HDC screen;
 #endif
-    if (word_A7D2 == 0) {
+    if (renderOrUpdateWindowFlag == 0) {
         return;
     }
-    word_A7D2 = 0;
+    renderOrUpdateWindowFlag = 0;
     var_2 = GetDC(arg_0);
-    SelectPalette(var_2, word_CA4A, FALSE);
+    SelectPalette(var_2, windowPaletteInUse, FALSE);
     RealizePalette(var_2);
     var_4 = CreateCompatibleDC(var_2);
-    SelectPalette(var_4, word_CA4A, FALSE);
-    SelectObject(var_4, word_A7BA);
-    BitBlt(var_2, 0, 0, word_A7E6, word_A7E8, var_4, 0, 0, SRCCOPY);
-    if (word_CA72 != 0) {
-        if (word_C0B8 == NULL) {
-            word_C0B8 = CreateCompatibleBitmap(var_2, 40, word_CA52 * 4 / 5);
-            if (word_C0B8 == NULL) {
+    SelectPalette(var_4, windowPaletteInUse, FALSE);
+    SelectObject(var_4, spriteRenderTargetMain);
+    BitBlt(var_2, 0, 0, updateAreaRectWidthCurrentFrame, updateAreaRectHeightCurrentFrame, var_4, 0, 0, SRCCOPY);
+    if (ufoBeamHeight != 0) {
+        if (ufoBeamColorBitmap == NULL) {
+            ufoBeamColorBitmap = CreateCompatibleBitmap(var_2, 40, screenHeight * 4 / 5);
+            if (ufoBeamColorBitmap == NULL) {
                 goto loc_398B;
             }
         }
-        if (word_C0B2 == NULL) {
-            word_C0B2 = CreateCompatibleBitmap(var_2, 40, word_CA52 * 4 / 5);
-            if (word_C0B2 == NULL) {
+        if (ufoBeamRenderTarget == NULL) {
+            ufoBeamRenderTarget = CreateCompatibleBitmap(var_2, 40, screenHeight * 4 / 5);
+            if (ufoBeamRenderTarget == NULL) {
                 goto loc_398B;
             }
         }
-        if (word_CA44 == NULL) {
-            word_CA44 = CreateSolidBrush(RGB(255, 255, 0));
+        if (ufoBeamMaskBrush == NULL) {
+            ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 255, 0));
         }
-        if (word_C0B4 == NULL) {
-            word_C0B4 = CreateSolidBrush(RGB(128, 128, 0));
+        if (ufoBeamPaintBrush == NULL) {
+            ufoBeamPaintBrush = CreateSolidBrush(RGB(128, 128, 0));
         }
         var_E = CreateCompatibleDC(var_2);
-        SelectObject(var_E, word_C0B2);
+        SelectObject(var_E, ufoBeamRenderTarget);
 #ifdef _WIN32
         /* Screen contents with height of only 40 pixels can be captured from window device context on Windows 10. Capture directly from screen instead. */
         screen = GetDC(NULL);
-        BitBlt(var_E, 0, 0, 40, word_CA72, screen, word_A7E2, word_A7E4 + 40, SRCCOPY);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeight, screen, updateAreaRectXCurrentFrame, updateAreaRectYCurrentFrame + 40, SRCCOPY);
         ReleaseDC(NULL, screen);
 #else
-        BitBlt(var_E, 0, 0, 40, word_CA72, var_2, 0, 40, SRCCOPY);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeight, var_2, 0, 40, SRCCOPY);
 #endif
         var_C.left = 0;
         var_C.top = 0;
         var_C.right = 40;
-        var_C.bottom = word_CA72;
-        SelectObject(var_4, word_C0B8);
-        FillRect(var_4, &var_C, word_CA44);
-        BitBlt(var_E, 0, 0, 40, word_CA72, var_4, 0, 0, SRCAND);
-        FillRect(var_4, &var_C, word_C0B4);
-        BitBlt(var_E, 0, 0, 40, word_CA72, var_4, 0, 0, SRCPAINT);
-        BitBlt(var_2, 0, 40, 40, word_CA72, var_E, 0, 0, SRCCOPY);
+        var_C.bottom = ufoBeamHeight;
+        SelectObject(var_4, ufoBeamColorBitmap);
+        FillRect(var_4, &var_C, ufoBeamMaskBrush);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeight, var_4, 0, 0, SRCAND);
+        FillRect(var_4, &var_C, ufoBeamPaintBrush);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeight, var_4, 0, 0, SRCPAINT);
+        BitBlt(var_2, 0, 40, 40, ufoBeamHeight, var_E, 0, 0, SRCCOPY);
         DeleteDC(var_E);
         DeleteDC(var_4);
     } else {
-        if (word_C0B4 != NULL) {
-            DeleteObject(word_C0B4);
-            word_C0B4 = NULL;
+        if (ufoBeamPaintBrush != NULL) {
+            DeleteObject(ufoBeamPaintBrush);
+            ufoBeamPaintBrush = NULL;
         }
-        if (word_CA44 != NULL) {
-            DeleteObject(word_CA44);
-            word_CA44 = NULL;
+        if (ufoBeamMaskBrush != NULL) {
+            DeleteObject(ufoBeamMaskBrush);
+            ufoBeamMaskBrush = NULL;
         }
-        if (word_C0B2 != NULL) {
-            DeleteObject(word_C0B2);
-            word_C0B2 = NULL;
+        if (ufoBeamRenderTarget != NULL) {
+            DeleteObject(ufoBeamRenderTarget);
+            ufoBeamRenderTarget = NULL;
         }
-        if (word_C0B8 != NULL) {
-            DeleteObject(word_C0B8);
-            word_C0B8 = NULL;
+        if (ufoBeamColorBitmap != NULL) {
+            DeleteObject(ufoBeamColorBitmap);
+            ufoBeamColorBitmap = NULL;
         }
         DeleteDC(var_4);
     }
@@ -1986,21 +2170,21 @@ loc_398B:
 }
 
 /* Unused. */
-void sub_399D(HWND arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
+void Func(HWND arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
 {
     MoveWindow(arg_0, arg_2, arg_4, arg_6, arg_8, FALSE);
     MoveWindow(arg_0, 0, 0, 0, 0, TRUE);
 }
 
 /* Find if a window has a match in known instance list. */
-BOOL sub_39D6(HWND arg_0)
+BOOL IsWindowInKnownInstanceList(HWND arg_0)
 {
     int var_2;
-    if (word_CA40 == 0) {
+    if (knownInstanceCount == 0) {
         return FALSE;
     }
     for (var_2 = 0; var_2 < 8; var_2 += 1) {
-        if (word_CA60[var_2] == arg_0 && word_CA60[var_2] != NULL) {
+        if (knownInstanceWindows[var_2] == arg_0 && knownInstanceWindows[var_2] != NULL) {
             return TRUE;
         }
     }
@@ -2008,7 +2192,7 @@ BOOL sub_39D6(HWND arg_0)
 }
 
 /* Find X-coordinate of possible collision with other instances. Return zero when no collision detected. */
-int sub_3A36(int arg_0, int arg_2, int arg_4, int arg_6)
+int FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(int arg_0, int arg_2, int arg_4, int arg_6)
 {
     int var_2;
     int var_4;
@@ -2016,9 +2200,9 @@ int sub_3A36(int arg_0, int arg_2, int arg_4, int arg_6)
     int var_8;
     int var_A;
     for (var_2 = 0; var_2 < 8; var_2 += 1) {
-        if (word_CA60[var_2] != NULL) {
-            var_4 = (short)GetWindowWord(word_CA60[var_2], 0);
-            var_8 = (short)GetWindowWord(word_CA60[var_2], 2);
+        if (knownInstanceWindows[var_2] != NULL) {
+            var_4 = (short)GetWindowWord(knownInstanceWindows[var_2], 0);
+            var_8 = (short)GetWindowWord(knownInstanceWindows[var_2], 2);
             var_6 = var_4 + 40;
             var_A = var_8 + 40;
             if (var_6 == 0) {
@@ -2036,7 +2220,7 @@ int sub_3A36(int arg_0, int arg_2, int arg_4, int arg_6)
 }
 
 /* Populate known instance list by searching for visible windows with name match. */
-void sub_3B4C(HWND arg_0)
+void PopulateKnownInstanceListSearchingVisibleWindowsNameMatch(HWND arg_0)
 {
     HWND var_2;
     UINT var_4;
@@ -2044,7 +2228,7 @@ void sub_3B4C(HWND arg_0)
     int var_8;
     char var_48[64];
     for (var_6 = 0; var_6 < 8; var_6 += 1) {
-        word_CA60[var_6] = NULL;
+        knownInstanceWindows[var_6] = NULL;
     }
     var_2 = GetDesktopWindow();
     var_4 = GW_CHILD;
@@ -2058,7 +2242,7 @@ void sub_3B4C(HWND arg_0)
         if ((GetWindowLong(var_2, GWL_STYLE) & WS_VISIBLE) != 0) {
             GetWindowText(var_2, var_48, 16);
             if (lstrcmp(var_48, "Screen Mate") == 0) {
-                word_CA60[var_8] = var_2;
+                knownInstanceWindows[var_8] = var_2;
                 var_8 += 1;
                 if (var_8 > 8) {
                     return;
@@ -2067,11 +2251,11 @@ void sub_3B4C(HWND arg_0)
             var_6 += 1;
         }
     }
-    word_CA40 = var_8;
+    knownInstanceCount = var_8;
 }
 
 /* Populate known instance list by searching for visible windows with name match, then notify other instances of self creation. */
-BOOL sub_3C20(HWND arg_0)
+BOOL PopulateKnownInstanceListAndNotify(HWND arg_0)
 {
     HWND var_2;
     UINT var_4;
@@ -2090,7 +2274,7 @@ BOOL sub_3C20(HWND arg_0)
         if ((GetWindowLong(var_2, GWL_STYLE) & WS_VISIBLE) != 0) {
             GetWindowText(var_2, var_48, 16);
             if (lstrcmp(var_48, "Screen Mate") == 0) {
-                word_CA60[var_8] = var_2;
+                knownInstanceWindows[var_8] = var_2;
                 var_8 += 1;
                 if (var_8 > 8) {
                     return FALSE;
@@ -2099,53 +2283,53 @@ BOOL sub_3C20(HWND arg_0)
             var_6 += 1;
         }
     }
-    word_CA40 = var_8;
-    word_CA48 = var_8;
-    for (var_6 = 0; var_6 < word_CA40; var_6 += 1) {
-        SendMessage(word_CA60[var_6], WM_USER, (WPARAM)1, (LPARAM)arg_0);
+    knownInstanceCount = var_8;
+    unusedCa48 = var_8;
+    for (var_6 = 0; var_6 < knownInstanceCount; var_6 += 1) {
+        SendMessage(knownInstanceWindows[var_6], WM_USER, (WPARAM)1, (LPARAM)arg_0);
     }
     return TRUE;
 }
 
 /* Notify other instances of self destruction. */
-void sub_3D12(HWND arg_0)
+void NotifyOtherInstancesSelfDestruction(HWND arg_0)
 {
     int var_2;
     for (var_2 = 0; var_2 < 8; var_2 += 1) {
-        if (word_CA60[var_2] != NULL) {
-            SendMessage(word_CA60[var_2], WM_USER, (WPARAM)2, (LPARAM)arg_0);
+        if (knownInstanceWindows[var_2] != NULL) {
+            SendMessage(knownInstanceWindows[var_2], WM_USER, (WPARAM)2, (LPARAM)arg_0);
         }
     }
 }
 
 /* Add window into known instance list. */
-void sub_3D5F(HWND arg_0)
+void AddWindowKnownInstanceList(HWND arg_0)
 {
     int var_2;
     for (var_2 = 0; var_2 < 8; var_2 += 1) {
-        if (word_CA60[var_2] == NULL) {
-            word_CA40 += 1;
-            word_CA60[var_2] = arg_0;
+        if (knownInstanceWindows[var_2] == NULL) {
+            knownInstanceCount += 1;
+            knownInstanceWindows[var_2] = arg_0;
             break;
         }
     }
 }
 
 /* Remove window from known instance list. */
-void sub_3DA7(HWND arg_0)
+void RemoveWindowKnownInstanceList(HWND arg_0)
 {
     int var_2;
     for (var_2 = 0; var_2 < 8; var_2 += 1) {
-        if (word_CA60[var_2] == arg_0) {
-            word_CA40 -= 1;
-            word_CA60[var_2] = NULL;
+        if (knownInstanceWindows[var_2] == arg_0) {
+            knownInstanceCount -= 1;
+            knownInstanceWindows[var_2] = NULL;
             break;
         }
     }
 }
 
 /* Populate known visible window list. */
-void sub_3DF0(void)
+void PopulateKnownVisibleWindowList(void)
 {
     HWND var_2;
     UINT var_4;
@@ -2155,55 +2339,55 @@ void sub_3DF0(void)
     var_6 = 0;
     while ((var_2 = GetWindow(var_2, var_4)) != NULL && var_6 < 32) {
         var_4 = GW_HWNDNEXT;
-        if (var_2 == word_C0B0) {
+        if (var_2 == selfInstanceWindowHandle) {
             continue;
         }
         if ((GetWindowLong(var_2, GWL_STYLE) & WS_VISIBLE) != 0) {
-            GetWindowRect(var_2, &stru_C0BC[var_6].rect);
-            stru_C0BC[var_6].window = var_2;
+            GetWindowRect(var_2, &visibleWindowList[var_6].rect);
+            visibleWindowList[var_6].window = var_2;
             var_6 += 1;
         }
     }
-    word_CA74 = var_6;
+    visibleWindowCount = var_6;
 }
 
 /* Find X-coordinate of possible collision with which visible window. */
-int sub_3E7C(HWND * arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
+int FindXCoordinatePossibleCollisionWhichVisibleWindow(HWND * arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
 {
     int var_2;
     int var_4;
     RECT var_C;
-    for (var_2 = 0; var_2 < word_CA74; var_2 += 1) {
+    for (var_2 = 0; var_2 < visibleWindowCount; var_2 += 1) {
         if (arg_8 > arg_6) {
-            if (stru_C0BC[var_2].rect.right >= arg_6 && stru_C0BC[var_2].rect.right < arg_8 && stru_C0BC[var_2].rect.top < arg_2 && stru_C0BC[var_2].rect.bottom > arg_4) {
+            if (visibleWindowList[var_2].rect.right >= arg_6 && visibleWindowList[var_2].rect.right < arg_8 && visibleWindowList[var_2].rect.top < arg_2 && visibleWindowList[var_2].rect.bottom > arg_4) {
                 for (var_4 = 0; var_4 < var_2; var_4 += 1) {
-                    if (stru_C0BC[var_4].rect.top <= arg_2 && stru_C0BC[var_4].rect.bottom >= arg_4 && stru_C0BC[var_4].rect.left <= arg_6 && stru_C0BC[var_4].rect.right >= arg_8) {
+                    if (visibleWindowList[var_4].rect.top <= arg_2 && visibleWindowList[var_4].rect.bottom >= arg_4 && visibleWindowList[var_4].rect.left <= arg_6 && visibleWindowList[var_4].rect.right >= arg_8) {
                         break;
                     }
                 }
                 if (var_4 == var_2) {
-                    if (IsWindow(stru_C0BC[var_2].window)) {
-                        GetWindowRect(stru_C0BC[var_2].window, &var_C);
-                        if (stru_C0BC[var_2].rect.right == var_C.right) {
-                            *arg_0 = stru_C0BC[var_2].window;
-                            return stru_C0BC[var_2].rect.right;
+                    if (IsWindow(visibleWindowList[var_2].window)) {
+                        GetWindowRect(visibleWindowList[var_2].window, &var_C);
+                        if (visibleWindowList[var_2].rect.right == var_C.right) {
+                            *arg_0 = visibleWindowList[var_2].window;
+                            return visibleWindowList[var_2].rect.right;
                         }
                     }
                 }
             }
         } else {
-            if (stru_C0BC[var_2].rect.left <= arg_6 && stru_C0BC[var_2].rect.left > arg_8 && stru_C0BC[var_2].rect.top < arg_2 && stru_C0BC[var_2].rect.bottom > arg_4) {
+            if (visibleWindowList[var_2].rect.left <= arg_6 && visibleWindowList[var_2].rect.left > arg_8 && visibleWindowList[var_2].rect.top < arg_2 && visibleWindowList[var_2].rect.bottom > arg_4) {
                 for (var_4 = 0; var_4 < var_2; var_4 += 1) {
-                    if (stru_C0BC[var_4].rect.top <= arg_2 && stru_C0BC[var_4].rect.bottom >= arg_4 && stru_C0BC[var_4].rect.left <= arg_6 && stru_C0BC[var_4].rect.right >= arg_8) {
+                    if (visibleWindowList[var_4].rect.top <= arg_2 && visibleWindowList[var_4].rect.bottom >= arg_4 && visibleWindowList[var_4].rect.left <= arg_6 && visibleWindowList[var_4].rect.right >= arg_8) {
                         break;
                     }
                 }
                 if (var_4 == var_2) {
-                    if (IsWindow(stru_C0BC[var_2].window)) {
-                        GetWindowRect(stru_C0BC[var_2].window, &var_C);
-                        if (stru_C0BC[var_2].rect.left == var_C.left) {
-                            *arg_0 = stru_C0BC[var_2].window;
-                            return stru_C0BC[var_2].rect.left;
+                    if (IsWindow(visibleWindowList[var_2].window)) {
+                        GetWindowRect(visibleWindowList[var_2].window, &var_C);
+                        if (visibleWindowList[var_2].rect.left == var_C.left) {
+                            *arg_0 = visibleWindowList[var_2].window;
+                            return visibleWindowList[var_2].rect.left;
                         }
                     }
                 }
@@ -2214,32 +2398,32 @@ int sub_3E7C(HWND * arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
 }
 
 /* Find Y-coordinate of possible landing top edge of which visible window. */
-int sub_408C(HWND * arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
+int FindYCoordinatePossibleLandingTopEdgeWhichVisibleWindow(HWND * arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
 {
     int var_2;
     int var_4;
-    for (var_2 = 0; var_2 < word_CA74; var_2 += 1) {
-        if (stru_C0BC[var_2].rect.top <= arg_2 && stru_C0BC[var_2].rect.top > arg_4 && stru_C0BC[var_2].rect.left < arg_8 && stru_C0BC[var_2].rect.right > arg_6 && stru_C0BC[var_2].rect.top > 10) {
+    for (var_2 = 0; var_2 < visibleWindowCount; var_2 += 1) {
+        if (visibleWindowList[var_2].rect.top <= arg_2 && visibleWindowList[var_2].rect.top > arg_4 && visibleWindowList[var_2].rect.left < arg_8 && visibleWindowList[var_2].rect.right > arg_6 && visibleWindowList[var_2].rect.top > 10) {
             for (var_4 = 0; var_4 < var_2; var_4 += 1) {
-                if (stru_C0BC[var_4].rect.left <= arg_6 && stru_C0BC[var_4].rect.right >= arg_8 && stru_C0BC[var_4].rect.top <= arg_4 && stru_C0BC[var_4].rect.bottom >= arg_2) {
+                if (visibleWindowList[var_4].rect.left <= arg_6 && visibleWindowList[var_4].rect.right >= arg_8 && visibleWindowList[var_4].rect.top <= arg_4 && visibleWindowList[var_4].rect.bottom >= arg_2) {
                     break;
                 }
             }
             if (var_4 == var_2) {
-                *arg_0 = stru_C0BC[var_2].window;
-                return stru_C0BC[var_2].rect.top;
+                *arg_0 = visibleWindowList[var_2].window;
+                return visibleWindowList[var_2].rect.top;
             }
         }
     }
-    if (arg_2 >= word_CA52 && arg_4 <= word_CA52) {
+    if (arg_2 >= screenHeight && arg_4 <= screenHeight) {
         *arg_0 = NULL;
-        return word_CA52;
+        return screenHeight;
     }
     return 0;
 }
 
 /* Get window top Y-coordinate if it is possible to land on the window. */
-int sub_419E(HWND arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
+int GetWindowTopYCoordinateIfItIsPossibleLandWindow(HWND arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
 {
     RECT var_8;
     if (IsWindow(arg_0)) {
@@ -2248,210 +2432,210 @@ int sub_419E(HWND arg_0, int arg_2, int arg_4, int arg_6, int arg_8)
             return var_8.top;
         }
     }
-    if (arg_2 > word_CA52) {
+    if (arg_2 > screenHeight) {
         return -1;
     }
     return 0;
 }
 
 /* Play sound by resource ID and additional flags. */
-void sub_4210(int arg_0, UINT arg_2, WORD arg_4)
+void PlaySoundResourceIdAdditionalFlags(int arg_0, UINT arg_2, WORD arg_4)
 {
     LPCSTR lpszSoundName;
-    if (word_A82E != NULL) {
+    if (waveResourceHandle != NULL) {
         sndPlaySound(NULL, SND_SYNC);
-        GlobalUnlock(word_A82E);
-        FreeResource(word_A82E);
-        word_A82E = NULL;
+        GlobalUnlock(waveResourceHandle);
+        FreeResource(waveResourceHandle);
+        waveResourceHandle = NULL;
     }
-    word_A82E = LoadResource(word_CA58, FindResource(word_CA58, MAKEINTRESOURCE(arg_0), "WAVE"));
-    lpszSoundName = LockResource(word_A82E);
+    waveResourceHandle = LoadResource(currentInstance, FindResource(currentInstance, MAKEINTRESOURCE(arg_0), "WAVE"));
+    lpszSoundName = LockResource(waveResourceHandle);
     sndPlaySound(lpszSoundName, arg_2 | (SND_ASYNC | SND_MEMORY));
 }
 
 /* Stop playing sound. */
-void sub_428E(void)
+void StopPlayingSound(void)
 {
     sndPlaySound(NULL, SND_SYNC);
 }
 
 /* Play sound by name. */
-void sub_42AA(LPCSTR lpszSoundName)
+void PlaySoundName(LPCSTR lpszSoundName)
 {
     sndPlaySound(lpszSoundName, SND_ASYNC);
 }
 
 /* Play sound by resource ID and additional flags (when option "Cry" enabled). */
-void sub_42C8(int arg_0, UINT arg_2, WORD arg_4)
+void PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(int arg_0, UINT arg_2, WORD arg_4)
 {
-    if (word_CA5A != 0U) {
-        sub_4210(arg_0, arg_2, arg_4);
+    if (cryEnabled != 0U) {
+        PlaySoundResourceIdAdditionalFlags(arg_0, arg_2, arg_4);
     }
 }
 
 /* Generate sprites from loaded resource images. */
-BOOL sub_42F3(HDC arg_0)
+BOOL GenerateSpritesFromLoadedResourceImages(HDC arg_0)
 {
     int var_2;
     int var_4;
     for (var_2 = 0; var_2 < 16; var_2 += 1) {
-        if (stru_9EE2[var_2].resource == 0) {
+        if (resourceList[var_2].resource == 0) {
             break;
         }
-        if (!sub_2B30(arg_0, &stru_9EE2[var_2].info, stru_9EE2[var_2].resource, -1)) {
+        if (!LoadSpriteImagesAndStoreHandles(arg_0, &resourceList[var_2].info, resourceList[var_2].resource, -1)) {
             return FALSE;
         }
-        if (!sub_2B30(arg_0, &stru_9FE2[var_2].info, stru_9EE2[var_2].resource, -3)) {
+        if (!LoadSpriteImagesAndStoreHandles(arg_0, &flippedResourceList[var_2].info, resourceList[var_2].resource, -3)) {
             return FALSE;
         }
         for (var_4 = 0; var_4 < 16; var_4 += 1) {
-            stru_A8A2[var_2 * 16 + var_4].bitmaps[0] = stru_9EE2[var_2].info.bitmaps[0];
-            stru_A8A2[var_2 * 16 + var_4].bitmaps[1] = stru_9EE2[var_2].info.bitmaps[1];
-            stru_A8A2[var_2 * 16 + var_4].width = 40;
-            stru_A8A2[var_2 * 16 + var_4].height = 40;
-            stru_A8A2[var_2 * 16 + var_4].x = var_4 * 40;
-            stru_A8A2[var_2 * 16 + var_4].y = 0;
-            stru_A8A2[var_2 * 16 + var_4 + 256].bitmaps[0] = stru_9FE2[var_2].info.bitmaps[0];
-            stru_A8A2[var_2 * 16 + var_4 + 256].bitmaps[1] = stru_9FE2[var_2].info.bitmaps[1];
-            stru_A8A2[var_2 * 16 + var_4 + 256].width = 40;
-            stru_A8A2[var_2 * 16 + var_4 + 256].height = 40;
-            stru_A8A2[var_2 * 16 + var_4 + 256].x = (15 - var_4) * 40;
-            stru_A8A2[var_2 * 16 + var_4 + 256].y = 0;
+            spriteListSub[var_2 * 16 + var_4].bitmaps[0] = resourceList[var_2].info.bitmaps[0];
+            spriteListSub[var_2 * 16 + var_4].bitmaps[1] = resourceList[var_2].info.bitmaps[1];
+            spriteListSub[var_2 * 16 + var_4].width = 40;
+            spriteListSub[var_2 * 16 + var_4].height = 40;
+            spriteListSub[var_2 * 16 + var_4].x = var_4 * 40;
+            spriteListSub[var_2 * 16 + var_4].y = 0;
+            spriteListSub[var_2 * 16 + var_4 + 256].bitmaps[0] = flippedResourceList[var_2].info.bitmaps[0];
+            spriteListSub[var_2 * 16 + var_4 + 256].bitmaps[1] = flippedResourceList[var_2].info.bitmaps[1];
+            spriteListSub[var_2 * 16 + var_4 + 256].width = 40;
+            spriteListSub[var_2 * 16 + var_4 + 256].height = 40;
+            spriteListSub[var_2 * 16 + var_4 + 256].x = (15 - var_4) * 40;
+            spriteListSub[var_2 * 16 + var_4 + 256].y = 0;
         }
     }
     return TRUE;
 }
 
 /* Release resource images. */
-void sub_44ED(void)
+void ReleaseResourceImages(void)
 {
     int var_2;
     for (var_2 = 0; var_2 < 16; var_2 += 1) {
-        if (stru_9EE2[var_2].resource == 0) {
+        if (resourceList[var_2].resource == 0) {
             break;
         }
-        sub_2EEC(&stru_9EE2[var_2].info);
-        if (stru_9EE2[var_2].flags == 1) {
-            sub_2EEC(&stru_9FE2[var_2].info);
+        ReleaseSpriteImages(&resourceList[var_2].info);
+        if (resourceList[var_2].flags == 1) {
+            ReleaseSpriteImages(&flippedResourceList[var_2].info);
         }
     }
 }
 
 /* Turn around when approaching screen border or otherwise with 1/20 probability.  */
-void sub_4559(void)
+void TurnAroundWhenApproachingScreenBorderOtherwise120Probability(void)
 {
-    if (word_A2AA > 0 && word_A800 < 0) {
-        word_A8A0 = 24;
+    if (facingDirection > 0 && spriteX < 0) {
+        subWindowState = 24;
     }
-    if (word_A2AA < 0 && word_CA50 - stru_A8A2[word_A804].width < word_A800) {
-        word_A8A0 = 24;
+    if (facingDirection < 0 && screenWidth - spriteListSub[spriteIndex].width < spriteX) {
+        subWindowState = 24;
     }
-    if (word_A2AA > 0 && word_CA50 - stru_A8A2[word_A804].width > word_A800 && rand() % 20 == 0) {
-        word_A8A0 = 24;
+    if (facingDirection > 0 && screenWidth - spriteListSub[spriteIndex].width > spriteX && rand() % 20 == 0) {
+        subWindowState = 24;
     }
-    if (word_A2AA < 0 && word_A800 > 0 && rand() % 20 == 0) {
-        word_A8A0 = 24;
+    if (facingDirection < 0 && spriteX > 0 && rand() % 20 == 0) {
+        subWindowState = 24;
     }
 }
 
 /* Flag-controlled collision and turn around. */
-void sub_4614(BOOL arg_0)
+void FlagControlledCollisionTurnAround(BOOL arg_0)
 {
-    if (word_A7FC == 0) {
-        if (word_A2AA > 0 && word_A800 < 0) {
-            word_A8A0 = 30;
+    if (gravityEnabled == 0) {
+        if (facingDirection > 0 && spriteX < 0) {
+            subWindowState = 30;
         }
-        if (word_A2AA < 0 && word_CA50 - stru_A8A2[word_A804].width < word_A800) {
-            word_A8A0 = 30;
+        if (facingDirection < 0 && screenWidth - spriteListSub[spriteIndex].width < spriteX) {
+            subWindowState = 30;
         }
     }
     if (arg_0) {
-        if (word_A2AA > 0 && word_CA50 - 80 > word_A800 && rand() % 20 == 0) {
-            word_A8A0 = 24;
+        if (facingDirection > 0 && screenWidth - 80 > spriteX && rand() % 20 == 0) {
+            subWindowState = 24;
         }
-        if (word_A2AA < 0 && word_A800 > 40 && rand() % 20 == 0) {
-            word_A8A0 = 24;
+        if (facingDirection < 0 && spriteX > 40 && rand() % 20 == 0) {
+            subWindowState = 24;
         }
     }
 }
 
 /* Switch to standing sprite after certain frames. */
-void sub_46D2(void)
+void SwitchToStandingSprite(void)
 {
-    if (word_A826-- <= 0) {
-        word_A8A0 = 42;
+    if (animationFrameCounter-- <= 0) {
+        subWindowState = 42;
     }
 }
 
 /* Process chime. */
-void sub_46F7(void)
+void ProcessChime(void)
 {
     struct tm * var_2;
     time_t var_6;
     DWORD var_A;
     int var_C;
-    if (word_A832 != 0) {
+    if (remainingChimeTimes != 0) {
         var_A = GetTickCount();
         if (dword_A834 + 1000 < var_A) {
             dword_A834 = var_A;
-            word_A832 -= 1;
-            if (word_A832 != 0) {
-                sub_4210(108, 0U, 0);
-            } else if (word_CA76 != 0) {
-                word_A8A0 = 113;
+            remainingChimeTimes -= 1;
+            if (remainingChimeTimes != 0) {
+                PlaySoundResourceIdAdditionalFlags(108, 0U, 0);
+            } else if (sleepingAfterTimeout != 0) {
+                subWindowState = 113;
             } else {
-                word_A8A0 = 1;
+                subWindowState = 1;
             }
         }
     } else {
-        if (word_A838++ < 10) {
+        if (timeCheckPeriodCounter++ < 10) {
             return;
         }
-        word_A838 = 0;
+        timeCheckPeriodCounter = 0;
         time(&var_6);
         var_2 = localtime(&var_6);
         var_C = var_2->tm_hour % 12;
         if (var_C == 0) {
             var_C = 12;
         }
-        if (var_2->tm_min == 0 && var_C != word_A830) {
-            sub_2A96();
+        if (var_2->tm_min == 0 && var_C != currentTimeHour) {
+            DestroySubwindow();
             dword_A834 = 0;
-            word_A830 = var_C;
-            word_A832 = word_A830 + 1;
-            word_A8A0 = 81;
+            currentTimeHour = var_C;
+            remainingChimeTimes = currentTimeHour + 1;
+            subWindowState = 81;
         }
     }
 }
 
 /* Update window position and sprite to be painted. */
-void sub_4807(int arg_0, int arg_2, int arg_4)
+void UpdateMainWindowSprite(int arg_0, int arg_2, int arg_4)
 {
-    SetWindowWord(word_C0B0, 0, (short)word_A800);
-    SetWindowWord(word_C0B0, 2, (short)word_A802);
+    SetWindowWord(selfInstanceWindowHandle, 0, (short)spriteX);
+    SetWindowWord(selfInstanceWindowHandle, 2, (short)spriteY);
     if (arg_4 >= 9 && arg_4 <= 14) {
-        sub_31A8(arg_0, arg_2, arg_4);
-    } else if (word_A2AA > 0) {
-        sub_31A8(arg_0, arg_2, arg_4);
+        UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4);
+    } else if (facingDirection > 0) {
+        UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4);
     } else {
-        sub_31A8(arg_0, arg_2, arg_4 + 256);
+        UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4 + 256);
     }
 }
 
 /* Update window position and sprite to be painted (sub). */
-void sub_488C(int arg_0, int arg_2, int arg_4)
+void UpdateSubWindowSprite(int arg_0, int arg_2, int arg_4)
 {
     if (arg_4 >= 9 && arg_4 <= 14) {
-        sub_9350(arg_0, arg_2, arg_4);
-    } else if (word_A2AC > 0) {
-        sub_9350(arg_0, arg_2, arg_4);
+        UpdateWindowPositionSpriteBeActuallyUsed2(arg_0, arg_2, arg_4);
+    } else if (facingDirectionSub > 0) {
+        UpdateWindowPositionSpriteBeActuallyUsed2(arg_0, arg_2, arg_4);
     } else {
-        sub_9350(arg_0, arg_2, arg_4 + 256);
+        UpdateWindowPositionSpriteBeActuallyUsed2(arg_0, arg_2, arg_4 + 256);
     }
 }
 
 /* Return TRUE if the window handle is NULL or if the handle contains an existing window. */
-BOOL sub_48F3(HWND arg_0)
+BOOL IsNullOrValidWindow(HWND arg_0)
 {
     if (arg_0 == NULL) {
         return TRUE;
@@ -2461,113 +2645,113 @@ BOOL sub_48F3(HWND arg_0)
 }
 
 /* Get window rect. If the window handle is NULL, get a screen rect located right under the current screen. */
-void sub_491D(HWND arg_0, LPRECT arg_2)
+void GetWindowRectOrScreenRect(HWND arg_0, LPRECT arg_2)
 {
     if (arg_0 == NULL) {
         arg_2->left = 0;
-        arg_2->right = word_CA50;
-        arg_2->top = word_CA52;
-        arg_2->bottom = word_CA52 * 2;
+        arg_2->right = screenWidth;
+        arg_2->top = screenHeight;
+        arg_2->bottom = screenHeight * 2;
     } else {
         GetWindowRect(arg_0, arg_2);
     }
 }
 
 /* Process when out of screen view or at different positions on top of visible window. */
-void sub_496F(int arg_0)
+void HandleOutOfViewOrTopPosition(int arg_0)
 {
     RECT var_8;
-    if (word_A7FC == 0) {
+    if (gravityEnabled == 0) {
         return;
     }
-    if (word_A81C != NULL) {
-        if (!sub_48F3(word_A81C)) {
+    if (landingTargetWindow != NULL) {
+        if (!IsNullOrValidWindow(landingTargetWindow)) {
             if (arg_0 == 2) {
-                word_A8A0 = 94;
+                subWindowState = 94;
             } else {
-                word_A8A0 = 102;
+                subWindowState = 102;
             }
             return;
         }
-        sub_491D(word_A81C, &var_8);
-        if (var_8.top > stru_A81E.top || word_A800 + 40 < var_8.left || var_8.right < word_A800) {
+        GetWindowRectOrScreenRect(landingTargetWindow, &var_8);
+        if (var_8.top > landingTargetWindowRect.top || spriteX + 40 < var_8.left || var_8.right < spriteX) {
             if (arg_0 == 2) {
-                word_A8A0 = 94;
+                subWindowState = 94;
             } else {
-                word_A8A0 = 102;
+                subWindowState = 102;
             }
             return;
         }
-        if (var_8.top < stru_A81E.top) {
-            word_A802 = var_8.top - stru_A8A2[word_A804].height;
-            stru_A81E.top = var_8.top;
-            stru_A81E.bottom = var_8.bottom;
-            stru_A81E.left = var_8.left;
-            stru_A81E.right = var_8.right;
-            sub_4807(word_A800, word_A802, word_A804);
+        if (var_8.top < landingTargetWindowRect.top) {
+            spriteY = var_8.top - spriteListSub[spriteIndex].height;
+            landingTargetWindowRect.top = var_8.top;
+            landingTargetWindowRect.bottom = var_8.bottom;
+            landingTargetWindowRect.left = var_8.left;
+            landingTargetWindowRect.right = var_8.right;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             return;
         }
         if (arg_0 == 1) {
-            if (word_A800 + 8 < var_8.left && word_A2AA > 0) {
-                word_A8A0 = 105;
-                word_A800 = var_8.left - 10;
+            if (spriteX + 8 < var_8.left && facingDirection > 0) {
+                subWindowState = 105;
+                spriteX = var_8.left - 10;
                 return;
             }
-            if (word_A800 + 32 >= var_8.right && word_A2AA < 0) {
-                word_A8A0 = 105;
-                word_A800 = var_8.right - 30;
+            if (spriteX + 32 >= var_8.right && facingDirection < 0) {
+                subWindowState = 105;
+                spriteX = var_8.right - 30;
                 return;
             }
-            if (rand() % 20 - 1 == 0 && word_CA52 - word_A802 > 100) {
-                word_A8A0 = 104;
+            if (rand() % 20 - 1 == 0 && screenHeight - spriteY > 100) {
+                subWindowState = 104;
                 return;
             }
         }
         if (arg_0 == 2) {
-            if (word_A800 + 32 < var_8.left || word_A800 + 8 > var_8.right) {
-                word_A8A0 = 94;
+            if (spriteX + 32 < var_8.left || spriteX + 8 > var_8.right) {
+                subWindowState = 94;
                 return;
             }
         }
     }
-    if (stru_A8A2[word_A804].width + word_A800 < 0 || word_A800 > word_CA50) {
-        word_A8A0 = 0;
+    if (spriteListSub[spriteIndex].width + spriteX < 0 || spriteX > screenWidth) {
+        subWindowState = 0;
         return;
     }
 }
 
 /* Process when climbing up side of a window. */
-void sub_4B3B(void)
+void HandleClimbingSideOfWindow(void)
 {
     RECT var_8;
-    if (word_A7FC == 0) {
+    if (gravityEnabled == 0) {
         return;
     }
-    if (word_A81C != NULL) {
-        if (!sub_48F3(word_A81C)) {
-            word_A8A0 = 102;
+    if (landingTargetWindow != NULL) {
+        if (!IsNullOrValidWindow(landingTargetWindow)) {
+            subWindowState = 102;
             return;
         }
-        sub_491D(word_A81C, &var_8);
-        if (var_8.right < stru_A81E.right && word_A2AA > 0 || var_8.left > stru_A81E.left && word_A2AA < 0) {
-            word_A8A0 = 102;
+        GetWindowRectOrScreenRect(landingTargetWindow, &var_8);
+        if (var_8.right < landingTargetWindowRect.right && facingDirection > 0 || var_8.left > landingTargetWindowRect.left && facingDirection < 0) {
+            subWindowState = 102;
             return;
         }
-        if (var_8.right > stru_A81E.right && word_A2AA > 0 || var_8.left < stru_A81E.left && word_A2AA < 0) {
-            if (word_A2AA > 0) {
-                word_A800 = var_8.right + 10;
+        if (var_8.right > landingTargetWindowRect.right && facingDirection > 0 || var_8.left < landingTargetWindowRect.left && facingDirection < 0) {
+            if (facingDirection > 0) {
+                spriteX = var_8.right + 10;
             } else {
-                word_A800 = var_8.left - 50;
+                spriteX = var_8.left - 50;
             }
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A8A0 = 102;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 102;
             return;
         }
     }
 }
 
 /* Detect collision with other instances, action controlled by a flag. */
-void sub_4C21(int arg_0, int arg_2, int arg_4)
+void DetectCollisionOtherInstancesActionControlledFlag(int arg_0, int arg_2, int arg_4)
 {
     if (arg_2 < arg_0) {
         arg_0 += 40;
@@ -2575,18 +2759,18 @@ void sub_4C21(int arg_0, int arg_2, int arg_4)
     } else {
         arg_2 = arg_0 + 80;
     }
-    if (sub_3A36(arg_0, arg_2, word_A802, word_A802 + 40) != 0) {
+    if (FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(arg_0, arg_2, spriteY, spriteY + 40) != 0) {
         if (arg_4 == 1) {
-            word_A8A0 = 24;
+            subWindowState = 24;
         }
         if (arg_4 == 2) {
-            word_A8A0 = 30;
+            subWindowState = 30;
         }
     }
 }
 
 /* Detect collision with other instances and find X-coordinate. */
-int sub_4C91(int arg_0, int arg_2)
+int DetectCollisionOtherInstancesFindXCoordinate(int arg_0, int arg_2)
 {
     if (arg_2 < arg_0) {
         arg_0 += 40;
@@ -2594,17 +2778,17 @@ int sub_4C91(int arg_0, int arg_2)
     } else {
         arg_2 = arg_0 + 80;
     }
-    return sub_3A36(arg_0, arg_2, word_A802, word_A802 + 40);
+    return FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(arg_0, arg_2, spriteY, spriteY + 40);
 }
 
 /* Reinitialize state. */
-void sub_4CE1(void)
+void ResetSpriteState(void)
 {
-    word_A8A0 = 0;
+    subWindowState = 0;
 }
 
 /* Process state change on each timer expiration. */
-void sub_4CF8(void)
+void UpdateSpriteStateOnTimer(void)
 {
     int var_2;
     int var_4;
@@ -2612,2249 +2796,2249 @@ void sub_4CF8(void)
     HWND var_8;
     RECT var_10;
     POINT var_14;
-    if (word_A84A++ > 100) {
-        sub_3B4C(word_C0B0);
-        word_A84A = 0;
+    if (knownInstanceListUpdatePeriodCounter++ > 100) {
+        PopulateKnownInstanceListSearchingVisibleWindowsNameMatch(selfInstanceWindowHandle);
+        knownInstanceListUpdatePeriodCounter = 0;
     }
-    if (word_C0AC != 0) {
-        sub_46F7();
+    if (chimeEnabled != 0) {
+        ProcessChime();
     }
-loc_4D33:
-    switch (word_A8A0) {
+stateLoopContinue:
+    switch (subWindowState) {
     case 0:
-        word_A7FC = 0;
+        gravityEnabled = 0;
         srand((unsigned int)GetTickCount());
-        word_A800 = -80;
-        word_A802 = -80;
-        word_A8A0 = 1;
+        spriteX = -80;
+        spriteY = -80;
+        subWindowState = 1;
     case 1:
-        word_A844 = 0;
-        if (word_CA42 != 0U) {
-            word_A8A0 = 2;
-            goto loc_4D33;
+        collisionVerticalSpeedUnused = 0;
+        if (gravityAlwaysEnabled != 0U) {
+            subWindowState = 2;
+            goto stateLoopContinue;
         }
-        word_CA72 = 0;
-        sub_2A96();
-        if (word_CA54 != 0) {
-            word_A8A0 = word_CA54;
-            word_CA54 = 0;
+        ufoBeamHeight = 0;
+        DestroySubwindow();
+        if (sleepTimeoutAction != 0) {
+            subWindowState = sleepTimeoutAction;
+            sleepTimeoutAction = 0;
             break;
         }
-        if (rand() % 20 == 5 && word_A7FC == 0) {
-            word_A8A0 = 85;
+        if (rand() % 20 == 5 && gravityEnabled == 0) {
+            subWindowState = 85;
             break;
         }
-        if (rand() % 40 == 5 && word_A7FC == 0 && word_CA3C == 0) {
-            word_A8A0 = 4;
+        if (rand() % 40 == 5 && gravityEnabled == 0 && preventSpecialActions == 0) {
+            subWindowState = 4;
             break;
         }
-        word_A8A0 = word_A15A[rand() % 80];
-        if (word_A800 > word_CA50 || word_A800 < -40 || word_A802 < -40 || word_A802 > word_CA52) {
+        subWindowState = normalActionTableGravityAlwaysOff[rand() % 80];
+        if (spriteX > screenWidth || spriteX < -40 || spriteY < -40 || spriteY > screenHeight) {
             if ((rand() & 1) == 0) {
-                word_A2AA = 1;
-                word_A800 = word_CA50 + word_CA4C;
-                word_A802 = rand() % (word_CA52 - 64) + word_CA4E;
+                facingDirection = 1;
+                spriteX = screenWidth + unusedCa4C;
+                spriteY = rand() % (screenHeight - 64) + unusedCa4E;
             } else {
-                word_A2AA = -1;
-                word_A800 = -40;
-                word_A802 = rand() % (word_CA52 - 64) + word_CA4E;
+                facingDirection = -1;
+                spriteX = -40;
+                spriteY = rand() % (screenHeight - 64) + unusedCa4E;
             }
-            word_A8A0 = 11;
+            subWindowState = 11;
         }
         break;
     case 2:
-        word_A7FC = 1;
-        word_CA72 = 0;
-        sub_2A96();
-        if (word_CA54 != 0) {
-            word_A8A0 = word_CA54;
-            word_CA54 = 0;
+        gravityEnabled = 1;
+        ufoBeamHeight = 0;
+        DestroySubwindow();
+        if (sleepTimeoutAction != 0) {
+            subWindowState = sleepTimeoutAction;
+            sleepTimeoutAction = 0;
             break;
         }
-        word_A8A0 = word_A1FA[rand() % 80];
-        if (word_A800 > word_CA50 || word_A800 < -40 || word_A802 < -40 || word_A802 > word_CA52) {
-            if (rand() % 10 == 0 && word_CA3C == 0) {
-                word_A8A0 = 6;
+        subWindowState = normalActionTableGravityAlwaysOn[rand() % 80];
+        if (spriteX > screenWidth || spriteX < -40 || spriteY < -40 || spriteY > screenHeight) {
+            if (rand() % 10 == 0 && preventSpecialActions == 0) {
+                subWindowState = 6;
                 break;
             }
-            word_A81C = GetActiveWindow();
-            if (word_A81C == word_C0B0 || word_A81C == word_CA60[8] || word_A81C == NULL || sub_39D6(word_A81C)) {
-                word_A8A0 = 3;
-                goto loc_4D33;
+            landingTargetWindow = GetActiveWindow();
+            if (landingTargetWindow == selfInstanceWindowHandle || landingTargetWindow == knownInstanceWindows[8] || landingTargetWindow == NULL || IsWindowInKnownInstanceList(landingTargetWindow)) {
+                subWindowState = 3;
+                goto stateLoopContinue;
             }
-            sub_491D(word_A81C, &stru_A81E);
-            if (stru_A81E.top < 10) {
-                word_A8A0 = 3;
-                goto loc_4D33;
+            GetWindowRectOrScreenRect(landingTargetWindow, &landingTargetWindowRect);
+            if (landingTargetWindowRect.top < 10) {
+                subWindowState = 3;
+                goto stateLoopContinue;
             }
-            word_A800 = (rand() % stru_A81E.right - stru_A81E.left) / 3 + (stru_A81E.right - stru_A81E.left) / 2 + stru_A81E.left - 20;
-            word_A802 = -40;
-            word_A840 = 0;
-            word_A806 = 0;
-            word_A808 = 0;
-            word_A842 = rand() % 2;
-            word_A8A0 = 92;
+            spriteX = (rand() % landingTargetWindowRect.right - landingTargetWindowRect.left) / 3 + (landingTargetWindowRect.right - landingTargetWindowRect.left) / 2 + landingTargetWindowRect.left - 20;
+            spriteY = -40;
+            bounceWhenFalling = 0;
+            verticalSpeed = 0;
+            horizontalSpeed = 0;
+            fallActionCaseNumber = rand() % 2;
+            subWindowState = 92;
             if (rand() % 3 == 0) {
-                word_A8A0 = 3;
-                goto loc_4D33;
+                subWindowState = 3;
+                goto stateLoopContinue;
             }
         }
         break;
     case 3:
-        word_A7FC = 1;
-        word_A800 = rand() % (word_CA50 - 40);
-        word_A802 = -(rand() % 20 - (-40));
-        word_A840 = 0;
-        word_A806 = 0;
-        word_A808 = 0;
-        word_A842 = rand() % 2;
+        gravityEnabled = 1;
+        spriteX = rand() % (screenWidth - 40);
+        spriteY = -(rand() % 20 - (-40));
+        bounceWhenFalling = 0;
+        verticalSpeed = 0;
+        horizontalSpeed = 0;
+        fallActionCaseNumber = rand() % 2;
         if (rand() % 3 == 0) {
-            sub_2ABF(word_C0B0);
+            PlaceWindowTopmostPosition(selfInstanceWindowHandle);
         }
-        word_A8A0 = 97;
+        subWindowState = 97;
         break;
     case 153:
         break;
     case 154:
         break;
     case 4:
-        if (word_CA50 / 2 - 20 > word_A800) {
-            word_A2AA = 1;
+        if (screenWidth / 2 - 20 > spriteX) {
+            facingDirection = 1;
         } else {
-            word_A2AA = -1;
+            facingDirection = -1;
         }
-        word_A804 = 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 5;
+        spriteIndex = 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 5;
         break;
     case 5:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A800 < -40 || word_A800 > word_CA50) {
-            word_A8A0 = 6;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteX < -40 || spriteX > screenWidth) {
+            subWindowState = 6;
         }
         break;
     case 6:
-        word_A8A0 = word_A29A[rand() % 8];
+        subWindowState = specialActionTable[rand() % 8];
         break;
     case 7:
-        word_A7FE = 0;
+        collisionEnabled = 0;
         if ((rand() & 1) == 0) {
-            word_A7FE = 1;
+            collisionEnabled = 1;
         }
-        if (word_A7FE != 0) {
-            sub_3DF0();
+        if (collisionEnabled != 0) {
+            PopulateKnownVisibleWindowList();
         }
-        word_A804 = 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 = rand() % 10 + 10;
-        word_A8A0 = 8;
+        spriteIndex = 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter = rand() % 10 + 10;
+        subWindowState = 8;
         break;
     case 8:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A7FE != 0) {
-            if (word_A2AA > 0) {
-                var_2 = sub_3E7C(&var_6, word_A802, word_A802 + 40, -(word_A2AA * 16 - word_A800), word_A800);
+        framePeriodCounter = 0;
+        if (collisionEnabled != 0) {
+            if (facingDirection > 0) {
+                var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * 16 - spriteX), spriteX);
             } else {
-                var_2 = sub_3E7C(&var_6, word_A802, word_A802 + 40, -(word_A2AA * 16 - word_A800) + 40, word_A800 + 40);
+                var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * 16 - spriteX) + 40, spriteX + 40);
             }
             if (var_2 != 0) {
-                if (word_A2AA > 0) {
-                    word_A800 = var_2;
+                if (facingDirection > 0) {
+                    spriteX = var_2;
                 } else {
-                    word_A800 = var_2 - 40;
+                    spriteX = var_2 - 40;
                 }
-                sub_4807(word_A800, word_A802, word_A804);
-                word_A8A0 = 30;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 30;
                 break;
             }
         }
-        if (word_A82C == 0) {
-            word_A800 -= word_A2AA * 16;
+        if (unusedA82C == 0) {
+            spriteX -= facingDirection * 16;
         }
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (rand() % 50 == 0 && word_A7FC != 0) {
-            word_A8A0 = 9;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (rand() % 50 == 0 && gravityEnabled != 0) {
+            subWindowState = 9;
         }
-        sub_4614(TRUE);
-        sub_46D2();
-        sub_496F(2);
-        sub_4C21(-(word_A2AA * 16 - word_A800), word_A2AA * 16 + word_A800, 2);
+        FlagControlledCollisionTurnAround(TRUE);
+        SwitchToStandingSprite();
+        HandleOutOfViewOrTopPosition(2);
+        DetectCollisionOtherInstancesActionControlledFlag(-(facingDirection * 16 - spriteX), facingDirection * 16 + spriteX, 2);
         break;
     case 9:
-        word_A806 = -11;
-        word_A808 = -(word_A2AA * 8);
-        word_A80C = word_A802;
-        word_A8A0 = 10;
+        verticalSpeed = -11;
+        horizontalSpeed = -(facingDirection * 8);
+        yCoordinateMemory = spriteY;
+        subWindowState = 10;
     case 10:
-        word_A800 += word_A808;
-        word_A802 += word_A806;
-        word_A806 += 2;
-        if (word_A806 >= -1 && word_A806 <= 1) {
-            word_A804 = 23;
-        } else if (word_A806 < -1) {
-            word_A804 = 30;
+        spriteX += horizontalSpeed;
+        spriteY += verticalSpeed;
+        verticalSpeed += 2;
+        if (verticalSpeed >= -1 && verticalSpeed <= 1) {
+            spriteIndex = 23;
+        } else if (verticalSpeed < -1) {
+            spriteIndex = 30;
         } else {
-            word_A804 = 24;
+            spriteIndex = 24;
         }
-        if (word_A80C <= word_A802) {
-            word_A802 = word_A80C;
-            word_A8A0 = 7;
+        if (yCoordinateMemory <= spriteY) {
+            spriteY = yCoordinateMemory;
+            subWindowState = 7;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_4614(FALSE);
-        sub_4C21(word_A808 + word_A800, word_A800 - word_A808, 2);
-        if (word_A8A0 == 30 && word_A80C != word_A802) {
-            word_A844 = word_A802 - word_A80C;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        FlagControlledCollisionTurnAround(FALSE);
+        DetectCollisionOtherInstancesActionControlledFlag(horizontalSpeed + spriteX, spriteX - horizontalSpeed, 2);
+        if (subWindowState == 30 && yCoordinateMemory != spriteY) {
+            collisionVerticalSpeedUnused = spriteY - yCoordinateMemory;
         }
         break;
     case 11:
-        word_A7FE = 0;
-        if ((word_A7FC & !(rand() & 1)) != 0) {
-            word_A7FE = 1;
+        collisionEnabled = 0;
+        if ((gravityEnabled & !(rand() & 1)) != 0) {
+            collisionEnabled = 1;
         }
-        if (word_A7FE != 0) {
-            sub_3DF0();
+        if (collisionEnabled != 0) {
+            PopulateKnownVisibleWindowList();
         }
-        word_A826 = rand() % 10 + 10;
-        word_A804 = 2;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 12;
+        animationFrameCounter = rand() % 10 + 10;
+        spriteIndex = 2;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 12;
         break;
     case 12:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A7FE != 0) {
-            if (word_A2AA > 0) {
-                var_2 = sub_3E7C(&var_6, word_A802, word_A802 + 40, -(word_A2AA * 6 - word_A800), word_A800);
+        framePeriodCounter = 0;
+        if (collisionEnabled != 0) {
+            if (facingDirection > 0) {
+                var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * 6 - spriteX), spriteX);
             } else {
-                var_2 = sub_3E7C(&var_6, word_A802, word_A802 + 40, -(word_A2AA * 6 - word_A800) + 40, word_A800 + 40);
+                var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * 6 - spriteX) + 40, spriteX + 40);
             }
             if (var_2 != 0) {
-                if (word_A2AA > 0) {
-                    word_A800 = var_2;
+                if (facingDirection > 0) {
+                    spriteX = var_2;
                 } else {
-                    word_A800 = var_2 - 40;
+                    spriteX = var_2 - 40;
                 }
-                word_A81C = var_6;
-                sub_491D(word_A81C, &stru_A81E);
-                word_A83E = stru_A81E.top - 12;
-                word_A7FC = 1;
-                word_A83C = word_A800;
-                word_A804 = 30;
-                sub_2B01(word_C0B0, word_A81C);
-                word_A8A0 = 89;
+                landingTargetWindow = var_6;
+                GetWindowRectOrScreenRect(landingTargetWindow, &landingTargetWindowRect);
+                targetYWindowEdgeAttachment = landingTargetWindowRect.top - 12;
+                gravityEnabled = 1;
+                targetXWindowEdgeAttachment = spriteX;
+                spriteIndex = 30;
+                PlaceWindowTopAnother(selfInstanceWindowHandle, landingTargetWindow);
+                subWindowState = 89;
                 break;
             }
         }
-        if (word_A82C == 0) {
-            word_A800 -= word_A2AA * 6;
+        if (unusedA82C == 0) {
+            spriteX -= facingDirection * 6;
         }
-        word_A804 = word_A804 == 2 ? 3 : 2;
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_4559();
-        sub_46D2();
-        sub_496F(1);
-        sub_4C21(-(word_A2AA * 6 - word_A800), word_A2AA * 6 + word_A800, 1);
+        spriteIndex = spriteIndex == 2 ? 3 : 2;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        TurnAroundWhenApproachingScreenBorderOtherwise120Probability();
+        SwitchToStandingSprite();
+        HandleOutOfViewOrTopPosition(1);
+        DetectCollisionOtherInstancesActionControlledFlag(-(facingDirection * 6 - spriteX), facingDirection * 6 + spriteX, 1);
         break;
     case 13:
-        word_A82A = rand() % 2;
-        word_A826 = rand() % 4 + 4;
-        if (word_A82A != 0) {
-            word_A804 = 88;
+        randomCaseNumberForAction = rand() % 2;
+        animationFrameCounter = rand() % 4 + 4;
+        if (randomCaseNumberForAction != 0) {
+            spriteIndex = 88;
         } else {
-            word_A804 = 86;
+            spriteIndex = 86;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 14;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 14;
         break;
     case 14:
-        if (word_A83A++ < 3) {
+        if (framePeriodCounter++ < 3) {
             break;
         }
-        word_A83A = 0;
-        if (word_A82C == 0) {
-            word_A800 -= word_A2AA * 6;
+        framePeriodCounter = 0;
+        if (unusedA82C == 0) {
+            spriteX -= facingDirection * 6;
         }
-        if (word_A82A != 0) {
-            word_A804 = word_A804 == 88 ? 89 : 88;
+        if (randomCaseNumberForAction != 0) {
+            spriteIndex = spriteIndex == 88 ? 89 : 88;
         } else {
-            word_A804 = word_A804 == 86 ? 87 : 86;
+            spriteIndex = spriteIndex == 86 ? 87 : 86;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_4559();
-        sub_46D2();
-        sub_496F(1);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        TurnAroundWhenApproachingScreenBorderOtherwise120Probability();
+        SwitchToStandingSprite();
+        HandleOutOfViewOrTopPosition(1);
         break;
     case 15:
-        word_A82A = rand() % 2;
-        word_A826 = rand() % 3 + 3;
-        if (word_A82A != 0) {
-            word_A804 = 54;
+        randomCaseNumberForAction = rand() % 2;
+        animationFrameCounter = rand() % 3 + 3;
+        if (randomCaseNumberForAction != 0) {
+            spriteIndex = 54;
         } else {
-            word_A804 = 52;
+            spriteIndex = 52;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 16;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 16;
         break;
     case 16:
-        if (word_A83A++ < 3) {
+        if (framePeriodCounter++ < 3) {
             break;
         }
-        word_A83A = 0;
-        if (word_A82A != 0) {
-            word_A804 = word_A804 == 54 ? 55 : 54;
+        framePeriodCounter = 0;
+        if (randomCaseNumberForAction != 0) {
+            spriteIndex = spriteIndex == 54 ? 55 : 54;
         } else {
-            word_A804 = word_A804 == 52 ? 53 : 52;
+            spriteIndex = spriteIndex == 52 ? 53 : 52;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_4559();
-        sub_46D2();
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        TurnAroundWhenApproachingScreenBorderOtherwise120Probability();
+        SwitchToStandingSprite();
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 17:
-        word_A804 = 6;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 18;
+        spriteIndex = 6;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 18;
         break;
     case 18:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 += 1;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A804 == 8) {
-            word_A804 = 0;
-            word_A8A0 = 19;
-            word_A826 = rand() % 8 + 8;
+        framePeriodCounter = 0;
+        spriteIndex += 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteIndex == 8) {
+            spriteIndex = 0;
+            subWindowState = 19;
+            animationFrameCounter = rand() % 8 + 8;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 19:
-        if (word_A83A++ < 4) {
+        if (framePeriodCounter++ < 4) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A804 == 0 ? 1 : 0;
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_46D2();
-        sub_496F(0);
+        framePeriodCounter = 0;
+        spriteIndex = spriteIndex == 0 ? 1 : 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        SwitchToStandingSprite();
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 20:
-        word_A82A = rand() % 3;
-        if (word_A82A == 0) {
-            word_A804 = 6;
-        } else if (word_A82A == 1) {
-            word_A804 = 31;
+        randomCaseNumberForAction = rand() % 3;
+        if (randomCaseNumberForAction == 0) {
+            spriteIndex = 6;
+        } else if (randomCaseNumberForAction == 1) {
+            spriteIndex = 31;
         } else {
-            word_A804 = 73;
+            spriteIndex = 73;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 21;
-        word_A83A = rand() % 15 + rand() % 15;
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 21;
+        framePeriodCounter = rand() % 15 + rand() % 15;
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 21:
-        sub_496F(0);
-        if (word_A83A-- > 0) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter-- > 0) {
             break;
         }
-        word_A8A0 = 22;
-        word_A826 = 0;
+        subWindowState = 22;
+        animationFrameCounter = 0;
         break;
     case 22:
-        word_A804 = word_A2B4[word_A82A][word_A826];
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 7) {
-            word_A8A0 = 23;
-            word_A83A = rand() % 15 + rand() % 15;
+        spriteIndex = blinkAnimationFrames[randomCaseNumberForAction][animationFrameCounter];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 7) {
+            subWindowState = 23;
+            framePeriodCounter = rand() % 15 + rand() % 15;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 23:
-        sub_496F(0);
-        if (word_A83A-- > 0) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter-- > 0) {
             break;
         }
-        word_A8A0 = 1;
+        subWindowState = 1;
         break;
     case 24:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         if ((rand() & 1) != 0) {
-            word_A82A = 0;
+            randomCaseNumberForAction = 0;
         } else {
-            word_A82A = 1;
+            randomCaseNumberForAction = 1;
         }
-        word_A8A0 = 25;
-        word_A826 = 0;
+        subWindowState = 25;
+        animationFrameCounter = 0;
         break;
     case 25:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A82A != 0) {
-            if (word_A2AA > 0) {
-                word_A804 = word_A826 + 9;
+        framePeriodCounter = 0;
+        if (randomCaseNumberForAction != 0) {
+            if (facingDirection > 0) {
+                spriteIndex = animationFrameCounter + 9;
             } else {
-                word_A804 = 11 - word_A826;
+                spriteIndex = 11 - animationFrameCounter;
             }
         } else {
-            if (word_A2AA > 0) {
-                word_A804 = word_A826 + 12;
+            if (facingDirection > 0) {
+                spriteIndex = animationFrameCounter + 12;
             } else {
-                word_A804 = 14 - word_A826;
+                spriteIndex = 14 - animationFrameCounter;
             }
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 2) {
-            word_A2AA = -word_A2AA;
-            word_A8A0 = 26;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 2) {
+            facingDirection = -facingDirection;
+            subWindowState = 26;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 26:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 1;
-        sub_496F(0);
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 1;
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 27:
-        word_A806 = -10;
-        word_A808 = word_A2AA * 8;
-        word_A80C = word_A802;
-        word_A848 = 0;
-        word_A8A0 = 28;
+        verticalSpeed = -10;
+        horizontalSpeed = facingDirection * 8;
+        yCoordinateMemory = spriteY;
+        collisionAnimationFrameIndex = 0;
+        subWindowState = 28;
     case 28:
-        word_A800 += word_A808;
-        word_A802 += word_A806;
-        word_A806 += 2;
-        word_A804 = word_A324[word_A848];
-        word_A848 += 1;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A804 == 64) {
-            word_A842 = 3;
-            word_A8A0 = 99;
+        spriteX += horizontalSpeed;
+        spriteY += verticalSpeed;
+        verticalSpeed += 2;
+        spriteIndex = collisionAnimationFramesWithHeightOffset[collisionAnimationFrameIndex];
+        collisionAnimationFrameIndex += 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteIndex == 64) {
+            fallActionCaseNumber = 3;
+            subWindowState = 99;
             break;
         }
         break;
     case 29:
-        word_A83A = 0;
-        word_A826 = 0;
-        word_A82A = 0;
+        framePeriodCounter = 0;
+        animationFrameCounter = 0;
+        randomCaseNumberForAction = 0;
         if ((rand() & 7) == 0) {
-            word_A82A = 1;
+            randomCaseNumberForAction = 1;
         }
         if (rand() % 5 == 0) {
-            word_A82A = 2;
+            randomCaseNumberForAction = 2;
         }
-        word_A8A0 = 32;
-        if (word_A82A != 0) {
-            word_A8A0 = 34;
+        subWindowState = 32;
+        if (randomCaseNumberForAction != 0) {
+            subWindowState = 34;
         }
-        goto loc_4D33;
+        goto stateLoopContinue;
     case 30:
-        if (word_A7FC != 0) {
-            word_A8A0 = 27;
-            goto loc_4D33;
+        if (gravityEnabled != 0) {
+            subWindowState = 27;
+            goto stateLoopContinue;
         } else {
-            word_A8A0 = 24;
-            goto loc_4D33;
+            subWindowState = 24;
+            goto stateLoopContinue;
         }
-        word_A83A = 0;
-        word_A826 = 0;
-        word_A82A = 0;
+        framePeriodCounter = 0;
+        animationFrameCounter = 0;
+        randomCaseNumberForAction = 0;
         if ((rand() & 7) == 0) {
-            word_A82A = 1;
+            randomCaseNumberForAction = 1;
         }
         if (rand() % 5 == 0) {
-            word_A82A = 2;
+            randomCaseNumberForAction = 2;
         }
-        word_A8A0 = 31;
+        subWindowState = 31;
     case 31:
-        sub_4C21(word_A2AA * 10 + word_A800, word_A800, 2);
-        if (word_A8A0 == 30) {
-            if (word_A826 != 0) {
-                word_A844 -= word_A324[word_A826 + 9];
+        DetectCollisionOtherInstancesActionControlledFlag(facingDirection * 10 + spriteX, spriteX, 2);
+        if (subWindowState == 30) {
+            if (animationFrameCounter != 0) {
+                collisionVerticalSpeedUnused -= collisionAnimationFramesWithHeightOffset[animationFrameCounter + 9];
             }
             break;
         }
-        word_A804 = word_A324[word_A826];
-        sub_4807(word_A800, word_A802 - word_A324[word_A826 + 10], word_A804);
-        word_A826 += 1;
-        if (word_A82A != 0 && word_A804 == 66) {
-            if (word_A844 != 0) {
-                word_A802 -= word_A844;
-                word_A800 += word_A2AA * 10;
-                sub_4807(word_A800, word_A802, word_A804);
+        spriteIndex = collisionAnimationFramesWithHeightOffset[animationFrameCounter];
+        UpdateMainWindowSprite(spriteX, spriteY - collisionAnimationFramesWithHeightOffset[animationFrameCounter + 10], spriteIndex);
+        animationFrameCounter += 1;
+        if (randomCaseNumberForAction != 0 && spriteIndex == 66) {
+            if (collisionVerticalSpeedUnused != 0) {
+                spriteY -= collisionVerticalSpeedUnused;
+                spriteX += facingDirection * 10;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             }
-            word_A846 = 3;
-            word_A8A0 = 34;
+            collisionSpinFrameCounterUnused = 3;
+            subWindowState = 34;
             break;
         }
-        if (word_A826 > 8) {
-            word_A8A0 = 32;
+        if (animationFrameCounter > 8) {
+            subWindowState = 32;
             break;
         }
-        word_A800 += word_A2AA * 10;
+        spriteX += facingDirection * 10;
         break;
     case 32:
-        sub_496F(0);
-        if (word_A83A++ < 8) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter++ < 8) {
             break;
         }
-        word_A83A = 0;
-        word_A2AA = -word_A2AA;
-        word_A804 = 93;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 33;
+        framePeriodCounter = 0;
+        facingDirection = -facingDirection;
+        spriteIndex = 93;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 33;
         break;
     case 33:
-        sub_496F(0);
-        if (word_A83A++ < 15) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter++ < 15) {
             break;
         }
-        word_A83A = 0;
-        word_A8A0 = 1;
+        framePeriodCounter = 0;
+        subWindowState = 1;
         break;
     case 34:
-        word_A800 += word_A2AA * 8;
-        if (word_A804 == 70) {
-            word_A804 = 63;
+        spriteX += facingDirection * 8;
+        if (spriteIndex == 70) {
+            spriteIndex = 63;
         } else {
-            word_A804 += 1;
+            spriteIndex += 1;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A82A == 2 && word_A804 == 70) {
-            word_A8A0 = 69;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (randomCaseNumberForAction == 2 && spriteIndex == 70) {
+            subWindowState = 69;
             break;
         }
-        if (word_A800 > word_CA50 || word_A800 < -40) {
-            word_A8A0 = 1;
+        if (spriteX > screenWidth || spriteX < -40) {
+            subWindowState = 1;
         }
-        sub_4C21(word_A2AA * 8 + word_A800, -(word_A2AA * 8 - word_A800), 2);
-        if (word_A8A0 == 30) {
-            if (word_A846-- > 0) {
-                word_A2AA = -word_A2AA;
-                word_A8A0 = 34;
+        DetectCollisionOtherInstancesActionControlledFlag(facingDirection * 8 + spriteX, -(facingDirection * 8 - spriteX), 2);
+        if (subWindowState == 30) {
+            if (collisionSpinFrameCounterUnused-- > 0) {
+                facingDirection = -facingDirection;
+                subWindowState = 34;
             } else {
-                word_A8A0 = 34;
+                subWindowState = 34;
             }
         }
-        sub_496F(2);
+        HandleOutOfViewOrTopPosition(2);
         break;
     case 35:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 37;
-        word_A826 = 0;
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 37;
+        animationFrameCounter = 0;
         break;
     case 36:
         break;
     case 37:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A2AA > 0) {
-            word_A804 = word_A826 + 12;
+        framePeriodCounter = 0;
+        if (facingDirection > 0) {
+            spriteIndex = animationFrameCounter + 12;
         } else {
-            word_A804 = 14 - word_A826;
+            spriteIndex = 14 - animationFrameCounter;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 1) {
-            word_A804 = 103;
-            word_A8A0 = 38;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 1) {
+            spriteIndex = 103;
+            subWindowState = 38;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 38:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A804 += 1;
-        if (word_A804 > 104) {
-            word_A826 = 0;
-            word_A8A0 = 39;
+        framePeriodCounter = 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        spriteIndex += 1;
+        if (spriteIndex > 104) {
+            animationFrameCounter = 0;
+            subWindowState = 39;
             break;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 39:
-        if (word_A826 == 0) {
-            if (word_A83A++ < 10) {
+        if (animationFrameCounter == 0) {
+            if (framePeriodCounter++ < 10) {
                 break;
             }
-            word_A83A = 0;
+            framePeriodCounter = 0;
         } else {
-            if (word_A83A++ < 1) {
+            if (framePeriodCounter++ < 1) {
                 break;
             }
-            word_A83A = 0;
+            framePeriodCounter = 0;
         }
-        if (word_A826 <= 8 || word_A826 >= 12 && word_A826 <= 12) {
-            word_A804 = word_A804 == 105 ? 106 : 105;
+        if (animationFrameCounter <= 8 || animationFrameCounter >= 12 && animationFrameCounter <= 12) {
+            spriteIndex = spriteIndex == 105 ? 106 : 105;
         } else {
-            word_A804 = 104;
+            spriteIndex = 104;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ > 15) {
-            word_A8A0 = 40;
-            word_A804 = 104;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ > 15) {
+            subWindowState = 40;
+            spriteIndex = 104;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 40:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (--word_A804 < 103) {
-            word_A826 = 0;
-            word_A8A0 = 41;
+        framePeriodCounter = 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (--spriteIndex < 103) {
+            animationFrameCounter = 0;
+            subWindowState = 41;
             break;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 41:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A2AA > 0) {
-            word_A804 = 13 - word_A826;
+        framePeriodCounter = 0;
+        if (facingDirection > 0) {
+            spriteIndex = 13 - animationFrameCounter;
         } else {
-            word_A804 = word_A826 + 13;
+            spriteIndex = animationFrameCounter + 13;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 1) {
-            word_A8A0 = 42;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 1) {
+            subWindowState = 42;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 42:
-        sub_496F(0);
-        if (word_A83A++ < 1) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 1;
-        word_A826 = 0;
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 1;
+        animationFrameCounter = 0;
         break;
     case 43:
-        sub_42C8(109, 0U, 0);
-        word_A826 = 0;
-        word_A8A0 = 44;
+        PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(109, 0U, 0);
+        animationFrameCounter = 0;
+        subWindowState = 44;
     case 44:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A34C[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = yawnAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 45:
-        sub_42C8(108, 0U, 0);
-        word_A826 = 0;
-        word_A8A0 = 46;
+        PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(108, 0U, 0);
+        animationFrameCounter = 0;
+        subWindowState = 46;
     case 46:
-        if (word_A83A++ < 0) {
+        if (framePeriodCounter++ < 0) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A362[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = baaAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 47:
-        word_A826 = 0;
-        word_A8A0 = 48;
+        animationFrameCounter = 0;
+        subWindowState = 48;
     case 48:
-        if (word_A83A++ < 0) {
+        if (framePeriodCounter++ < 0) {
             break;
         }
-        word_A83A = 0;
-        if (word_A826 == 2) {
-            sub_42C8(110, 0U, 0);
+        framePeriodCounter = 0;
+        if (animationFrameCounter == 2) {
+            PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(110, 0U, 0);
         }
-        word_A804 = word_A372[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        spriteIndex = sneezeAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 49:
-        word_A826 = 0;
-        word_A8A0 = 50;
+        animationFrameCounter = 0;
+        subWindowState = 50;
     case 50:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A38C[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = amazedAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 51:
-        word_A826 = 0;
-        word_A8A0 = 52;
+        animationFrameCounter = 0;
+        subWindowState = 52;
     case 52:
-        if (word_A83A++ < 0) {
+        if (framePeriodCounter++ < 0) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A804 == 56 ? 57 : 56;
-        if (word_A826++ > 30) {
-            word_A804 = 3;
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = spriteIndex == 56 ? 57 : 56;
+        if (animationFrameCounter++ > 30) {
+            spriteIndex = 3;
+            subWindowState = 1;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 53:
-        word_A826 = 0;
-        word_A8A0 = 54;
-        sub_2A21();
-        word_A2AC = word_A2AA;
-        word_A810 = word_A802;
-        word_A812 = 149;
-        if (word_A2AA > 0) {
-            word_A80E = word_A800 - 40;
+        animationFrameCounter = 0;
+        subWindowState = 54;
+        CreateSubwindow();
+        facingDirectionSub = facingDirection;
+        spriteYSub = spriteY;
+        spriteIndexSub = 149;
+        if (facingDirection > 0) {
+            spriteXSub = spriteX - 40;
         } else {
-            word_A80E = word_A800 + 40;
+            spriteXSub = spriteX + 40;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
-        word_C0AE = 1;
-        sub_2B01(word_CA60[8], word_C0B0);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        screenMateOnTopOfSubwindow = 1;
+        PlaceWindowTopAnother(knownInstanceWindows[8], selfInstanceWindowHandle);
         break;
     case 54:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A398[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 2) {
-            word_A800 -= word_A2AA * 8;
-            sub_4807(word_A800, word_A802, word_A804);
+        framePeriodCounter = 0;
+        spriteIndex = eatAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 2) {
+            spriteX -= facingDirection * 8;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             break;
         }
-        if (word_A804 >= 149 && word_A804 <= 153) {
-            word_A812 = word_A804;
-            if (word_A812 == 153) {
-                word_A812 = 173;
+        if (spriteIndex >= 149 && spriteIndex <= 153) {
+            spriteIndexSub = spriteIndex;
+            if (spriteIndexSub == 153) {
+                spriteIndexSub = 173;
             }
-            sub_488C(word_A80E, word_A810, word_A812);
-            word_A804 = word_A398[word_A826];
-            word_A826 += 1;
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+            spriteIndex = eatAnimationFrames[animationFrameCounter];
+            animationFrameCounter += 1;
         }
-        if (word_A804 == 0) {
-            sub_2A96();
-            word_A8A0 = 1;
+        if (spriteIndex == 0) {
+            DestroySubwindow();
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 55:
         break;
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 6;
-        word_A804 = 2;
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_4559();
-        sub_46D2();
-        sub_496F(1);
-        sub_4C21(-(word_A2AA * 6 - word_A800), word_A2AA * 6 + word_A800, 1);
-        word_A8A0 = 54;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 6;
+        spriteIndex = 2;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        TurnAroundWhenApproachingScreenBorderOtherwise120Probability();
+        SwitchToStandingSprite();
+        HandleOutOfViewOrTopPosition(1);
+        DetectCollisionOtherInstancesActionControlledFlag(-(facingDirection * 6 - spriteX), facingDirection * 6 + spriteX, 1);
+        subWindowState = 54;
         break;
     case 56:
-        word_A826 = 0;
-        word_A8A0 = 57;
+        animationFrameCounter = 0;
+        subWindowState = 57;
     case 57:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A398[word_A826];
-        word_A826 += 1;
-        if (word_A804 >= 149 && word_A804 <= 153) {
-            word_A804 = word_A398[word_A826];
-            word_A826 += 1;
+        framePeriodCounter = 0;
+        spriteIndex = eatAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex >= 149 && spriteIndex <= 153) {
+            spriteIndex = eatAnimationFrames[animationFrameCounter];
+            animationFrameCounter += 1;
         }
-        if (word_A826 >= 16) {
-            word_A8A0 = 42;
+        if (animationFrameCounter >= 16) {
+            subWindowState = 42;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 58:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 59;
-        word_A826 = 0;
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 59;
+        animationFrameCounter = 0;
         break;
     case 59:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A2AA > 0) {
-            word_A804 = word_A826 + 9;
+        framePeriodCounter = 0;
+        if (facingDirection > 0) {
+            spriteIndex = animationFrameCounter + 9;
         } else {
-            word_A804 = 11 - word_A826;
+            spriteIndex = 11 - animationFrameCounter;
         }
-        word_A826 += 1;
-        if (word_A826 > 2) {
-            word_A804 = 34;
-            word_A83A = -10;
-            word_A8A0 = 60;
-            word_A826 = 0;
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 2) {
+            spriteIndex = 34;
+            framePeriodCounter = -10;
+            subWindowState = 60;
+            animationFrameCounter = 0;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 60:
-        if (word_A83A++ < 0) {
+        if (framePeriodCounter++ < 0) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A2B4[5][word_A826];
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 7) {
-            word_A826 = 0;
-            word_A8A0 = 61;
-            word_A83A = -5;
+        framePeriodCounter = 0;
+        spriteIndex = blinkAnimationFrames[5][animationFrameCounter];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 7) {
+            animationFrameCounter = 0;
+            subWindowState = 61;
+            framePeriodCounter = -5;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 61:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A2AA > 0) {
-            word_A804 = 10 - word_A826;
+        framePeriodCounter = 0;
+        if (facingDirection > 0) {
+            spriteIndex = 10 - animationFrameCounter;
         } else {
-            word_A804 = word_A826 + 10;
+            spriteIndex = animationFrameCounter + 10;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 1) {
-            word_A8A0 = 42;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 1) {
+            subWindowState = 42;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 64:
         break;
     case 65:
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 = 0;
-        word_A8A0 = 66;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter = 0;
+        subWindowState = 66;
         break;
     case 66:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A826 == 0) {
-            if (word_A2AA > 0) {
-                word_A804 = 9;
+        framePeriodCounter = 0;
+        if (animationFrameCounter == 0) {
+            if (facingDirection > 0) {
+                spriteIndex = 9;
             } else {
-                word_A804 = 11;
+                spriteIndex = 11;
             }
         } else {
-            word_A804 = 10;
+            spriteIndex = 10;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ > 0) {
-            word_A8A0 = 67;
-            word_A828 = (rand() % 4 + 4) * 8;
-            word_A826 = 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ > 0) {
+            subWindowState = 67;
+            randomDurationCounter = (rand() % 4 + 4) * 8;
+            animationFrameCounter = 0;
             break;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 67:
-        if (--word_A826 < 0) {
-            word_A826 = 79;
+        if (--animationFrameCounter < 0) {
+            animationFrameCounter = 79;
         }
-        word_A800 -= word_A2AA * 8;
-        word_A804 = word_A524[word_A826 % 8];
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A2AA > 0 && word_A800 < 0) {
-            word_A8A0 = 30;
+        spriteX -= facingDirection * 8;
+        spriteIndex = rollAnimationFrames[animationFrameCounter % 8];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (facingDirection > 0 && spriteX < 0) {
+            subWindowState = 30;
         }
-        if (word_A2AA < 0 && word_CA50 - stru_A8A2[word_A804].width < word_A800) {
-            word_A8A0 = 30;
+        if (facingDirection < 0 && screenWidth - spriteListSub[spriteIndex].width < spriteX) {
+            subWindowState = 30;
         }
-        if (--word_A828 <= 0) {
-            word_A8A0 = 68;
-            word_A826 = 0;
+        if (--randomDurationCounter <= 0) {
+            subWindowState = 68;
+            animationFrameCounter = 0;
         }
-        sub_496F(2);
-        sub_4C21(-(word_A2AA * 8 - word_A800), word_A2AA * 8 + word_A800, 2);
+        HandleOutOfViewOrTopPosition(2);
+        DetectCollisionOtherInstancesActionControlledFlag(-(facingDirection * 8 - spriteX), facingDirection * 8 + spriteX, 2);
         break;
     case 68:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A826 == 1) {
-            if (word_A2AA > 0) {
-                word_A804 = 9;
+        framePeriodCounter = 0;
+        if (animationFrameCounter == 1) {
+            if (facingDirection > 0) {
+                spriteIndex = 9;
             } else {
-                word_A804 = 11;
+                spriteIndex = 11;
             }
-        } else if (word_A826 == 0) {
-            word_A804 = 10;
+        } else if (animationFrameCounter == 0) {
+            spriteIndex = 10;
         } else {
-            word_A804 = 3;
+            spriteIndex = 3;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ > 1) {
-            word_A8A0 = 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ > 1) {
+            subWindowState = 1;
             break;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 62:
-        word_A8A0 = 63;
-        word_A826 = 0;
+        subWindowState = 63;
+        animationFrameCounter = 0;
         break;
     case 63:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A50C[word_A826];
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = blushAnimationFrames[animationFrameCounter];
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 75:
-        word_A826 = rand() % 8 + 8;
-        word_A828 = word_A826;
-        word_A804 = 131;
-        if (word_A2AA > 0) {
-            word_A804 = 12;
+        animationFrameCounter = rand() % 8 + 8;
+        randomDurationCounter = animationFrameCounter;
+        spriteIndex = 131;
+        if (facingDirection > 0) {
+            spriteIndex = 12;
         } else {
-            word_A804 = 14;
+            spriteIndex = 14;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 76;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 76;
         break;
     case 76:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 13;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 77;
+        framePeriodCounter = 0;
+        spriteIndex = 13;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 77;
         break;
     case 77:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A804 == 131 ? 132 : 131;
-        word_A802 -= 8;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826-- <= 0) {
-            word_A826 = word_A828;
-            word_A8A0 = 78;
+        framePeriodCounter = 0;
+        spriteIndex = spriteIndex == 131 ? 132 : 131;
+        spriteY -= 8;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter-- <= 0) {
+            animationFrameCounter = randomDurationCounter;
+            subWindowState = 78;
         }
         break;
     case 78:
-        word_A804 = 133;
-        word_A802 += 8;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826-- <= 0) {
-            word_A8A0 = 79;
+        spriteIndex = 133;
+        spriteY += 8;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter-- <= 0) {
+            subWindowState = 79;
         }
         break;
     case 79:
-        if (word_A83A++ < 10) {
+        if (framePeriodCounter++ < 10) {
             break;
         }
-        word_A83A = 0;
-        word_A8A0 = 80;
-        word_A826 = 3;
+        framePeriodCounter = 0;
+        subWindowState = 80;
+        animationFrameCounter = 3;
         break;
     case 80:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A2AA > 0) {
-            word_A804 = word_A43C[word_A826];
-            word_A826 += 1;
+        framePeriodCounter = 0;
+        if (facingDirection > 0) {
+            spriteIndex = getUpAnimationFramesLeft[animationFrameCounter];
+            animationFrameCounter += 1;
         } else {
-            word_A804 = word_A44C[word_A826];
-            word_A826 += 1;
+            spriteIndex = getUpAnimationFramesRight[animationFrameCounter];
+            animationFrameCounter += 1;
         }
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 69:
-        word_A83A = 0;
-        word_A826 = 0;
-        word_A8A0 = 70;
+        framePeriodCounter = 0;
+        animationFrameCounter = 0;
+        subWindowState = 70;
     case 70:
-        if (word_A2AA > 0) {
-            word_A804 = word_A536[word_A826 % 8];
+        if (facingDirection > 0) {
+            spriteIndex = spinAnimationFrames[animationFrameCounter % 8];
         } else {
-            word_A804 = word_A536[(word_A826 + 4) % 8];
+            spriteIndex = spinAnimationFrames[(animationFrameCounter + 4) % 8];
         }
-        if (word_A804 == 2) {
-            word_A804 = 3;
-            if (word_A2AA > 0) {
-                word_A2AA = -word_A2AA;
-                sub_4807(word_A800, word_A802, word_A804);
-                word_A2AA = -word_A2AA;
+        if (spriteIndex == 2) {
+            spriteIndex = 3;
+            if (facingDirection > 0) {
+                facingDirection = -facingDirection;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                facingDirection = -facingDirection;
             } else {
-                sub_4807(word_A800, word_A802, word_A804);
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             }
-        } else if (word_A804 == 3) {
-            if (word_A2AA < 0) {
-                word_A2AA = -word_A2AA;
-                sub_4807(word_A800, word_A802, word_A804);
-                word_A2AA = -word_A2AA;
+        } else if (spriteIndex == 3) {
+            if (facingDirection < 0) {
+                facingDirection = -facingDirection;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                facingDirection = -facingDirection;
             } else {
-                sub_4807(word_A800, word_A802, word_A804);
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             }
         } else {
-            sub_4807(word_A800, word_A802, word_A804);
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         }
-        if (word_A826++ >= 16) {
-            word_A804 = 70;
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A8A0 = 71;
+        if (animationFrameCounter++ >= 16) {
+            spriteIndex = 70;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 71;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 71:
-        sub_496F(0);
-        if (word_A83A++ < 14) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter++ < 14) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 96;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 72;
+        framePeriodCounter = 0;
+        spriteIndex = 96;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 72;
         break;
     case 72:
-        sub_496F(0);
-        if (word_A83A++ < 30) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter++ < 30) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 1;
         break;
     case 73:
-        word_A826 = 0;
-        word_A8A0 = 74;
+        animationFrameCounter = 0;
+        subWindowState = 74;
     case 74:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A422[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = rollOverAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_496F(0);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 81:
-        word_A804 = 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 82;
+        spriteIndex = 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 82;
         break;
     case 82:
-        word_A83A = 0;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
+        framePeriodCounter = 0;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 83:
         break;
     case 84:
-        word_A8A0 = 0;
+        subWindowState = 0;
         break;
     case 85:
-        word_A81C = GetActiveWindow();
-        if (word_A81C == word_C0B0 || word_A81C == word_CA60[8] || word_A81C == NULL || sub_39D6(word_A81C)) {
-            word_A8A0 = 1;
+        landingTargetWindow = GetActiveWindow();
+        if (landingTargetWindow == selfInstanceWindowHandle || landingTargetWindow == knownInstanceWindows[8] || landingTargetWindow == NULL || IsWindowInKnownInstanceList(landingTargetWindow)) {
+            subWindowState = 1;
             break;
         }
-        sub_491D(word_A81C, &stru_A81E);
-        if (stru_A81E.top < 10) {
-            word_A8A0 = 1;
+        GetWindowRectOrScreenRect(landingTargetWindow, &landingTargetWindowRect);
+        if (landingTargetWindowRect.top < 10) {
+            subWindowState = 1;
             break;
         }
-        if (word_A2AA > 0 && stru_A81E.right < word_A800 && stru_A81E.top < word_A802 && word_A802 + 40 < stru_A81E.bottom || word_A2AA < 0 && word_A800 + 40 < stru_A81E.left && stru_A81E.top < word_A802 && word_A802 + 40 < stru_A81E.bottom) {
-            word_A8A0 = 87;
+        if (facingDirection > 0 && landingTargetWindowRect.right < spriteX && landingTargetWindowRect.top < spriteY && spriteY + 40 < landingTargetWindowRect.bottom || facingDirection < 0 && spriteX + 40 < landingTargetWindowRect.left && landingTargetWindowRect.top < spriteY && spriteY + 40 < landingTargetWindowRect.bottom) {
+            subWindowState = 87;
             break;
         }
-        word_A83C = (rand() % stru_A81E.right - stru_A81E.left) / 3 + (stru_A81E.right - stru_A81E.left) / 2 + stru_A81E.left - 20;
-        word_A83E = stru_A81E.top - 40;
-        if (word_CA50 / 2 - 20 > word_A800) {
-            word_A2AA = 1;
+        targetXWindowEdgeAttachment = (rand() % landingTargetWindowRect.right - landingTargetWindowRect.left) / 3 + (landingTargetWindowRect.right - landingTargetWindowRect.left) / 2 + landingTargetWindowRect.left - 20;
+        targetYWindowEdgeAttachment = landingTargetWindowRect.top - 40;
+        if (screenWidth / 2 - 20 > spriteX) {
+            facingDirection = 1;
         } else {
-            word_A2AA = -1;
+            facingDirection = -1;
         }
-        word_A804 = 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 86;
+        spriteIndex = 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 86;
         break;
     case 86:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A800 < -40 || word_A800 > word_CA50) {
-            if (!sub_48F3(word_A81C)) {
-                word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteX < -40 || spriteX > screenWidth) {
+            if (!IsNullOrValidWindow(landingTargetWindow)) {
+                subWindowState = 1;
                 break;
             }
             if (rand() % 3 == 0) {
-                word_A8A0 = 3;
-                goto loc_4D33;
+                subWindowState = 3;
+                goto stateLoopContinue;
             }
-            word_A840 = 0;
-            word_A8A0 = 92;
-            word_A7FC = 1;
-            word_A800 = word_A83C;
-            word_A802 = -40;
-            word_A806 = 0;
-            word_A808 = 0;
-            word_A842 = rand() % 2;
-            if (word_A842 != 0) {
-                word_A808 = -(word_A2AA * 3);
+            bounceWhenFalling = 0;
+            subWindowState = 92;
+            gravityEnabled = 1;
+            spriteX = targetXWindowEdgeAttachment;
+            spriteY = -40;
+            verticalSpeed = 0;
+            horizontalSpeed = 0;
+            fallActionCaseNumber = rand() % 2;
+            if (fallActionCaseNumber != 0) {
+                horizontalSpeed = -(facingDirection * 3);
             }
-            sub_2B01(word_C0B0, word_A81C);
+            PlaceWindowTopAnother(selfInstanceWindowHandle, landingTargetWindow);
         }
         break;
     case 87:
-        sub_2B01(word_C0B0, word_A81C);
-        if (word_A2AA > 0) {
-            word_A83C = stru_A81E.right;
-            word_A83E = stru_A81E.top;
+        PlaceWindowTopAnother(selfInstanceWindowHandle, landingTargetWindow);
+        if (facingDirection > 0) {
+            targetXWindowEdgeAttachment = landingTargetWindowRect.right;
+            targetYWindowEdgeAttachment = landingTargetWindowRect.top;
         } else {
-            word_A83C = stru_A81E.left - 40;
-            word_A83E = stru_A81E.top;
+            targetXWindowEdgeAttachment = landingTargetWindowRect.left - 40;
+            targetYWindowEdgeAttachment = landingTargetWindowRect.top;
         }
-        word_A8A0 = 88;
+        subWindowState = 88;
     case 88:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        if (word_A83C >= word_A800 && word_A2AA > 0 || word_A83C <= word_A800 && word_A2AA < 0) {
-            if (!sub_48F3(word_A81C)) {
-                word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        if (targetXWindowEdgeAttachment >= spriteX && facingDirection > 0 || targetXWindowEdgeAttachment <= spriteX && facingDirection < 0) {
+            if (!IsNullOrValidWindow(landingTargetWindow)) {
+                subWindowState = 1;
                 break;
             }
-            sub_491D(word_A81C, &var_10);
-            if (var_10.left == stru_A81E.left && var_10.right == stru_A81E.right && var_10.top < word_A802 && word_A802 + 40 < var_10.bottom) {
-                word_A83E = var_10.top - 12;
-                word_A7FC = 1;
-                word_A800 = word_A83C;
-                word_A804 = 30;
-                word_A8A0 = 89;
+            GetWindowRectOrScreenRect(landingTargetWindow, &var_10);
+            if (var_10.left == landingTargetWindowRect.left && var_10.right == landingTargetWindowRect.right && var_10.top < spriteY && spriteY + 40 < var_10.bottom) {
+                targetYWindowEdgeAttachment = var_10.top - 12;
+                gravityEnabled = 1;
+                spriteX = targetXWindowEdgeAttachment;
+                spriteIndex = 30;
+                subWindowState = 89;
                 break;
             } else {
-                word_A8A0 = 1;
+                subWindowState = 1;
                 break;
             }
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 89:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A802 -= 6;
-        word_A804 = word_A804 == 15 ? 16 : 15;
-        if (word_A83E >= word_A802) {
-            word_A8A0 = 90;
+        framePeriodCounter = 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        spriteY -= 6;
+        spriteIndex = spriteIndex == 15 ? 16 : 15;
+        if (targetYWindowEdgeAttachment >= spriteY) {
+            subWindowState = 90;
             break;
         }
-        sub_4B3B();
+        HandleClimbingSideOfWindow();
         break;
     case 90:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 8;
-        word_A802 = word_A83E - 20;
-        word_A804 = 76;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 91;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 8;
+        spriteY = targetYWindowEdgeAttachment - 20;
+        spriteIndex = 76;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 91;
         break;
     case 91:
-        if (word_A83A++ < 2) {
+        if (framePeriodCounter++ < 2) {
             break;
         }
-        word_A83A = 0;
-        word_A800 += word_A2AA * -24;
-        word_A802 -= 8;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 11;
+        framePeriodCounter = 0;
+        spriteX += facingDirection * -24;
+        spriteY -= 8;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 11;
         break;
     case 92:
-        word_A806 += 4;
-        word_A80C = word_A802;
-        word_A800 += word_A808;
-        word_A802 += word_A806;
-        if ((var_4 = sub_419E(word_A81C, stru_A8A2[word_A804].height + word_A802, stru_A8A2[word_A804].height + word_A80C, word_A800, stru_A8A2[word_A804].width + word_A800)) != 0) {
+        verticalSpeed += 4;
+        yCoordinateMemory = spriteY;
+        spriteX += horizontalSpeed;
+        spriteY += verticalSpeed;
+        if ((var_4 = GetWindowTopYCoordinateIfItIsPossibleLandWindow(landingTargetWindow, spriteListSub[spriteIndex].height + spriteY, spriteListSub[spriteIndex].height + yCoordinateMemory, spriteX, spriteListSub[spriteIndex].width + spriteX)) != 0) {
             if (var_4 == -1) {
-                sub_4807(word_A800, word_A802, word_A804);
-                word_A8A0 = 0;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 0;
                 break;
             }
-            word_A802 = var_4 - stru_A8A2[word_A804].height;
-            if (word_A806 < 64 && word_A840 == 0 || word_A806 < 8) {
-                SetWindowPos(word_C0B0, word_A81C, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
-                word_A840 = 0;
-                word_A826 = 0;
-                word_A8A0 = 93;
-                if (word_A806 < 36) {
-                    word_A804 = 49;
-                    word_A83A = -4;
+            spriteY = var_4 - spriteListSub[spriteIndex].height;
+            if (verticalSpeed < 64 && bounceWhenFalling == 0 || verticalSpeed < 8) {
+                SetWindowPos(selfInstanceWindowHandle, landingTargetWindow, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+                bounceWhenFalling = 0;
+                animationFrameCounter = 0;
+                subWindowState = 93;
+                if (verticalSpeed < 36) {
+                    spriteIndex = 49;
+                    framePeriodCounter = -4;
                 } else {
                     if ((rand() & 3) == 0) {
-                        word_A804 = 48;
+                        spriteIndex = 48;
                     } else {
-                        word_A804 = 42;
+                        spriteIndex = 42;
                     }
-                    word_A83A = -12;
+                    framePeriodCounter = -12;
                 }
-                sub_4807(word_A800, word_A802, word_A804);
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
                 break;
             } else {
-                word_A806 = word_A806 * 2 / -3;
-                word_A840 = 1;
+                verticalSpeed = verticalSpeed * 2 / -3;
+                bounceWhenFalling = 1;
             }
         }
-        if (word_A842 != 0) {
-            word_A804 = word_A804 == 4 ? 5 : 4;
+        if (fallActionCaseNumber != 0) {
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
         } else {
-            word_A804 = 42;
+            spriteIndex = 42;
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 93:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A842 != 0) {
-            word_A8A0 = 11;
-            word_A804 = 2;
+        framePeriodCounter = 0;
+        if (fallActionCaseNumber != 0) {
+            subWindowState = 11;
+            spriteIndex = 2;
             break;
         }
-        if (word_A826 == 0) {
-            word_A804 = 13;
-        } else if (word_A826 == 1) {
-            if (word_A2AA > 0) {
-                word_A804 = 12;
+        if (animationFrameCounter == 0) {
+            spriteIndex = 13;
+        } else if (animationFrameCounter == 1) {
+            if (facingDirection > 0) {
+                spriteIndex = 12;
             } else {
-                word_A804 = 14;
+                spriteIndex = 14;
             }
-        } else if (word_A826 == 2) {
-            word_A804 = 3;
+        } else if (animationFrameCounter == 2) {
+            spriteIndex = 3;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ >= 2) {
-            word_A8A0 = 11;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ >= 2) {
+            subWindowState = 11;
         }
         break;
     case 94:
-        word_A7FC = 1;
-        word_A806 = 0;
-        word_A808 = -(word_A2AA * 8);
-        word_A842 = 1;
-        word_A8A0 = 99;
-        goto loc_4D33;
+        gravityEnabled = 1;
+        verticalSpeed = 0;
+        horizontalSpeed = -(facingDirection * 8);
+        fallActionCaseNumber = 1;
+        subWindowState = 99;
+        goto stateLoopContinue;
     case 95:
-        word_A7FC = 1;
-        word_A806 = 0;
-        word_A808 = -(word_A2AA * 3);
-        word_A842 = 1;
-        word_A8A0 = 99;
-        goto loc_4D33;
+        gravityEnabled = 1;
+        verticalSpeed = 0;
+        horizontalSpeed = -(facingDirection * 3);
+        fallActionCaseNumber = 1;
+        subWindowState = 99;
+        goto stateLoopContinue;
     case 96:
-        word_A7FC = 1;
-        word_A806 = 0;
-        word_A808 = 0;
-        word_A842 = 0;
-        word_A8A0 = 99;
-        goto loc_4D33;
+        gravityEnabled = 1;
+        verticalSpeed = 0;
+        horizontalSpeed = 0;
+        fallActionCaseNumber = 0;
+        subWindowState = 99;
+        goto stateLoopContinue;
     case 97:
-        word_A7FC = 1;
-        word_A806 = 0;
-        word_A808 = 0;
-        word_A842 = 1;
-        word_A8A0 = 99;
-        goto loc_4D33;
+        gravityEnabled = 1;
+        verticalSpeed = 0;
+        horizontalSpeed = 0;
+        fallActionCaseNumber = 1;
+        subWindowState = 99;
+        goto stateLoopContinue;
     case 98:
-        word_A7FC = 1;
-        word_A806 = 0;
-        word_A808 = 0;
-        word_A842 = 2;
-        word_A8A0 = 99;
-        goto loc_4D33;
+        gravityEnabled = 1;
+        verticalSpeed = 0;
+        horizontalSpeed = 0;
+        fallActionCaseNumber = 2;
+        subWindowState = 99;
+        goto stateLoopContinue;
     case 99:
-        sub_3DF0();
-        word_A806 += 4;
-        word_A80C = word_A802;
-        word_A800 += word_A808;
-        word_A802 += word_A806;
-        if (word_A80C > word_CA52) {
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A8A0 = 0;
+        PopulateKnownVisibleWindowList();
+        verticalSpeed += 4;
+        yCoordinateMemory = spriteY;
+        spriteX += horizontalSpeed;
+        spriteY += verticalSpeed;
+        if (yCoordinateMemory > screenHeight) {
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 0;
             break;
         }
-        if ((var_4 = sub_408C(&word_A81C, stru_A8A2[word_A804].height + word_A802, stru_A8A2[word_A804].height + word_A80C, word_A800, stru_A8A2[word_A804].width + word_A800)) != 0) {
-            if (!sub_48F3(word_A81C)) {
-                sub_4807(word_A800, word_A802, word_A804);
-                word_A8A0 = 0;
+        if ((var_4 = FindYCoordinatePossibleLandingTopEdgeWhichVisibleWindow(&landingTargetWindow, spriteListSub[spriteIndex].height + spriteY, spriteListSub[spriteIndex].height + yCoordinateMemory, spriteX, spriteListSub[spriteIndex].width + spriteX)) != 0) {
+            if (!IsNullOrValidWindow(landingTargetWindow)) {
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 0;
                 break;
             }
-            sub_491D(word_A81C, &stru_A81E);
-            word_A802 = var_4 - stru_A8A2[word_A804].height;
-            if (word_A842 == 3) {
-                word_A804 = 66;
-                sub_4807(word_A800, word_A802, word_A804);
-                word_A8A0 = 29;
+            GetWindowRectOrScreenRect(landingTargetWindow, &landingTargetWindowRect);
+            spriteY = var_4 - spriteListSub[spriteIndex].height;
+            if (fallActionCaseNumber == 3) {
+                spriteIndex = 66;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 29;
                 break;
             }
-            if (word_A806 < 64 && word_A840 == 0 || word_A806 < 8) {
-                if (word_A81C != NULL) {
-                    SetWindowPos(word_C0B0, word_A81C, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+            if (verticalSpeed < 64 && bounceWhenFalling == 0 || verticalSpeed < 8) {
+                if (landingTargetWindow != NULL) {
+                    SetWindowPos(selfInstanceWindowHandle, landingTargetWindow, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
                 }
-                word_A840 = 0;
-                word_A826 = 0;
-                word_A8A0 = 100;
-                if (word_A806 < 36) {
-                    word_A804 = 49;
-                    word_A83A = -4;
+                bounceWhenFalling = 0;
+                animationFrameCounter = 0;
+                subWindowState = 100;
+                if (verticalSpeed < 36) {
+                    spriteIndex = 49;
+                    framePeriodCounter = -4;
                 } else {
                     if ((rand() & 3) == 0) {
-                        word_A804 = 48;
+                        spriteIndex = 48;
                     } else {
-                        word_A804 = 42;
+                        spriteIndex = 42;
                     }
-                    word_A83A = -10;
+                    framePeriodCounter = -10;
                 }
-                if (word_A842 == 2) {
-                    if (word_A806 < 36) {
-                        word_A804 = 41;
+                if (fallActionCaseNumber == 2) {
+                    if (verticalSpeed < 36) {
+                        spriteIndex = 41;
                     } else {
-                        word_A804 = 45;
+                        spriteIndex = 45;
                     }
                 }
-                sub_4807(word_A800, word_A802, word_A804);
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
                 break;
             } else {
-                if ((rand() & 7) == 0 && word_A840 == 0) {
-                    word_A840 = 0;
-                    word_A826 = 0;
-                    word_A8A0 = 100;
-                    word_A804 = 48;
-                    word_A83A = -12;
-                    if (word_A842 == 2) {
-                        word_A804 = 45;
+                if ((rand() & 7) == 0 && bounceWhenFalling == 0) {
+                    bounceWhenFalling = 0;
+                    animationFrameCounter = 0;
+                    subWindowState = 100;
+                    spriteIndex = 48;
+                    framePeriodCounter = -12;
+                    if (fallActionCaseNumber == 2) {
+                        spriteIndex = 45;
                     }
-                    sub_4807(word_A800, word_A802, word_A804);
+                    UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
                     break;
                 }
-                word_A806 = word_A806 * 2 / -3;
-                word_A840 = 1;
+                verticalSpeed = verticalSpeed * 2 / -3;
+                bounceWhenFalling = 1;
             }
         }
-        if (word_A842 == 2) {
-            word_A804 = word_A804 == 40 ? 41 : 40;
-        } else if (word_A842 == 1) {
-            word_A804 = word_A804 == 4 ? 5 : 4;
-        } else if (word_A842 == 0) {
-            word_A804 = 42;
+        if (fallActionCaseNumber == 2) {
+            spriteIndex = spriteIndex == 40 ? 41 : 40;
+        } else if (fallActionCaseNumber == 1) {
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
+        } else if (fallActionCaseNumber == 0) {
+            spriteIndex = 42;
         } else {
-            word_A804 = word_A324[word_A848];
-            word_A848 += 1;
-            if (word_A804 == 66) {
-                word_A848 -= 1;
+            spriteIndex = collisionAnimationFramesWithHeightOffset[collisionAnimationFrameIndex];
+            collisionAnimationFrameIndex += 1;
+            if (spriteIndex == 66) {
+                collisionAnimationFrameIndex -= 1;
             }
         }
-        if (word_A842 == 3 && sub_4C91(word_A800, word_A800 - word_A808) != 0) {
-            word_A2AA = -word_A2AA;
-            word_A8A0 = 30;
+        if (fallActionCaseNumber == 3 && DetectCollisionOtherInstancesFindXCoordinate(spriteX, spriteX - horizontalSpeed) != 0) {
+            facingDirection = -facingDirection;
+            subWindowState = 30;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 100:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A842 == 1) {
-            word_A8A0 = 11;
-            word_A804 = 2;
+        framePeriodCounter = 0;
+        if (fallActionCaseNumber == 1) {
+            subWindowState = 11;
+            spriteIndex = 2;
             break;
         }
-        if (word_A842 == 2) {
-            word_A826 = 0;
-            word_A8A0 = 101;
+        if (fallActionCaseNumber == 2) {
+            animationFrameCounter = 0;
+            subWindowState = 101;
             break;
         }
-        if (word_A826 == 0) {
-            word_A804 = 13;
-        } else if (word_A826 == 1) {
-            if (word_A2AA > 0) {
-                word_A804 = 12;
+        if (animationFrameCounter == 0) {
+            spriteIndex = 13;
+        } else if (animationFrameCounter == 1) {
+            if (facingDirection > 0) {
+                spriteIndex = 12;
             } else {
-                word_A804 = 14;
+                spriteIndex = 14;
             }
-        } else if (word_A826 == 2) {
-            word_A804 = 3;
+        } else if (animationFrameCounter == 2) {
+            spriteIndex = 3;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ >= 2) {
-            word_A8A0 = 11;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ >= 2) {
+            subWindowState = 11;
         }
         break;
     case 101:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A826 == 0) {
-            word_A804 = 31;
-            word_A83A = -8;
-        } else if (word_A826 == 2) {
-            word_A804 = 3;
+        framePeriodCounter = 0;
+        if (animationFrameCounter == 0) {
+            spriteIndex = 31;
+            framePeriodCounter = -8;
+        } else if (animationFrameCounter == 2) {
+            spriteIndex = 3;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ >= 6) {
-            word_A8A0 = 11;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ >= 6) {
+            subWindowState = 11;
         }
         break;
     case 102:
-        sub_428E();
-        word_A826 = 6;
-        word_A804 = 3;
-        word_A82A = 0;
+        StopPlayingSound();
+        animationFrameCounter = 6;
+        spriteIndex = 3;
+        randomCaseNumberForAction = 0;
         if (rand() % 3 == 0) {
-            word_A82A = 1;
+            randomCaseNumberForAction = 1;
         }
-        word_A8A0 = 103;
+        subWindowState = 103;
     case 103:
-        if (word_A82A != 0) {
-            word_A804 = word_A804 == 50 ? 51 : 50;
+        if (randomCaseNumberForAction != 0) {
+            spriteIndex = spriteIndex == 50 ? 51 : 50;
         } else {
-            word_A804 = word_A804 == 4 ? 5 : 4;
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826-- <= 0) {
-            word_A8A0 = 97;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter-- <= 0) {
+            subWindowState = 97;
         }
         break;
     case 104:
-        word_A842 = 0;
-        word_A8A0 = 106;
-        goto loc_4D33;
+        fallActionCaseNumber = 0;
+        subWindowState = 106;
+        goto stateLoopContinue;
     case 105:
-        word_A842 = 1;
-        word_A8A0 = 106;
-        goto loc_4D33;
+        fallActionCaseNumber = 1;
+        subWindowState = 106;
+        goto stateLoopContinue;
     case 106:
-        if (word_A842 == 0) {
-            var_14.x = word_A800;
-            var_14.y = word_A802 + 39;
+        if (fallActionCaseNumber == 0) {
+            var_14.x = spriteX;
+            var_14.y = spriteY + 39;
             *(HWND *)&var_10 = WindowFromPoint(var_14);
-            var_14.x = word_A800 + 39;
+            var_14.x = spriteX + 39;
             var_8 = WindowFromPoint(var_14);
-            if (*(HWND *)&var_10 == word_C0B0 && var_8 == word_C0B0) {
-                sub_2ABF(word_C0B0);
-            } else if (*(HWND *)&var_10 == word_C0B0) {
-                sub_2B01(word_C0B0, var_8);
+            if (*(HWND *)&var_10 == selfInstanceWindowHandle && var_8 == selfInstanceWindowHandle) {
+                PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+            } else if (*(HWND *)&var_10 == selfInstanceWindowHandle) {
+                PlaceWindowTopAnother(selfInstanceWindowHandle, var_8);
             } else {
-                sub_2B01(word_C0B0, *(HWND *)&var_10);
+                PlaceWindowTopAnother(selfInstanceWindowHandle, *(HWND *)&var_10);
             }
-            word_A804 = 81;
+            spriteIndex = 81;
         } else {
-            word_A804 = 78;
+            spriteIndex = 78;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 107;
-        word_A826 = 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 107;
+        animationFrameCounter = 0;
         break;
     case 107:
-        word_A804 = word_A2B4[4 - word_A842][word_A826];
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 7) {
-            if (word_A842 != 0) {
+        spriteIndex = blinkAnimationFrames[4 - fallActionCaseNumber][animationFrameCounter];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 7) {
+            if (fallActionCaseNumber != 0) {
                 if ((rand() & 1) == 0) {
-                    word_A8A0 = 111;
+                    subWindowState = 111;
                 } else {
-                    word_A8A0 = 109;
+                    subWindowState = 109;
                 }
             } else {
                 if ((rand() & 1) == 0) {
-                    word_A8A0 = 111;
+                    subWindowState = 111;
                 } else {
-                    word_A8A0 = 108;
+                    subWindowState = 108;
                 }
             }
         }
         break;
     case 108:
-        if (word_A83A++ < 10) {
+        if (framePeriodCounter++ < 10) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = 3;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteIndex = 3;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 1;
         break;
     case 109:
-        word_A808 = -(word_A2AA * 14);
-        word_A804 = 23;
-        word_A800 += word_A808;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 95;
-        word_A826 = 0;
+        horizontalSpeed = -(facingDirection * 14);
+        spriteIndex = 23;
+        spriteX += horizontalSpeed;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 95;
+        animationFrameCounter = 0;
         break;
     case 110:
-        word_A800 += word_A808;
-        word_A808 += word_A2AA;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826++ > 3) {
-            word_A8A0 = 95;
+        spriteX += horizontalSpeed;
+        horizontalSpeed += facingDirection;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter++ > 3) {
+            subWindowState = 95;
         }
         break;
     case 111:
-        if (word_A842 != 0) {
-            word_A800 += word_A2AA * -26;
-            word_A802 += 35;
-            word_A2AA = -word_A2AA;
+        if (fallActionCaseNumber != 0) {
+            spriteX += facingDirection * -26;
+            spriteY += 35;
+            facingDirection = -facingDirection;
         } else {
-            word_A82A = rand() % 2;
-            if (word_A82A != 0) {
-                word_A802 += 36;
+            randomCaseNumberForAction = rand() % 2;
+            if (randomCaseNumberForAction != 0) {
+                spriteY += 36;
             } else {
-                word_A802 += 20;
+                spriteY += 20;
             }
         }
-        word_A826 = 0;
-        word_A8A0 = 112;
+        animationFrameCounter = 0;
+        subWindowState = 112;
     case 112:
-        if (word_A826 == 0) {
-            if (word_A83A++ < 10) {
+        if (animationFrameCounter == 0) {
+            if (framePeriodCounter++ < 10) {
                 break;
             }
-            word_A83A = 0;
+            framePeriodCounter = 0;
         } else {
-            if (word_A83A++ < 1) {
+            if (framePeriodCounter++ < 1) {
                 break;
             }
-            word_A83A = 0;
+            framePeriodCounter = 0;
         }
-        if (word_A842 != 0) {
-            word_A804 = word_A804 == 40 ? 41 : 40;
+        if (fallActionCaseNumber != 0) {
+            spriteIndex = spriteIndex == 40 ? 41 : 40;
         } else {
-            word_A804 = word_A314[word_A82A][word_A826 % 4];
+            spriteIndex = hangOnWindowTopEdgeAnimationFrames[randomCaseNumberForAction][animationFrameCounter % 4];
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A826 += 1;
-        if (word_A826 > 12) {
-            if (word_A842 != 0) {
-                word_A8A0 = 98;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter > 12) {
+            if (fallActionCaseNumber != 0) {
+                subWindowState = 98;
             } else {
-                word_A8A0 = 96;
+                subWindowState = 96;
             }
         }
         break;
     case 113:
-        word_CA76 = 1;
-        word_A804 = 6;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 114;
+        sleepingAfterTimeout = 1;
+        spriteIndex = 6;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 114;
         break;
     case 114:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A804 += 1;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A804 == 8) {
-            word_A804 = 0;
-            word_A8A0 = 115;
+        framePeriodCounter = 0;
+        spriteIndex += 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteIndex == 8) {
+            spriteIndex = 0;
+            subWindowState = 115;
         }
-        sub_496F(0);
+        HandleOutOfViewOrTopPosition(0);
         break;
     case 115:
-        sub_496F(0);
-        if (word_A83A++ < 4) {
+        HandleOutOfViewOrTopPosition(0);
+        if (framePeriodCounter++ < 4) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A804 == 0 ? 1 : 0;
-        sub_4807(word_A800, word_A802, word_A804);
+        framePeriodCounter = 0;
+        spriteIndex = spriteIndex == 0 ? 1 : 0;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 116:
-        word_A800 = word_CA50;
-        word_A802 = word_CA52 * 7 / 8;
-        word_A804 = 4;
-        word_A2AA = 1;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 117;
+        spriteX = screenWidth;
+        spriteY = screenHeight * 7 / 8;
+        spriteIndex = 4;
+        facingDirection = 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 117;
         break;
     case 117:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_CA50 / 2 - 20 >= word_A800) {
-            word_A8A0 = 118;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (screenWidth / 2 - 20 >= spriteX) {
+            subWindowState = 118;
         }
         break;
     case 118:
-        sub_2A21();
-        word_A2AC = -1;
-        word_A80E = -40;
-        word_A810 = word_CA52 / 8;
-        word_A812 = 154;
-        word_A826 = 0;
-        word_A8A0 = 119;
-        word_C0AE = 0;
-        sub_2ABF(word_C0B0);
-        sub_2ABF(word_CA60[8]);
+        CreateSubwindow();
+        facingDirectionSub = -1;
+        spriteXSub = -40;
+        spriteYSub = screenHeight / 8;
+        spriteIndexSub = 154;
+        animationFrameCounter = 0;
+        subWindowState = 119;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
         break;
     case 119:
-        if (word_A826 != 0) {
-            word_A804 = word_A2B4[2][word_A826];
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A826 += 1;
-            if (word_A826 > 7) {
-                word_A826 = 0;
+        if (animationFrameCounter != 0) {
+            spriteIndex = blinkAnimationFrames[2][animationFrameCounter];
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            animationFrameCounter += 1;
+            if (animationFrameCounter > 7) {
+                animationFrameCounter = 0;
             }
         } else {
-            word_A804 = 73;
-            sub_4807(word_A800, word_A802, word_A804);
+            spriteIndex = 73;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             if (rand() % 20 == 0) {
-                word_A826 = 1;
+                animationFrameCounter = 1;
             }
         }
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A80E -= word_A2AC * 16;
-        word_A812 = word_A812 == 154 ? 155 : 154;
-        sub_488C(word_A80E, word_A810, word_A812);
-        if (word_A80E > word_A800) {
-            word_A2AA = -1;
-            sub_4807(word_A800, word_A802, word_A804);
+        framePeriodCounter = 0;
+        spriteXSub -= facingDirectionSub * 16;
+        spriteIndexSub = spriteIndexSub == 154 ? 155 : 154;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        if (spriteXSub > spriteX) {
+            facingDirection = -1;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         }
-        if (word_A80E > word_CA50) {
-            sub_2A96();
-            word_A8A0 = 120;
+        if (spriteXSub > screenWidth) {
+            DestroySubwindow();
+            subWindowState = 120;
         }
         break;
     case 120:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A800 > word_CA50) {
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteX > screenWidth) {
+            subWindowState = 1;
         }
         break;
     case 121:
-        word_A800 = word_CA50;
-        word_A802 = word_CA52 * 7 / 8;
-        word_A804 = 4;
-        word_A2AA = 1;
-        sub_2A21();
-        word_A2AC = -1;
-        word_A80E = -40;
-        word_A810 = word_CA52 * 7 / 8;
-        word_A812 = 154;
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_488C(word_A80E, word_A810, word_A812);
-        word_A8A0 = 122;
-        word_C0AE = 0;
-        sub_2ABF(word_C0B0);
-        sub_2ABF(word_CA60[8]);
+        spriteX = screenWidth;
+        spriteY = screenHeight * 7 / 8;
+        spriteIndex = 4;
+        facingDirection = 1;
+        CreateSubwindow();
+        facingDirectionSub = -1;
+        spriteXSub = -40;
+        spriteYSub = screenHeight * 7 / 8;
+        spriteIndexSub = 154;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        subWindowState = 122;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
         break;
     case 122:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        word_A80E -= word_A2AC * 16;
-        word_A812 = word_A812 == 154 ? 155 : 154;
-        if (word_A800 - word_A80E <= 46) {
-            word_A800 = word_CA50 / 2 + 3;
-            word_A80E = word_CA50 / 2 - 43;
-            word_A804 = 3;
-            word_A812 = 157;
-            sub_4807(word_A800, word_A802, word_A804);
-            sub_488C(word_A80E, word_A810, word_A812);
-            word_A826 = 0;
-            word_A8A0 = 123;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        spriteXSub -= facingDirectionSub * 16;
+        spriteIndexSub = spriteIndexSub == 154 ? 155 : 154;
+        if (spriteX - spriteXSub <= 46) {
+            spriteX = screenWidth / 2 + 3;
+            spriteXSub = screenWidth / 2 - 43;
+            spriteIndex = 3;
+            spriteIndexSub = 157;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+            animationFrameCounter = 0;
+            subWindowState = 123;
         } else {
-            sub_4807(word_A800, word_A802, word_A804);
-            sub_488C(word_A80E, word_A810, word_A812);
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         }
         break;
     case 123:
-        if (word_A83A++ < 3) {
+        if (framePeriodCounter++ < 3) {
             break;
         }
-        word_A83A = 0;
-        word_A804 = word_A826 + 127;
-        word_A826 += 1;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A826 >= 4) {
-            word_A8A0 = 124;
+        framePeriodCounter = 0;
+        spriteIndex = animationFrameCounter + 127;
+        animationFrameCounter += 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (animationFrameCounter >= 4) {
+            subWindowState = 124;
         }
         break;
     case 124:
-        if (word_A83A++ < 4) {
+        if (framePeriodCounter++ < 4) {
             break;
         }
-        word_A83A = 0;
-        word_CA46 += 1;
-        if (word_CA46 > 8) {
-            sub_2A96();
-            word_A826 = 0;
-            word_A8A0 = 125;
+        framePeriodCounter = 0;
+        fadeOutFrameCounter += 1;
+        if (fadeOutFrameCounter > 8) {
+            DestroySubwindow();
+            animationFrameCounter = 0;
+            subWindowState = 125;
         }
         break;
     case 125:
-        word_A804 = word_A45C[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A8A0 = 1;
+        spriteIndex = merry2AnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            subWindowState = 1;
             break;
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 126:
-        word_A800 = word_CA50;
-        word_A802 = word_CA52 * 7 / 8;
-        word_A804 = 4;
-        word_A2AA = 1;
-        sub_2A21();
-        word_A2AC = 1;
-        word_A80E = word_CA50 + 46;
-        word_A810 = word_CA52 * 7 / 8;
-        word_A812 = 154;
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_488C(word_A80E, word_A810, word_A812);
-        word_A8A0 = 127;
-        word_C0AE = 0;
-        sub_2ABF(word_C0B0);
-        sub_2ABF(word_CA60[8]);
+        spriteX = screenWidth;
+        spriteY = screenHeight * 7 / 8;
+        spriteIndex = 4;
+        facingDirection = 1;
+        CreateSubwindow();
+        facingDirectionSub = 1;
+        spriteXSub = screenWidth + 46;
+        spriteYSub = screenHeight * 7 / 8;
+        spriteIndexSub = 154;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        subWindowState = 127;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
         break;
     case 127:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        word_A80E -= word_A2AC * 16;
-        word_A812 = word_A812 == 154 ? 155 : 154;
-        if (word_A80E < -40) {
-            sub_2A96();
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        spriteXSub -= facingDirectionSub * 16;
+        spriteIndexSub = spriteIndexSub == 154 ? 155 : 154;
+        if (spriteXSub < -40) {
+            DestroySubwindow();
+            subWindowState = 1;
         } else {
-            sub_4807(word_A800, word_A802, word_A804);
-            sub_488C(word_A80E, word_A810, word_A812);
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         }
         break;
     case 128:
-        word_A800 = word_CA50;
-        word_A802 = word_CA52 * 7 / 8;
-        word_A804 = 4;
-        word_A2AA = 1;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 129;
+        spriteX = screenWidth;
+        spriteY = screenHeight * 7 / 8;
+        spriteIndex = 4;
+        facingDirection = 1;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 129;
         break;
     case 129:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_CA50 / 2 - 20 >= word_A800) {
-            word_A8A0 = 130;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (screenWidth / 2 - 20 >= spriteX) {
+            subWindowState = 130;
         }
         break;
     case 130:
-        sub_2A21();
-        word_A2AC = -1;
-        word_A80E = -40;
-        word_A810 = word_CA52 / 8;
-        word_A812 = 158;
-        word_A826 = 0;
-        word_A8A0 = 131;
-        word_C0AE = 0;
-        sub_2ABF(word_C0B0);
-        sub_2ABF(word_CA60[8]);
+        CreateSubwindow();
+        facingDirectionSub = -1;
+        spriteXSub = -40;
+        spriteYSub = screenHeight / 8;
+        spriteIndexSub = 158;
+        animationFrameCounter = 0;
+        subWindowState = 131;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
         break;
     case 131:
-        if (word_A826 != 0) {
-            word_A804 = word_A2B4[2][word_A826];
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A826 += 1;
-            if (word_A826 > 7) {
-                word_A826 = 0;
+        if (animationFrameCounter != 0) {
+            spriteIndex = blinkAnimationFrames[2][animationFrameCounter];
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            animationFrameCounter += 1;
+            if (animationFrameCounter > 7) {
+                animationFrameCounter = 0;
             }
         } else {
-            word_A804 = 73;
-            sub_4807(word_A800, word_A802, word_A804);
+            spriteIndex = 73;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             if (rand() % 20 == 0) {
-                word_A826 = 1;
+                animationFrameCounter = 1;
             }
         }
-        word_A80E -= word_A2AC * 16;
-        if (word_A812 == 161) {
-            word_A812 = 158;
+        spriteXSub -= facingDirectionSub * 16;
+        if (spriteIndexSub == 161) {
+            spriteIndexSub = 158;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
-        if (word_A80E > word_A800) {
-            word_A80E = word_A800;
-            word_A812 = 162;
-            word_A8A0 = 132;
+        if (spriteXSub > spriteX) {
+            spriteXSub = spriteX;
+            spriteIndexSub = 162;
+            subWindowState = 132;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         break;
     case 132:
-        word_A804 = 73;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_CA5C += 40;
-        if (word_A802 - word_A810 - 40 <= word_CA5C) {
-            word_CA5C = word_A802 - word_A810 - 40;
-            word_CA5C -= 20;
-            word_A8A0 = 133;
+        spriteIndex = 73;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        ufoBeamHeightSub += 40;
+        if (spriteY - spriteYSub - 40 <= ufoBeamHeightSub) {
+            ufoBeamHeightSub = spriteY - spriteYSub - 40;
+            ufoBeamHeightSub -= 20;
+            subWindowState = 133;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
-        if (word_A83A++ < 1) {
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A812 == 165) {
-            word_A812 = 162;
+        framePeriodCounter = 0;
+        if (spriteIndexSub == 165) {
+            spriteIndexSub = 162;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
         break;
     case 133:
-        word_CA5C -= 20;
-        if (word_CA5C <= 0) {
-            word_CA5C = 0;
-            word_A802 = word_A810 + 40;
-            word_A8A0 = 134;
-            word_A804 = word_A804 == 4 ? 5 : 4;
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A812 = 158;
-            sub_488C(word_A80E, word_A810, word_A812);
+        ufoBeamHeightSub -= 20;
+        if (ufoBeamHeightSub <= 0) {
+            ufoBeamHeightSub = 0;
+            spriteY = spriteYSub + 40;
+            subWindowState = 134;
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            spriteIndexSub = 158;
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
             break;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        word_A802 -= 20;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A83A++ < 1) {
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        spriteY -= 20;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A812 == 165) {
-            word_A812 = 162;
+        framePeriodCounter = 0;
+        if (spriteIndexSub == 165) {
+            spriteIndexSub = 162;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
         break;
     case 134:
-        word_A800 = -80;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A80E -= word_A2AC * 16;
-        if (word_A812 == 161) {
-            word_A812 = 158;
+        spriteX = -80;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        spriteXSub -= facingDirectionSub * 16;
+        if (spriteIndexSub == 161) {
+            spriteIndexSub = 158;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
-        if (word_A80E > word_CA50) {
-            sub_2A96();
-            sub_428E();
-            word_A8A0 = 1;
+        if (spriteXSub > screenWidth) {
+            DestroySubwindow();
+            StopPlayingSound();
+            subWindowState = 1;
             break;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         break;
     case 135:
-        word_A810 = word_CA52 * 7 / 8;
-        word_A2AA = -1;
-        word_A800 = -40;
-        word_A802 = word_CA52 / 8;
-        word_A804 = 158;
-        word_A826 = 0;
-        word_A8A0 = 136;
+        spriteYSub = screenHeight * 7 / 8;
+        facingDirection = -1;
+        spriteX = -40;
+        spriteY = screenHeight / 8;
+        spriteIndex = 158;
+        animationFrameCounter = 0;
+        subWindowState = 136;
         break;
     case 136:
-        word_A800 -= word_A2AA * 16;
-        if (word_A804 == 161) {
-            word_A804 = 158;
+        spriteX -= facingDirection * 16;
+        if (spriteIndex == 161) {
+            spriteIndex = 158;
         } else {
-            word_A804 += 1;
+            spriteIndex += 1;
         }
-        if (word_CA50 / 2 - 20 < word_A800) {
-            word_A800 = word_CA50 / 2 - 20;
-            word_A804 = 162;
-            word_A8A0 = 137;
+        if (screenWidth / 2 - 20 < spriteX) {
+            spriteX = screenWidth / 2 - 20;
+            spriteIndex = 162;
+            subWindowState = 137;
         }
-        sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
     case 137:
-        word_CA72 += 40;
-        if (word_A810 - word_A802 - 40 <= word_CA72) {
-            word_CA72 = word_A810 - word_A802 - 40;
-            word_A8A0 = 138;
+        ufoBeamHeight += 40;
+        if (spriteYSub - spriteY - 40 <= ufoBeamHeight) {
+            ufoBeamHeight = spriteYSub - spriteY - 40;
+            subWindowState = 138;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A83A++ < 1) {
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A804 == 165) {
-            word_A804 = 162;
+        framePeriodCounter = 0;
+        if (spriteIndex == 165) {
+            spriteIndex = 162;
         } else {
-            word_A804 += 1;
+            spriteIndex += 1;
         }
         break;
     case 138:
-        if (word_A83A++ < 4) {
+        if (framePeriodCounter++ < 4) {
             break;
         }
-        word_A83A = 0;
-        sub_2A21();
-        word_A80E = word_A800;
-        word_A812 = 167;
-        sub_488C(word_A80E, word_A810, word_A812);
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A8A0 = 139;
-        word_C0AE = 0;
-        sub_2ABF(word_C0B0);
-        sub_2ABF(word_CA60[8]);
+        framePeriodCounter = 0;
+        CreateSubwindow();
+        spriteXSub = spriteX;
+        spriteIndexSub = 167;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 139;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
         break;
     case 139:
-        if (word_CA72 != 0) {
-            word_CA72 -= 40;
-            if (word_CA72 <= 0) {
-                word_A804 = 158;
-                word_CA72 = 0;
+        if (ufoBeamHeight != 0) {
+            ufoBeamHeight -= 40;
+            if (ufoBeamHeight <= 0) {
+                spriteIndex = 158;
+                ufoBeamHeight = 0;
             }
-            if (word_A804 == 165) {
-                word_A804 = 162;
+            if (spriteIndex == 165) {
+                spriteIndex = 162;
             } else {
-                word_A804 += 1;
+                spriteIndex += 1;
             }
         } else {
-            word_A800 -= word_A2AA * 16;
-            if (word_A804 == 161) {
-                word_A804 = 158;
+            spriteX -= facingDirection * 16;
+            if (spriteIndex == 161) {
+                spriteIndex = 158;
             } else {
-                word_A804 += 1;
+                spriteIndex += 1;
             }
         }
-        if (word_A800 > word_CA50) {
-            word_A8A0 = 140;
+        if (spriteX > screenWidth) {
+            subWindowState = 140;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A83A++ < 1) {
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A812 = word_A812 == 167 ? 168 : 167;
-        sub_488C(word_A80E, word_A810, word_A812);
+        framePeriodCounter = 0;
+        spriteIndexSub = spriteIndexSub == 167 ? 168 : 167;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         break;
     case 140:
-        word_A812 = 166;
-        sub_488C(word_A80E, word_A810, word_A812);
-        if (word_A83A++ < 1) {
+        spriteIndexSub = 166;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_CA46 += 1;
-        if (word_CA46 > 8) {
-            sub_2A96();
-            sub_428E();
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        fadeOutFrameCounter += 1;
+        if (fadeOutFrameCounter > 8) {
+            DestroySubwindow();
+            StopPlayingSound();
+            subWindowState = 1;
         }
         break;
     case 141:
         break;
     case 142:
-        word_A800 = -80;
-        word_A802 = word_CA52 / 8;
-        sub_4807(word_A800, word_A802, word_A804);
-        sub_2A21();
-        word_A2AC = -1;
-        word_A80E = -40;
-        word_A810 = word_CA52 * 7 / 8;
-        word_A812 = 158;
-        word_A826 = 0;
-        word_A8A0 = 143;
-        word_C0AE = 0;
-        sub_2ABF(word_C0B0);
-        sub_2ABF(word_CA60[8]);
+        spriteX = -80;
+        spriteY = screenHeight / 8;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        CreateSubwindow();
+        facingDirectionSub = -1;
+        spriteXSub = -40;
+        spriteYSub = screenHeight * 7 / 8;
+        spriteIndexSub = 158;
+        animationFrameCounter = 0;
+        subWindowState = 143;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
         break;
     case 143:
-        word_A80E -= word_A2AC * 16;
-        if (word_A812 == 161) {
-            word_A812 = 158;
+        spriteXSub -= facingDirectionSub * 16;
+        if (spriteIndexSub == 161) {
+            spriteIndexSub = 158;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
-        if (word_CA52 / 8 < word_A80E) {
-            word_A80E = word_CA52 / 8;
-            word_A800 = word_CA50;
-            word_A802 = word_A810;
-            word_A804 = 4;
-            word_A2AA = 1;
-            word_A8A0 = 144;
+        if (screenHeight / 8 < spriteXSub) {
+            spriteXSub = screenHeight / 8;
+            spriteX = screenWidth;
+            spriteY = spriteYSub;
+            spriteIndex = 4;
+            facingDirection = 1;
+            subWindowState = 144;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         break;
     case 144:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        if (word_A812 == 161) {
-            word_A812 = 158;
+        framePeriodCounter = 0;
+        if (spriteIndexSub == 161) {
+            spriteIndexSub = 158;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
-        word_A800 -= word_A2AA * 16;
-        word_A804 = word_A804 == 4 ? 5 : 4;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A80E + 40 >= word_A800) {
-            word_A800 = -80;
-            sub_4807(word_A800, word_A802, word_A804);
-            word_A8A0 = 145;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        spriteX -= facingDirection * 16;
+        spriteIndex = spriteIndex == 4 ? 5 : 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteXSub + 40 >= spriteX) {
+            spriteX = -80;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 145;
         }
         break;
     case 145:
-        word_A810 -= 40;
-        if (word_A812 == 161) {
-            word_A812 = 158;
+        spriteYSub -= 40;
+        if (spriteIndexSub == 161) {
+            spriteIndexSub = 158;
         } else {
-            word_A812 += 1;
+            spriteIndexSub += 1;
         }
-        if (word_A810 < -40) {
-            sub_2A96();
-            sub_428E();
-            word_A8A0 = 1;
+        if (spriteYSub < -40) {
+            DestroySubwindow();
+            StopPlayingSound();
+            subWindowState = 1;
             break;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         break;
     case 146:
         break;
     case 147:
-        sub_2A21();
-        word_CA56 = 1;
-        word_A2AC = 1;
-        word_A812 = 146;
-        word_A826 = 0;
-        word_A800 = word_CA50;
-        word_A802 = -40;
-        word_A2AA = 1;
-        word_A808 = word_CA50 / -96;
-        word_A806 = word_CA52 / 96;
-        word_A80E = word_A808 * 92 + word_CA50;
-        word_A810 = word_A806 * 92 - 20;
-        word_A8A0 = 148;
-        word_C0AE = 1;
-        sub_2ABF(word_CA60[8]);
-        sub_2ABF(word_C0B0);
+        CreateSubwindow();
+        keepSubwindowOnPaint = 1;
+        facingDirectionSub = 1;
+        spriteIndexSub = 146;
+        animationFrameCounter = 0;
+        spriteX = screenWidth;
+        spriteY = -40;
+        facingDirection = 1;
+        horizontalSpeed = screenWidth / -96;
+        verticalSpeed = screenHeight / 96;
+        spriteXSub = horizontalSpeed * 92 + screenWidth;
+        spriteYSub = verticalSpeed * 92 - 20;
+        subWindowState = 148;
+        screenMateOnTopOfSubwindow = 1;
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
     case 148:
-        if (word_A83A++ < 0) {
+        if (framePeriodCounter++ < 0) {
             break;
         }
-        word_A83A = 0;
-        sub_488C(word_A80E, word_A810, word_A812);
-        word_A800 += word_A808;
-        word_A802 += word_A806;
-        word_A804 = word_A3DE[word_A826 / 3];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A826 -= 1;
+        framePeriodCounter = 0;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        spriteX += horizontalSpeed;
+        spriteY += verticalSpeed;
+        spriteIndex = burnAnimationFrames[animationFrameCounter / 3];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            animationFrameCounter -= 1;
         }
-        if (word_A804 == 0 || word_A804 == 144 || word_A804 == 145) {
-            word_A804 = word_A804 == 144 ? 145 : 144;
+        if (spriteIndex == 0 || spriteIndex == 144 || spriteIndex == 145) {
+            spriteIndex = spriteIndex == 144 ? 145 : 144;
         }
-        if (word_A804 == 137 || word_A804 == 138) {
-            word_A804 = word_A804 == 137 ? 138 : 137;
+        if (spriteIndex == 137 || spriteIndex == 138) {
+            spriteIndex = spriteIndex == 137 ? 138 : 137;
         }
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A80E + 10 > word_A800 || word_A810 + 20 < word_A802) {
-            word_A826 = 0;
-            word_A8A0 = 149;
-            word_A804 = 173;
-            sub_4807(word_A800, word_A802, word_A804);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteXSub + 10 > spriteX || spriteYSub + 20 < spriteY) {
+            animationFrameCounter = 0;
+            subWindowState = 149;
+            spriteIndex = 173;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             break;
         }
         break;
     case 149:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 = -80;
-        sub_4807(word_A800, word_A802, word_A804);
-        word_A812 = word_A494[word_A826];
-        word_A826 += 1;
-        if (word_A812 == 0) {
-            word_A800 = word_A80E;
-            word_A802 = word_A810;
-            word_A826 = 0;
-            sub_42C8(108, 0U, 0);
-            word_A8A0 = 150;
+        framePeriodCounter = 0;
+        spriteX = -80;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        spriteIndexSub = burnBathtubSplashAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndexSub == 0) {
+            spriteX = spriteXSub;
+            spriteY = spriteYSub;
+            animationFrameCounter = 0;
+            PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(108, 0U, 0);
+            subWindowState = 150;
             break;
         }
-        sub_488C(word_A80E, word_A810, word_A812);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
         break;
     case 150:
-        word_A804 = 169;
-        word_A804 = word_A49E[word_A826];
-        word_A826 += 1;
-        if (word_A804 == 0) {
-            word_A804 = 3;
-            word_A8A0 = 151;
+        spriteIndex = 169;
+        spriteIndex = burnGetOutOfBathtubAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            spriteIndex = 3;
+            subWindowState = 151;
             break;
         }
-        if (word_A804 >= 81 && word_A804 <= 83) {
-            sub_4807(word_A800, word_A802 - 20, word_A804);
+        if (spriteIndex >= 81 && spriteIndex <= 83) {
+            UpdateMainWindowSprite(spriteX, spriteY - 20, spriteIndex);
         } else {
-            sub_4807(word_A800, word_A802, word_A804);
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         }
         break;
     case 151:
-        if (word_A83A++ < 1) {
+        if (framePeriodCounter++ < 1) {
             break;
         }
-        word_A83A = 0;
-        word_A800 -= word_A2AA * 6;
-        word_A804 = word_A804 == 2 ? 3 : 2;
-        sub_4807(word_A800, word_A802, word_A804);
-        if (word_A800 < -40) {
-            sub_2A96();
-            word_A8A0 = 1;
+        framePeriodCounter = 0;
+        spriteX -= facingDirection * 6;
+        spriteIndex = spriteIndex == 2 ? 3 : 2;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (spriteX < -40) {
+            DestroySubwindow();
+            subWindowState = 1;
             break;
         }
         break;
@@ -4866,26 +5050,26 @@ loc_4D33:
 }
 
 /* Environment-affected action change, controlled by a flag. */
-void sub_8FD7(int arg_0)
+void ApplyEnvironmentActionChange(int arg_0)
 {
     switch (arg_0) {
     case 0:
-        word_A8A0 = 1;
-        if (word_A7FC != 0) {
-            word_A8A0 = 97;
+        subWindowState = 1;
+        if (gravityEnabled != 0) {
+            subWindowState = 97;
         }
         break;
     case 1:
-        word_A8A0 = 81;
+        subWindowState = 81;
         break;
     case 2:
-        word_A8A0 = 97;
+        subWindowState = 97;
         break;
     case 3:
-        word_CA54 = 113;
+        sleepTimeoutAction = 113;
         break;
     case 4:
-        word_A8A0 = 56;
+        subWindowState = 56;
         break;
     default:
         break;
@@ -4893,101 +5077,101 @@ void sub_8FD7(int arg_0)
 }
 
 /* Process debug window action change. */
-void sub_904A(WPARAM arg_0)
+void ProcessDebugWindowActionChange(WPARAM arg_0)
 {
-    word_CA72 = 0;
-    sub_428E();
-    sub_2A96();
+    ufoBeamHeight = 0;
+    StopPlayingSound();
+    DestroySubwindow();
     switch (arg_0) {
     case 0:
-        word_A8A0 = 1;
+        subWindowState = 1;
         break;
     case 1:
-        word_A8A0 = 7;
+        subWindowState = 7;
         break;
     case 2:
-        word_A8A0 = 11;
+        subWindowState = 11;
         break;
     case 3:
-        word_A8A0 = 13;
+        subWindowState = 13;
         break;
     case 4:
-        word_A8A0 = 15;
+        subWindowState = 15;
         break;
     case 5:
-        word_A8A0 = 17;
+        subWindowState = 17;
         break;
     case 6:
-        word_A8A0 = 20;
+        subWindowState = 20;
         break;
     case 7:
-        word_A8A0 = 24;
+        subWindowState = 24;
         break;
     case 8:
-        word_A8A0 = 30;
+        subWindowState = 30;
         break;
     case 9:
-        word_A8A0 = 35;
+        subWindowState = 35;
         break;
     case 10:
-        word_A8A0 = 43;
+        subWindowState = 43;
         break;
     case 11:
-        word_A8A0 = 45;
+        subWindowState = 45;
         break;
     case 12:
-        word_A8A0 = 49;
+        subWindowState = 49;
         break;
     case 13:
-        word_A8A0 = 51;
+        subWindowState = 51;
         break;
     case 14:
-        word_A8A0 = 53;
+        subWindowState = 53;
         break;
     case 15:
-        word_A8A0 = 58;
+        subWindowState = 58;
         break;
     case 16:
-        word_A8A0 = 47;
+        subWindowState = 47;
         break;
     case 17:
-        word_A8A0 = 147;
+        subWindowState = 147;
         break;
     case 18:
-        word_A8A0 = 116;
+        subWindowState = 116;
         break;
     case 19:
-        word_A8A0 = 121;
+        subWindowState = 121;
         break;
     case 20:
-        word_A8A0 = 126;
+        subWindowState = 126;
         break;
     case 21:
-        word_A8A0 = 128;
+        subWindowState = 128;
         break;
     case 22:
-        word_A8A0 = 135;
+        subWindowState = 135;
         break;
     case 23:
-        word_A8A0 = 142;
+        subWindowState = 142;
         break;
     case 24:
-        word_A8A0 = 65;
+        subWindowState = 65;
         break;
     case 25:
-        word_A8A0 = 62;
+        subWindowState = 62;
         break;
     case 26:
-        word_A8A0 = 75;
+        subWindowState = 75;
         break;
     case 27:
-        word_A8A0 = 96;
+        subWindowState = 96;
         break;
     case 28:
-        word_A8A0 = 9;
+        subWindowState = 9;
         break;
     case 29:
-        word_A8A0 = 69;
+        subWindowState = 69;
         break;
     default:
         break;
@@ -4995,97 +5179,97 @@ void sub_904A(WPARAM arg_0)
 }
 
 /* Move window by offset. */
-void sub_91CD(int arg_0, int arg_2)
+void MoveWindowOffset(int arg_0, int arg_2)
 {
-    word_A800 += arg_0;
-    word_A802 += arg_2;
-    sub_4807(word_A800, word_A802, word_A804);
+    spriteX += arg_0;
+    spriteY += arg_2;
+    UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
 }
 
 /* Initialize bitmaps (sub). */
-BOOL sub_9200(HWND arg_0)
+BOOL InitializeBitmapsSub(HWND arg_0)
 {
     HDC var_2;
     var_2 = GetDC(arg_0);
-    word_A850[0] = CreateCompatibleBitmap(var_2, 100, 100);
-    if (word_A850[0] == NULL) {
-        goto loc_92FA;
+    doubleBufferSub[0] = CreateCompatibleBitmap(var_2, 100, 100);
+    if (doubleBufferSub[0] == NULL) {
+        goto bitmapSubInitFailedCleanup;
     }
-    word_A850[1] = CreateCompatibleBitmap(var_2, 100, 100);
-    if (word_A850[1] == NULL) {
-        goto loc_92FA;
+    doubleBufferSub[1] = CreateCompatibleBitmap(var_2, 100, 100);
+    if (doubleBufferSub[1] == NULL) {
+        goto bitmapSubInitFailedCleanup;
     }
-    word_A854 = CreateCompatibleBitmap(var_2, 100, 100);
-    if (word_A854 == NULL) {
-        goto loc_92FA;
+    spriteRenderTargetSub = CreateCompatibleBitmap(var_2, 100, 100);
+    if (spriteRenderTargetSub == NULL) {
+        goto bitmapSubInitFailedCleanup;
     }
-    word_A85A = CreateCompatibleBitmap(var_2, 40, 40);
-    if (word_A85A == NULL) {
-        goto loc_92FA;
+    fadeOutColourBitmapSub = CreateCompatibleBitmap(var_2, 40, 40);
+    if (fadeOutColourBitmapSub == NULL) {
+        goto bitmapSubInitFailedCleanup;
     }
-    word_A85C = CreateCompatibleBitmap(var_2, 40, 40);
-    if (word_A85C == NULL) {
-        goto loc_92FA;
+    fadeOutMaskBitmapSub = CreateCompatibleBitmap(var_2, 40, 40);
+    if (fadeOutMaskBitmapSub == NULL) {
+        goto bitmapSubInitFailedCleanup;
     }
-    word_CA4C = 0;
-    word_CA4E = 0;
-    word_CA50 = GetSystemMetrics(SM_CXSCREEN);
-    word_CA52 = GetSystemMetrics(SM_CYSCREEN);
+    unusedCa4C = 0;
+    unusedCa4E = 0;
+    screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    screenHeight = GetSystemMetrics(SM_CYSCREEN);
     ReleaseDC(arg_0, var_2);
-    word_CA46 = 0;
-    word_CA5C = 0;
-    word_CA56 = 0;
-    word_A890 = 0;
-    word_A892 = 0;
-    word_A894 = 0;
-    word_A896 = 0;
+    fadeOutFrameCounter = 0;
+    ufoBeamHeightSub = 0;
+    keepSubwindowOnPaint = 0;
+    screenXSubPreviousFrame = 0;
+    screenYSubPreviousFrame = 0;
+    spriteWidthSubPreviousFrame = 0;
+    spriteHeightSubPreviousFrame = 0;
     return TRUE;
-loc_92FA:
+bitmapSubInitFailedCleanup:
     ReleaseDC(arg_0, var_2);
     return FALSE;
 }
 
 /* Release bitmaps (sub). */
-void sub_930F()
+void ReleaseBitmaps2()
 {
-    DeleteObject(word_A85C);
-    DeleteObject(word_A85A);
-    DeleteObject(word_A850[0]);
-    DeleteObject(word_A850[1]);
-    DeleteObject(word_A854);
+    DeleteObject(fadeOutMaskBitmapSub);
+    DeleteObject(fadeOutColourBitmapSub);
+    DeleteObject(doubleBufferSub[0]);
+    DeleteObject(doubleBufferSub[1]);
+    DeleteObject(spriteRenderTargetSub);
 }
 
 /* Update window position and sprite to be actually used (sub). */
-void sub_9350(int arg_0, int arg_2, int arg_4)
+void UpdateWindowPositionSpriteBeActuallyUsed2(int arg_0, int arg_2, int arg_4)
 {
-    word_A878 = arg_0;
-    word_A87A = arg_2;
-    word_A856 = stru_A8A2[arg_4].bitmaps[0];
-    word_A858 = stru_A8A2[arg_4].bitmaps[1];
-    word_A85E = stru_A8A2[arg_4].x;
-    word_A860 = stru_A8A2[arg_4].y;
-    word_A87C = stru_A8A2[arg_4].width;
-    word_A87E = stru_A8A2[arg_4].height;
+    screenXSubCurrentFrame = arg_0;
+    screenYSubCurrentFrame = arg_2;
+    spriteColourBitmapSubCurrentFrame = spriteListSub[arg_4].bitmaps[0];
+    spriteMaskBitmapSubCurrentFrame = spriteListSub[arg_4].bitmaps[1];
+    spriteXInResourceImageSubCurrentFrame = spriteListSub[arg_4].x;
+    spriteYInResourceImageSubCurrentFrame = spriteListSub[arg_4].y;
+    spriteWidthSubCurrentFrame = spriteListSub[arg_4].width;
+    spriteHeightSubCurrentFrame = spriteListSub[arg_4].height;
 }
 
 /* Clear window (sub). */
-void sub_93DF(HWND arg_0)
+void ClearWindow2(HWND arg_0)
 {
-    if (word_CA56 != 0) {
+    if (keepSubwindowOnPaint != 0) {
         return;
     }
-    word_A890 = 0;
-    word_A892 = 0;
-    word_A894 = 0;
-    word_A896 = 0;
+    screenXSubPreviousFrame = 0;
+    screenYSubPreviousFrame = 0;
+    spriteWidthSubPreviousFrame = 0;
+    spriteHeightSubPreviousFrame = 0;
     MoveWindow(arg_0, 0, 0, 0, 0, TRUE);
-    word_A872 = 1;
-    word_C0BA = 1;
-    word_A876 = NULL;
+    unused_A872 = 1;
+    noUpdatePeriodsAfterClearing = 1;
+    spriteColourBitmapSubPreviousFrame = NULL;
 }
 
 /* Render sprite with double buffering (with fade out effect) (sub). */
-void sub_9438(HWND arg_0)
+void RenderSpriteDoubleBufferingFadeOutEffect(HWND arg_0)
 {
     HDC var_2;
     HDC var_4;
@@ -5100,114 +5284,114 @@ void sub_9438(HWND arg_0)
     int var_1A;
     int var_1C;
     int var_1E;
-    if (word_A870 != 0) {
+    if (renderOrUpdateWindowFlagSub != 0) {
         return;
     }
-    if (word_A890 == word_A878 && word_A892 == word_A87A && word_A876 == word_A856 && word_A866 == word_A85E && word_CA46 == 0 && word_CA5C == 0) {
+    if (screenXSubPreviousFrame == screenXSubCurrentFrame && screenYSubPreviousFrame == screenYSubCurrentFrame && spriteColourBitmapSubPreviousFrame == spriteColourBitmapSubCurrentFrame && spriteXInResourceImageSubPreviousFrame == spriteXInResourceImageSubCurrentFrame && fadeOutFrameCounter == 0 && ufoBeamHeightSub == 0) {
         return;
     }
-    word_A86E ^= 1;
+    currentSpriteFramebufferIndexSub ^= 1;
     var_2 = GetDC(NULL);
-    SelectPalette(var_2, word_CA4A, FALSE);
+    SelectPalette(var_2, windowPaletteInUse, FALSE);
     var_4 = CreateCompatibleDC(var_2);
     var_6 = CreateCompatibleDC(var_2);
-    SelectPalette(var_6, word_CA4A, FALSE);
-    SelectPalette(var_4, word_CA4A, FALSE);
-    var_16 = max(word_A878, word_A890);
-    var_14 = max(word_A87A, word_A892);
-    var_12 = min(word_A87C + word_A878, word_A894 + word_A890) - var_16;
-    var_10 = min(word_A87A + word_A87E, word_A892 + word_A896) - var_14;
+    SelectPalette(var_6, windowPaletteInUse, FALSE);
+    SelectPalette(var_4, windowPaletteInUse, FALSE);
+    var_16 = max(screenXSubCurrentFrame, screenXSubPreviousFrame);
+    var_14 = max(screenYSubCurrentFrame, screenYSubPreviousFrame);
+    var_12 = min(spriteWidthSubCurrentFrame + screenXSubCurrentFrame, spriteWidthSubPreviousFrame + screenXSubPreviousFrame) - var_16;
+    var_10 = min(screenYSubCurrentFrame + spriteHeightSubCurrentFrame, screenYSubPreviousFrame + spriteHeightSubPreviousFrame) - var_14;
     if (var_12 <= 0 || var_10 <= 0) {
-        word_A898 = 1;
-        if (word_A872 != 0) {
-            word_A872 = 0;
+        unused_A898 = 1;
+        if (unused_A872 != 0) {
+            unused_A872 = 0;
         }
-        word_A880 = word_A878;
-        word_A882 = word_A87A;
-        word_A884 = word_A87C;
-        word_A886 = word_A87E;
-        SelectObject(var_4, word_A850[word_A86E]);
-        BitBlt(var_4, 0, 0, word_A884, word_A886, var_2, word_A880, word_A882, SRCCOPY);
+        updateAreaRectXSubCurrentFrame = screenXSubCurrentFrame;
+        updateAreaRectYSubCurrentFrame = screenYSubCurrentFrame;
+        updateAreaRectWidthSubCurrentFrame = spriteWidthSubCurrentFrame;
+        updateAreaRectHeightSubCurrentFrame = spriteHeightSubCurrentFrame;
+        SelectObject(var_4, doubleBufferSub[currentSpriteFramebufferIndexSub]);
+        BitBlt(var_4, 0, 0, updateAreaRectWidthSubCurrentFrame, updateAreaRectHeightSubCurrentFrame, var_2, updateAreaRectXSubCurrentFrame, updateAreaRectYSubCurrentFrame, SRCCOPY);
     } else {
-        word_A898 = 0;
-        word_A880 = min(word_A878, word_A890);
-        word_A882 = min(word_A87A, word_A892);
-        word_A884 = max(word_A87C + word_A878, word_A894 + word_A890) - word_A880;
-        word_A886 = max(word_A87A + word_A87E, word_A892 + word_A896) - word_A882;
-        SelectObject(var_4, word_A850[word_A86E]);
-        BitBlt(var_4, 0, 0, word_A884, word_A886, var_2, word_A880, word_A882, SRCCOPY);
-        var_1E = max(word_A880, word_A888);
-        var_1C = max(word_A882, word_A88A);
-        var_1A = min(word_A884 + word_A880, word_A88C + word_A888) - var_1E;
-        var_18 = min(word_A882 + word_A886, word_A88A + word_A88E) - var_1C;
-        var_16 = max(0, var_1E - word_A880);
-        var_14 = max(0, var_1C - word_A882);
-        var_E = max(0, var_1E - word_A888);
-        var_C = max(0, var_1C - word_A88A);
+        unused_A898 = 0;
+        updateAreaRectXSubCurrentFrame = min(screenXSubCurrentFrame, screenXSubPreviousFrame);
+        updateAreaRectYSubCurrentFrame = min(screenYSubCurrentFrame, screenYSubPreviousFrame);
+        updateAreaRectWidthSubCurrentFrame = max(spriteWidthSubCurrentFrame + screenXSubCurrentFrame, spriteWidthSubPreviousFrame + screenXSubPreviousFrame) - updateAreaRectXSubCurrentFrame;
+        updateAreaRectHeightSubCurrentFrame = max(screenYSubCurrentFrame + spriteHeightSubCurrentFrame, screenYSubPreviousFrame + spriteHeightSubPreviousFrame) - updateAreaRectYSubCurrentFrame;
+        SelectObject(var_4, doubleBufferSub[currentSpriteFramebufferIndexSub]);
+        BitBlt(var_4, 0, 0, updateAreaRectWidthSubCurrentFrame, updateAreaRectHeightSubCurrentFrame, var_2, updateAreaRectXSubCurrentFrame, updateAreaRectYSubCurrentFrame, SRCCOPY);
+        var_1E = max(updateAreaRectXSubCurrentFrame, updateAreaRectXSubPreviousFrame);
+        var_1C = max(updateAreaRectYSubCurrentFrame, updateAreaRectYSubPreviousFrame);
+        var_1A = min(updateAreaRectWidthSubCurrentFrame + updateAreaRectXSubCurrentFrame, updateAreaRectWidthSubPreviousFrame + updateAreaRectXSubPreviousFrame) - var_1E;
+        var_18 = min(updateAreaRectYSubCurrentFrame + updateAreaRectHeightSubCurrentFrame, updateAreaRectYSubPreviousFrame + updateAreaRectHeightSubPreviousFrame) - var_1C;
+        var_16 = max(0, var_1E - updateAreaRectXSubCurrentFrame);
+        var_14 = max(0, var_1C - updateAreaRectYSubCurrentFrame);
+        var_E = max(0, var_1E - updateAreaRectXSubPreviousFrame);
+        var_C = max(0, var_1C - updateAreaRectYSubPreviousFrame);
         if (var_1A > 0 && var_18 > 0) {
-            SelectObject(var_6, word_A850[LOBYTE(word_A86E) - 0xFF & 1]);
+            SelectObject(var_6, doubleBufferSub[LOBYTE(currentSpriteFramebufferIndexSub) - 0xFF & 1]);
             BitBlt(var_4, var_16, var_14, var_1A, var_18, var_6, var_E, var_C, SRCCOPY);
         }
     }
-    if (word_A856 != NULL) {
-        SelectObject(var_6, word_A854);
-        BitBlt(var_6, 0, 0, word_A884, word_A886, var_4, 0, 0, SRCCOPY);
-        var_16 = max(0, word_A878 - word_A880);
-        var_14 = max(0, word_A87A - word_A882);
-        if (word_A858 != NULL) {
-            if (word_CA46 != 0) {
-                if (word_CA46 == 1) {
-                    SelectObject(var_4, word_A858);
-                    SelectObject(var_6, word_A85C);
-                    BitBlt(var_6, 0, 0, 40, 40, var_4, word_A85E, word_A860, SRCCOPY);
-                    SelectObject(var_4, word_A856);
-                    SelectObject(var_6, word_A85A);
-                    BitBlt(var_6, 0, 0, 40, 40, var_4, word_A85E, word_A860, SRCCOPY);
+    if (spriteColourBitmapSubCurrentFrame != NULL) {
+        SelectObject(var_6, spriteRenderTargetSub);
+        BitBlt(var_6, 0, 0, updateAreaRectWidthSubCurrentFrame, updateAreaRectHeightSubCurrentFrame, var_4, 0, 0, SRCCOPY);
+        var_16 = max(0, screenXSubCurrentFrame - updateAreaRectXSubCurrentFrame);
+        var_14 = max(0, screenYSubCurrentFrame - updateAreaRectYSubCurrentFrame);
+        if (spriteMaskBitmapSubCurrentFrame != NULL) {
+            if (fadeOutFrameCounter != 0) {
+                if (fadeOutFrameCounter == 1) {
+                    SelectObject(var_4, spriteMaskBitmapSubCurrentFrame);
+                    SelectObject(var_6, fadeOutMaskBitmapSub);
+                    BitBlt(var_6, 0, 0, 40, 40, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCCOPY);
+                    SelectObject(var_4, spriteColourBitmapSubCurrentFrame);
+                    SelectObject(var_6, fadeOutColourBitmapSub);
+                    BitBlt(var_6, 0, 0, 40, 40, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCCOPY);
                 }
-                SelectObject(var_4, word_A85C);
-                SelectObject(var_6, stru_A8A2[172].bitmaps[0]);
-                BitBlt(var_4, word_CA46 - 1, word_CA46 - 1, 41 - word_CA46, 40, var_6, stru_A8A2[172].x, 0, SRCPAINT);
-                SelectObject(var_4, word_A85A);
-                SelectObject(var_6, stru_A8A2[172].bitmaps[1]);
-                BitBlt(var_4, word_CA46 - 1, word_CA46 - 1, 41 - word_CA46, 40, var_6, stru_A8A2[172].x, 0, SRCAND);
-                SelectObject(var_6, word_A854);
-                SelectObject(var_4, word_A85C);
-                BitBlt(var_6, var_16, var_14, word_A87C, word_A87E, var_4, 0, 0, SRCAND);
-                SelectObject(var_4, word_A85A);
-                BitBlt(var_6, var_16, var_14, word_A87C, word_A87E, var_4, 0, 0, SRCPAINT);
+                SelectObject(var_4, fadeOutMaskBitmapSub);
+                SelectObject(var_6, spriteListSub[172].bitmaps[0]);
+                BitBlt(var_4, fadeOutFrameCounter - 1, fadeOutFrameCounter - 1, 41 - fadeOutFrameCounter, 40, var_6, spriteListSub[172].x, 0, SRCPAINT);
+                SelectObject(var_4, fadeOutColourBitmapSub);
+                SelectObject(var_6, spriteListSub[172].bitmaps[1]);
+                BitBlt(var_4, fadeOutFrameCounter - 1, fadeOutFrameCounter - 1, 41 - fadeOutFrameCounter, 40, var_6, spriteListSub[172].x, 0, SRCAND);
+                SelectObject(var_6, spriteRenderTargetSub);
+                SelectObject(var_4, fadeOutMaskBitmapSub);
+                BitBlt(var_6, var_16, var_14, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, var_4, 0, 0, SRCAND);
+                SelectObject(var_4, fadeOutColourBitmapSub);
+                BitBlt(var_6, var_16, var_14, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, var_4, 0, 0, SRCPAINT);
             } else {
-                SelectObject(var_4, word_A858);
-                BitBlt(var_6, var_16, var_14, word_A87C, word_A87E, var_4, word_A85E, word_A860, SRCAND);
-                SelectObject(var_4, word_A856);
-                BitBlt(var_6, var_16, var_14, word_A87C, word_A87E, var_4, word_A85E, word_A860, SRCPAINT);
+                SelectObject(var_4, spriteMaskBitmapSubCurrentFrame);
+                BitBlt(var_6, var_16, var_14, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCAND);
+                SelectObject(var_4, spriteColourBitmapSubCurrentFrame);
+                BitBlt(var_6, var_16, var_14, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCPAINT);
             }
         } else {
-            SelectObject(var_4, word_A856);
-            BitBlt(var_6, var_16, var_14, word_A87C, word_A87E, var_4, word_A85E, word_A860, SRCCOPY);
+            SelectObject(var_4, spriteColourBitmapSubCurrentFrame);
+            BitBlt(var_6, var_16, var_14, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCCOPY);
         }
-        word_A870 = 1;
-        word_CA5E = 1;
-        MoveWindow(arg_0, word_A880, word_A882, word_A884, word_A886 + word_CA5C, TRUE);
-        word_CA5E = 0;
+        renderOrUpdateWindowFlagSub = 1;
+        unusedCa5E = 1;
+        MoveWindow(arg_0, updateAreaRectXSubCurrentFrame, updateAreaRectYSubCurrentFrame, updateAreaRectWidthSubCurrentFrame, updateAreaRectHeightSubCurrentFrame + ufoBeamHeightSub, TRUE);
+        unusedCa5E = 0;
     }
     DeleteDC(var_4);
     DeleteDC(var_6);
-    word_A888 = word_A880;
-    word_A88A = word_A882;
-    word_A88C = word_A884;
-    word_A88E = word_A886;
-    word_A890 = word_A878;
-    word_A892 = word_A87A;
-    word_A894 = word_A87C;
-    word_A896 = word_A87E;
-    word_A876 = word_A856;
-    word_A866 = word_A85E;
-    word_A868 = word_A860;
+    updateAreaRectXSubPreviousFrame = updateAreaRectXSubCurrentFrame;
+    updateAreaRectYSubPreviousFrame = updateAreaRectYSubCurrentFrame;
+    updateAreaRectWidthSubPreviousFrame = updateAreaRectWidthSubCurrentFrame;
+    updateAreaRectHeightSubPreviousFrame = updateAreaRectHeightSubCurrentFrame;
+    screenXSubPreviousFrame = screenXSubCurrentFrame;
+    screenYSubPreviousFrame = screenYSubCurrentFrame;
+    spriteWidthSubPreviousFrame = spriteWidthSubCurrentFrame;
+    spriteHeightSubPreviousFrame = spriteHeightSubCurrentFrame;
+    spriteColourBitmapSubPreviousFrame = spriteColourBitmapSubCurrentFrame;
+    spriteXInResourceImageSubPreviousFrame = spriteXInResourceImageSubCurrentFrame;
+    spriteYInResourceImageSubPreviousFrameUnused = spriteYInResourceImageSubCurrentFrame;
     ReleaseDC(NULL, var_2);
 }
 
 /* Render UFO beam (if any) and present render targets onto window (sub). */
-BOOL sub_9A49(HWND arg_0)
+BOOL RenderUfoBeamAndPresentSubRenderTargets(HWND arg_0)
 {
     HDC var_2;
     HDC var_4;
@@ -5216,80 +5400,80 @@ BOOL sub_9A49(HWND arg_0)
 #ifdef _WIN32
     HDC screen;
 #endif
-    if (word_A870 == 0) {
+    if (renderOrUpdateWindowFlagSub == 0) {
         return TRUE;
     }
-    word_A870 = 0;
+    renderOrUpdateWindowFlagSub = 0;
     var_2 = GetDC(arg_0);
-    SelectPalette(var_2, word_CA4A, FALSE);
+    SelectPalette(var_2, windowPaletteInUse, FALSE);
     RealizePalette(var_2);
     var_4 = CreateCompatibleDC(var_2);
-    SelectPalette(var_4, word_CA4A, FALSE);
-    SelectObject(var_4, word_A854);
-    BitBlt(var_2, 0, 0, word_A884, word_A886, var_4, 0, 0, SRCCOPY);
-    if (word_CA5C != 0) {
-        if (word_C0B8 == NULL) {
-            word_C0B8 = CreateCompatibleBitmap(var_2, 40, word_CA52 * 4 / 5);
-            if (word_C0B8 == NULL) {
-                goto loc_9CC3;
+    SelectPalette(var_4, windowPaletteInUse, FALSE);
+    SelectObject(var_4, spriteRenderTargetSub);
+    BitBlt(var_2, 0, 0, updateAreaRectWidthSubCurrentFrame, updateAreaRectHeightSubCurrentFrame, var_4, 0, 0, SRCCOPY);
+    if (ufoBeamHeightSub != 0) {
+        if (ufoBeamColorBitmap == NULL) {
+            ufoBeamColorBitmap = CreateCompatibleBitmap(var_2, 40, screenHeight * 4 / 5);
+            if (ufoBeamColorBitmap == NULL) {
+                goto ufoBeamSubRenderFailedCleanupDestroyWindow;
             }
         }
-        if (word_C0B2 == NULL) {
-            word_C0B2 = CreateCompatibleBitmap(var_2, 40, word_CA52 * 4 / 5);
-            if (word_C0B2 == NULL) {
-                goto loc_9CC3;
+        if (ufoBeamRenderTarget == NULL) {
+            ufoBeamRenderTarget = CreateCompatibleBitmap(var_2, 40, screenHeight * 4 / 5);
+            if (ufoBeamRenderTarget == NULL) {
+                goto ufoBeamSubRenderFailedCleanupDestroyWindow;
             }
         }
-        if (word_CA44 == NULL) {
-            word_CA44 = CreateSolidBrush(RGB(255, 255, 0));
+        if (ufoBeamMaskBrush == NULL) {
+            ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 255, 0));
         }
-        if (word_C0B4 == NULL) {
-            word_C0B4 = CreateSolidBrush(RGB(128, 128, 0));
+        if (ufoBeamPaintBrush == NULL) {
+            ufoBeamPaintBrush = CreateSolidBrush(RGB(128, 128, 0));
         }
         var_E = CreateCompatibleDC(var_2);
-        SelectObject(var_E, word_C0B2);
+        SelectObject(var_E, ufoBeamRenderTarget);
 #ifdef _WIN32
         /* Screen contents with height of only 40 pixels can be captured from window device context on Windows 10. Capture directly from screen instead. */
         screen = GetDC(NULL);
-        BitBlt(var_E, 0, 0, 40, word_CA5C, screen, word_A880, word_A882 + 40, SRCCOPY);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeightSub, screen, updateAreaRectXSubCurrentFrame, updateAreaRectYSubCurrentFrame + 40, SRCCOPY);
         ReleaseDC(NULL, screen);
 #else
-        BitBlt(var_E, 0, 0, 40, word_CA5C, var_2, 0, 40, SRCCOPY);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeightSub, var_2, 0, 40, SRCCOPY);
 #endif
         var_C.left = 0;
         var_C.top = 0;
         var_C.right = 40;
-        var_C.bottom = word_CA5C;
-        SelectObject(var_4, word_C0B8);
-        FillRect(var_4, &var_C, word_CA44);
-        BitBlt(var_E, 0, 0, 40, word_CA5C, var_4, 0, 0, SRCAND);
-        FillRect(var_4, &var_C, word_C0B4);
-        BitBlt(var_E, 0, 0, 40, word_CA5C, var_4, 0, 0, SRCPAINT);
-        BitBlt(var_2, 0, 40, 40, word_CA5C, var_E, 0, 0, SRCCOPY);
+        var_C.bottom = ufoBeamHeightSub;
+        SelectObject(var_4, ufoBeamColorBitmap);
+        FillRect(var_4, &var_C, ufoBeamMaskBrush);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeightSub, var_4, 0, 0, SRCAND);
+        FillRect(var_4, &var_C, ufoBeamPaintBrush);
+        BitBlt(var_E, 0, 0, 40, ufoBeamHeightSub, var_4, 0, 0, SRCPAINT);
+        BitBlt(var_2, 0, 40, 40, ufoBeamHeightSub, var_E, 0, 0, SRCCOPY);
         DeleteDC(var_E);
         DeleteDC(var_4);
     } else {
-        if (word_C0B4 != NULL) {
-            DeleteObject(word_C0B4);
-            word_C0B4 = NULL;
+        if (ufoBeamPaintBrush != NULL) {
+            DeleteObject(ufoBeamPaintBrush);
+            ufoBeamPaintBrush = NULL;
         }
-        if (word_CA44 != NULL) {
-            DeleteObject(word_CA44);
-            word_CA44 = NULL;
+        if (ufoBeamMaskBrush != NULL) {
+            DeleteObject(ufoBeamMaskBrush);
+            ufoBeamMaskBrush = NULL;
         }
-        if (word_C0B2 != NULL) {
-            DeleteObject(word_C0B2);
-            word_C0B2 = NULL;
+        if (ufoBeamRenderTarget != NULL) {
+            DeleteObject(ufoBeamRenderTarget);
+            ufoBeamRenderTarget = NULL;
         }
-        if (word_C0B8 != NULL) {
-            DeleteObject(word_C0B8);
-            word_C0B8 = NULL;
+        if (ufoBeamColorBitmap != NULL) {
+            DeleteObject(ufoBeamColorBitmap);
+            ufoBeamColorBitmap = NULL;
         }
         DeleteDC(var_4);
     }
     ReleaseDC(arg_0, var_2);
     return TRUE;
-loc_9CC3:
+ufoBeamSubRenderFailedCleanupDestroyWindow:
     ReleaseDC(arg_0, var_2);
     DestroyWindow(arg_0);
     return FALSE;
