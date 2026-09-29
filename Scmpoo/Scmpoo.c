@@ -37,7 +37,7 @@ typedef struct windowinfo {
 } windowinfo;
 
 int paletteSearchMaxIndexUnused = 245; /* Palette search maximum index (unused). */
-resourceinfo resourceList[16] = { /* Resource list. */
+resourceinfo resourceList[32] = { /* Resource list. Normal 101-111, alien 112-122. */
     {101, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {102, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {103, 1, {{NULL, NULL}, 0, 0, 0, 0}},
@@ -48,9 +48,20 @@ resourceinfo resourceList[16] = { /* Resource list. */
     {108, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {109, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {110, 1, {{NULL, NULL}, 0, 0, 0, 0}},
-    {111, 1, {{NULL, NULL}, 0, 0, 0, 0}}
+    {111, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {112, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {113, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {114, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {115, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {116, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {117, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {118, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {119, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {120, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {121, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {122, 1, {{NULL, NULL}, 0, 0, 0, 0}}
 };
-resourceinfo flippedResourceList[16] = {0}; /* Resource list storing flipped images. */
+resourceinfo flippedResourceList[32] = {0}; /* Resource list storing flipped images. */
 WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "Gravity always on" disabled). */
     11, 11, 7, 7,
     11, 11, 7, 7,
@@ -71,7 +82,7 @@ WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "G
     11, 7, 17, 20,
     13, 58, 15, 45,
     35, 53, 43, 47,
-    45, 47, 49, 51
+    45, 47, 49, 49
 };
 WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gravity always on" enabled). */
     11, 11, 7, 7,
@@ -93,11 +104,11 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     11, 7, 17, 20,
     13, 58, 15, 65,
     35, 53, 43, 75,
-    45, 47, 49, 51
+    45, 47, 49, 49
 };
 WORD specialActionTable[8] = { /* Special action table. */
     116, 121, 126, 147,
-    128, 135, 142, 147
+    128, 135, 142, 155
 };
 int facingDirection = 1; /* Facing direction. 1 = left, -1 = right */
 int facingDirectionSub = 1; /* Facing direction (sub). 1 = left, -1 = right */
@@ -361,7 +372,7 @@ int spriteWidthSubPreviousFrame = 0; /* Sprite width for previous frame (sub). *
 int spriteHeightSubPreviousFrame = 0; /* Sprite height for previous frame (sub). */
 WORD unused_A898 = 0; /* Current frame rectangle and previous frame rectangle have no intersecion? (sub) (unused) */
 WORD subWindowState = 0; /* State. */
-spriteinfo spriteListSub[512] = {{{NULL, NULL}, 0, 0, 0, 0}}; /* Sprite list. First 256 for left-facing sprites, last 256 for right-facing sprites. */
+spriteinfo spriteListSub[1024] = {{{NULL, NULL}, 0, 0, 0, 0}}; /* Sprite list. First 512 unflipped, last 512 flipped. */
 
 #define timeCheckPeriodCounter timeCheckPeriodCounter
 #define framePeriodCounter framePeriodCounter
@@ -421,6 +432,10 @@ windowinfo visibleWindowList[32] = {{NULL, {0, 0, 0, 0}, {0}}}; /* Currently vis
 #define visibleWindowList visibleWindowList
 WORD preventSpecialActions = 0; /* Prevent special actions? */
 WORD alwaysOnTopUnused = 0; /* Always on top? (unused) */
+WORD alienTransformPending = 0; /* UFO beam-up will return alien sheep? */
+WORD alienModeActive = 0; /* Temporary aggressive alien mode. */
+int alienModeTicks = 0; /* Remaining ticks in alien mode. */
+int alienKnockCooldown = 0; /* Frames until next alien knock. */
 int knownInstanceCount = 0; /* Known instance count. */
 UINT gravityAlwaysEnabled = 0U; /* Configuration: Gravity always on */
 HBRUSH ufoBeamMaskBrush = NULL; /* UFO beam mask colour brush. */
@@ -472,6 +487,10 @@ HWND ownerWindowHandle = NULL;
 #define sleepingAfterTimeout sleepingAfterTimeout
 
 #define alwaysOnTopUnused alwaysOnTopUnused
+#define alienTransformPending alienTransformPending
+#define alienModeActive alienModeActive
+#define alienModeTicks alienModeTicks
+#define alienKnockCooldown alienKnockCooldown
 #define unusedCa48 unusedCa48
 #define unusedCa4C unusedCa4C
 #define unusedCa4E unusedCa4E
@@ -522,6 +541,9 @@ void RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(HWND);
 void Func(HWND, int, int, int, int);
 BOOL IsWindowInKnownInstanceList(HWND);
 int FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(int, int, int, int);
+HWND FindCollidedOtherInstanceWindow(int, int, int, int);
+int AggressiveSpriteIndex(int);
+void FaceNearestOtherSheep(void);
 void PopulateKnownInstanceListSearchingVisibleWindowsNameMatch(HWND);
 BOOL PopulateKnownInstanceListAndNotify(HWND);
 void NotifyOtherInstancesSelfDestruction(HWND);
@@ -1452,6 +1474,28 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         if (wParam == 2) {
             RemoveWindowKnownInstanceList((HWND)lParam);
         }
+        if (wParam == 3) {
+            /* Hit by alien: roll, or sometimes panic-flee in knock direction. */
+            DestroySubwindow();
+            ufoBeamHeight = 0;
+            ufoBeamHeightSub = 0;
+            facingDirection = (int)(short)lParam;
+            if (facingDirection == 0) {
+                facingDirection = 1;
+            }
+            animationFrameCounter = 0;
+            framePeriodCounter = 0;
+            if ((rand() & 1) != 0) {
+                /* Scared flee: longer run away from alien. */
+                collisionEnabled = 0;
+                animationFrameCounter = 35 + rand() % 25;
+                spriteIndex = 4;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 8;
+            } else {
+                subWindowState = 65;
+            }
+        }
         return 0;
     case WM_PAINT:
         if (doNotClearWindowOnPaint != 0) {
@@ -1576,7 +1620,7 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         }
         KillTimer(hWnd, 1U);
         StopPlayingSound();
-        ReleaseBitmaps((WORD)0);
+        ReleaseBitmaps();
         ReleaseResourceImages();
         DeleteObject(windowPaletteInUse);
         DragAcceptFiles(hWnd, FALSE);
@@ -1627,7 +1671,7 @@ LRESULT CALLBACK ScreenMateSubWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
     case WM_ERASEBKGND:
         return 0;
     case WM_DESTROY:
-        ReleaseBitmaps2(0);
+        ReleaseBitmaps2();
         KillTimer(hWnd, 1U);
         break;
     default:
@@ -1682,8 +1726,12 @@ BOOL CALLBACK DebugDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
         if (wParam == IDOK || wParam == IDCANCEL) {
             EndDialog(hDlg, (int)wParam);
         }
-        if (wParam >= 1002 && wParam <= 1031 && IsDlgButtonChecked(hDlg, (int)wParam) != 0U) {
-            ProcessDebugWindowActionChange(wParam - 1002);
+        if (((wParam >= 1002 && wParam <= 1031) || wParam == 1036) && IsDlgButtonChecked(hDlg, (int)wParam) != 0U) {
+            if (wParam == 1036) {
+                ProcessDebugWindowActionChange(30);
+            } else {
+                ProcessDebugWindowActionChange(wParam - 1002);
+            }
         }
         switch (wParam) {
         case 1032:
@@ -2117,10 +2165,18 @@ void RenderUfoBeamIfAnyPresentRenderTargetsOntoWindow(HWND arg_0)
             }
         }
         if (ufoBeamMaskBrush == NULL) {
-            ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 255, 0));
+            if (alienTransformPending != 0) {
+                ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 64, 64));
+            } else {
+                ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 255, 0));
+            }
         }
         if (ufoBeamPaintBrush == NULL) {
-            ufoBeamPaintBrush = CreateSolidBrush(RGB(128, 128, 0));
+            if (alienTransformPending != 0) {
+                ufoBeamPaintBrush = CreateSolidBrush(RGB(160, 0, 0));
+            } else {
+                ufoBeamPaintBrush = CreateSolidBrush(RGB(128, 128, 0));
+            }
         }
         var_E = CreateCompatibleDC(var_2);
         SelectObject(var_E, ufoBeamRenderTarget);
@@ -2217,6 +2273,80 @@ int FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetec
         }
     }
     return 0;
+}
+
+/* Find HWND of another instance overlapping the given rect. */
+HWND FindCollidedOtherInstanceWindow(int arg_0, int arg_2, int arg_4, int arg_6)
+{
+    int var_2;
+    int var_4;
+    int var_6;
+    int var_8;
+    int var_A;
+    /* Match DetectCollisionOtherInstancesActionControlledFlag hit box expansion. */
+    if (arg_2 < arg_0) {
+        arg_0 += 40;
+        arg_2 = arg_0 - 80;
+    } else {
+        arg_2 = arg_0 + 80;
+    }
+    for (var_2 = 0; var_2 < 8; var_2 += 1) {
+        if (knownInstanceWindows[var_2] != NULL) {
+            var_4 = (short)GetWindowWord(knownInstanceWindows[var_2], 0);
+            var_8 = (short)GetWindowWord(knownInstanceWindows[var_2], 2);
+            var_6 = var_4 + 40;
+            var_A = var_8 + 40;
+            if (var_6 == 0) {
+                continue;
+            }
+            if ((var_8 <= arg_4 && var_A > arg_4 || var_8 < arg_6 && var_A > arg_6) && var_6 > arg_0 && var_6 <= arg_2 && arg_2 > arg_0) {
+                return knownInstanceWindows[var_2];
+            }
+            if ((var_8 <= arg_4 && var_A > arg_4 || var_8 < arg_6 && var_A > arg_6) && var_4 >= arg_2 && var_4 < arg_0 && arg_2 < arg_0) {
+                return knownInstanceWindows[var_2];
+            }
+        }
+    }
+    return NULL;
+}
+
+/* Map normal sheep sprite index (sheets 101-111) to alien sheets 112-122. */
+int AggressiveSpriteIndex(int arg_0)
+{
+    if (arg_0 >= 0 && arg_0 < 176) {
+        return arg_0 + 176;
+    }
+    return arg_0;
+}
+
+/* Face the nearest other sheep instance (for alien chase). */
+void FaceNearestOtherSheep(void)
+{
+    int i;
+    int ox;
+    int dist;
+    int bestDist = 0x7fffffff;
+    int bestX = spriteX;
+    int found = 0;
+    for (i = 0; i < 8; i += 1) {
+        if (knownInstanceWindows[i] == NULL) {
+            continue;
+        }
+        ox = (short)GetWindowWord(knownInstanceWindows[i], 0);
+        dist = ox - spriteX;
+        if (dist < 0) {
+            dist = -dist;
+        }
+        if (dist < bestDist) {
+            bestDist = dist;
+            bestX = ox;
+            found = 1;
+        }
+    }
+    if (found != 0) {
+        /* facingDirection > 0 moves left (decreasing X). */
+        facingDirection = (bestX < spriteX) ? 1 : -1;
+    }
 }
 
 /* Populate known instance list by searching for visible windows with name match. */
@@ -2478,7 +2608,7 @@ BOOL GenerateSpritesFromLoadedResourceImages(HDC arg_0)
 {
     int var_2;
     int var_4;
-    for (var_2 = 0; var_2 < 16; var_2 += 1) {
+    for (var_2 = 0; var_2 < 32; var_2 += 1) {
         if (resourceList[var_2].resource == 0) {
             break;
         }
@@ -2495,12 +2625,12 @@ BOOL GenerateSpritesFromLoadedResourceImages(HDC arg_0)
             spriteListSub[var_2 * 16 + var_4].height = 40;
             spriteListSub[var_2 * 16 + var_4].x = var_4 * 40;
             spriteListSub[var_2 * 16 + var_4].y = 0;
-            spriteListSub[var_2 * 16 + var_4 + 256].bitmaps[0] = flippedResourceList[var_2].info.bitmaps[0];
-            spriteListSub[var_2 * 16 + var_4 + 256].bitmaps[1] = flippedResourceList[var_2].info.bitmaps[1];
-            spriteListSub[var_2 * 16 + var_4 + 256].width = 40;
-            spriteListSub[var_2 * 16 + var_4 + 256].height = 40;
-            spriteListSub[var_2 * 16 + var_4 + 256].x = (15 - var_4) * 40;
-            spriteListSub[var_2 * 16 + var_4 + 256].y = 0;
+            spriteListSub[var_2 * 16 + var_4 + 512].bitmaps[0] = flippedResourceList[var_2].info.bitmaps[0];
+            spriteListSub[var_2 * 16 + var_4 + 512].bitmaps[1] = flippedResourceList[var_2].info.bitmaps[1];
+            spriteListSub[var_2 * 16 + var_4 + 512].width = 40;
+            spriteListSub[var_2 * 16 + var_4 + 512].height = 40;
+            spriteListSub[var_2 * 16 + var_4 + 512].x = (15 - var_4) * 40;
+            spriteListSub[var_2 * 16 + var_4 + 512].y = 0;
         }
     }
     return TRUE;
@@ -2510,7 +2640,7 @@ BOOL GenerateSpritesFromLoadedResourceImages(HDC arg_0)
 void ReleaseResourceImages(void)
 {
     int var_2;
-    for (var_2 = 0; var_2 < 16; var_2 += 1) {
+    for (var_2 = 0; var_2 < 32; var_2 += 1) {
         if (resourceList[var_2].resource == 0) {
             break;
         }
@@ -2613,12 +2743,18 @@ void UpdateMainWindowSprite(int arg_0, int arg_2, int arg_4)
 {
     SetWindowWord(selfInstanceWindowHandle, 0, (short)spriteX);
     SetWindowWord(selfInstanceWindowHandle, 2, (short)spriteY);
+    if (alienModeActive != 0) {
+        int flip = (arg_4 >= 512) ? 512 : 0;
+        int i = arg_4 - flip;
+        i = AggressiveSpriteIndex(i);
+        arg_4 = i + flip;
+    }
     if (arg_4 >= 9 && arg_4 <= 14) {
         UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4);
     } else if (facingDirection > 0) {
         UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4);
     } else {
-        UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4 + 256);
+        UpdateWindowPositionSpriteBeActuallyUsed(arg_0, arg_2, arg_4 + 512);
     }
 }
 
@@ -2630,7 +2766,7 @@ void UpdateSubWindowSprite(int arg_0, int arg_2, int arg_4)
     } else if (facingDirectionSub > 0) {
         UpdateWindowPositionSpriteBeActuallyUsed2(arg_0, arg_2, arg_4);
     } else {
-        UpdateWindowPositionSpriteBeActuallyUsed2(arg_0, arg_2, arg_4 + 256);
+        UpdateWindowPositionSpriteBeActuallyUsed2(arg_0, arg_2, arg_4 + 512);
     }
 }
 
@@ -2759,6 +2895,19 @@ void DetectCollisionOtherInstancesActionControlledFlag(int arg_0, int arg_2, int
     } else {
         arg_2 = arg_0 + 80;
     }
+    if (alienModeActive != 0) {
+        HWND hit;
+        if (alienKnockCooldown > 0) {
+            alienKnockCooldown -= 1;
+            return;
+        }
+        hit = FindCollidedOtherInstanceWindow(arg_0, arg_2, spriteY, spriteY + 40);
+        if (hit != NULL) {
+            SendMessage(hit, WM_USER, (WPARAM)3, (LPARAM)facingDirection);
+            alienKnockCooldown = 4;
+        }
+        return;
+    }
     if (FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(arg_0, arg_2, spriteY, spriteY + 40) != 0) {
         if (arg_4 == 1) {
             subWindowState = 24;
@@ -2803,6 +2952,15 @@ void UpdateSpriteStateOnTimer(void)
     if (chimeEnabled != 0) {
         ProcessChime();
     }
+    if (alienModeActive != 0
+        && subWindowState != 155
+        && subWindowState != 156
+        && subWindowState != 162 && subWindowState != 163) {
+        if (--alienModeTicks <= 0 || (rand() % 400) == 0) {
+            alienModeTicks = 0;
+            subWindowState = 162;
+        }
+    }
 stateLoopContinue:
     switch (subWindowState) {
     case 0:
@@ -2833,6 +2991,10 @@ stateLoopContinue:
             break;
         }
         subWindowState = normalActionTableGravityAlwaysOff[rand() % 80];
+        if (alienModeActive != 0 && rand() % 5 != 0) {
+            /* Alien: chase/run most of the time. */
+            subWindowState = 7;
+        }
         if (spriteX > screenWidth || spriteX < -40 || spriteY < -40 || spriteY > screenHeight) {
             if ((rand() & 1) == 0) {
                 facingDirection = 1;
@@ -2856,6 +3018,9 @@ stateLoopContinue:
             break;
         }
         subWindowState = normalActionTableGravityAlwaysOn[rand() % 80];
+        if (alienModeActive != 0 && rand() % 5 != 0) {
+            subWindowState = 7;
+        }
         if (spriteX > screenWidth || spriteX < -40 || spriteY < -40 || spriteY > screenHeight) {
             if (rand() % 10 == 0 && preventSpecialActions == 0) {
                 subWindowState = 6;
@@ -2931,12 +3096,18 @@ stateLoopContinue:
         if ((rand() & 1) == 0) {
             collisionEnabled = 1;
         }
+        if (alienModeActive != 0) {
+            collisionEnabled = 1;
+            FaceNearestOtherSheep();
+            animationFrameCounter = rand() % 20 + 30;
+        } else {
+            animationFrameCounter = rand() % 10 + 10;
+        }
         if (collisionEnabled != 0) {
             PopulateKnownVisibleWindowList();
         }
         spriteIndex = 4;
         UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
-        animationFrameCounter = rand() % 10 + 10;
         subWindowState = 8;
         break;
     case 8:
@@ -2944,35 +3115,41 @@ stateLoopContinue:
             break;
         }
         framePeriodCounter = 0;
-        if (collisionEnabled != 0) {
-            if (facingDirection > 0) {
-                var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * 16 - spriteX), spriteX);
-            } else {
-                var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * 16 - spriteX) + 40, spriteX + 40);
+        {
+            int runStep = (alienModeActive != 0) ? 24 : 16;
+            if (alienModeActive != 0 && (animationFrameCounter & 3) == 0) {
+                FaceNearestOtherSheep();
             }
-            if (var_2 != 0) {
+            if (collisionEnabled != 0) {
                 if (facingDirection > 0) {
-                    spriteX = var_2;
+                    var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * runStep - spriteX), spriteX);
                 } else {
-                    spriteX = var_2 - 40;
+                    var_2 = FindXCoordinatePossibleCollisionWhichVisibleWindow(&var_6, spriteY, spriteY + 40, -(facingDirection * runStep - spriteX) + 40, spriteX + 40);
                 }
-                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
-                subWindowState = 30;
-                break;
+                if (var_2 != 0) {
+                    if (facingDirection > 0) {
+                        spriteX = var_2;
+                    } else {
+                        spriteX = var_2 - 40;
+                    }
+                    UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                    subWindowState = 30;
+                    break;
+                }
             }
+            if (unusedA82C == 0) {
+                spriteX -= facingDirection * runStep;
+            }
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            if (rand() % 50 == 0 && gravityEnabled != 0) {
+                subWindowState = 9;
+            }
+            FlagControlledCollisionTurnAround(TRUE);
+            SwitchToStandingSprite();
+            HandleOutOfViewOrTopPosition(2);
+            DetectCollisionOtherInstancesActionControlledFlag(-(facingDirection * runStep - spriteX), facingDirection * runStep + spriteX, 2);
         }
-        if (unusedA82C == 0) {
-            spriteX -= facingDirection * 16;
-        }
-        spriteIndex = spriteIndex == 4 ? 5 : 4;
-        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
-        if (rand() % 50 == 0 && gravityEnabled != 0) {
-            subWindowState = 9;
-        }
-        FlagControlledCollisionTurnAround(TRUE);
-        SwitchToStandingSprite();
-        HandleOutOfViewOrTopPosition(2);
-        DetectCollisionOtherInstancesActionControlledFlag(-(facingDirection * 16 - spriteX), facingDirection * 16 + spriteX, 2);
         break;
     case 9:
         verticalSpeed = -11;
@@ -4204,7 +4381,11 @@ stateLoopContinue:
                 bounceWhenFalling = 0;
                 animationFrameCounter = 0;
                 subWindowState = 100;
-                if (verticalSpeed < 36) {
+                if (fallActionCaseNumber == 4) {
+                    /* Landing pose: handstand sheet cell 4 or 6. */
+                    spriteIndex = randomCaseNumberForAction;
+                    framePeriodCounter = -8;
+                } else if (verticalSpeed < 36) {
                     spriteIndex = 49;
                     framePeriodCounter = -4;
                 } else {
@@ -4243,6 +4424,9 @@ stateLoopContinue:
         }
         if (fallActionCaseNumber == 2) {
             spriteIndex = spriteIndex == 40 ? 41 : 40;
+        } else if (fallActionCaseNumber == 4) {
+            /* Alien drop mid-air: normal fall run sprites (land pose only on impact). */
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
         } else if (fallActionCaseNumber == 1) {
             spriteIndex = spriteIndex == 4 ? 5 : 4;
         } else if (fallActionCaseNumber == 0) {
@@ -4266,6 +4450,15 @@ stateLoopContinue:
             break;
         }
         framePeriodCounter = 0;
+        if (fallActionCaseNumber == 4) {
+            /* Alien drop landed: enter normal hub while alien mode stays active. */
+            if (gravityAlwaysEnabled != 0U) {
+                subWindowState = 2;
+            } else {
+                subWindowState = 1;
+            }
+            break;
+        }
         if (fallActionCaseNumber == 1) {
             subWindowState = 11;
             spriteIndex = 2;
@@ -4773,7 +4966,12 @@ stateLoopContinue:
         if (spriteXSub > screenWidth) {
             DestroySubwindow();
             StopPlayingSound();
-            subWindowState = 1;
+            if (alienTransformPending != 0) {
+                /* No UFO return: alien sheep falls from the sky. */
+                subWindowState = 156;
+            } else {
+                subWindowState = 1;
+            }
             break;
         }
         UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
@@ -5044,6 +5242,78 @@ stateLoopContinue:
         break;
     case 152:
         break;
+    case 155:
+        /* Alien sheep: UFO abduction then aggressive return. */
+        alienTransformPending = 1;
+        alienModeActive = 0;
+        alienModeTicks = 0;
+        alienKnockCooldown = 0;
+        ufoBeamHeight = 0;
+        ufoBeamHeightSub = 0;
+        fadeOutFrameCounter = 0;
+        subWindowState = 128;
+        break;
+    case 156:
+        /* Alien return: fall from sky; land pose cell 4/6 of 117.bmp on impact only. */
+        alienTransformPending = 0;
+        alienModeActive = 1;
+        alienModeTicks = 400 + rand() % 301;
+        alienKnockCooldown = 0;
+        ufoBeamHeight = 0;
+        ufoBeamHeightSub = 0;
+        facingDirection = (rand() & 1) != 0 ? 1 : -1;
+        spriteX = rand() % (screenWidth - 40);
+        spriteY = -40;
+        gravityEnabled = 1;
+        bounceWhenFalling = 0;
+        verticalSpeed = 0;
+        horizontalSpeed = 0;
+        /* Cells 4 and 6 of sheet 106/117 — used only when landing. */
+        randomCaseNumberForAction = (rand() & 1) != 0 ? 84 : 86;
+        spriteIndex = 4;
+        fallActionCaseNumber = 4;
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 99;
+        break;
+    case 162:
+        /* Fade alien sheep via subwindow, then return to normal. */
+        CreateSubwindow();
+        spriteXSub = spriteX;
+        spriteYSub = spriteY;
+        facingDirectionSub = facingDirection;
+        spriteIndexSub = AggressiveSpriteIndex(3);
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        spriteX = -80;
+        UpdateMainWindowSprite(spriteX, spriteY, AggressiveSpriteIndex(3));
+        fadeOutFrameCounter = 0;
+        framePeriodCounter = 0;
+        subWindowState = 163;
+        screenMateOnTopOfSubwindow = 0;
+        PlaceWindowTopmostPosition(knownInstanceWindows[8]);
+        PlaceWindowTopmostPosition(selfInstanceWindowHandle);
+        break;
+    case 163:
+        if (framePeriodCounter++ < 1) {
+            break;
+        }
+        framePeriodCounter = 0;
+        fadeOutFrameCounter += 1;
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        if (fadeOutFrameCounter > 8) {
+            DestroySubwindow();
+            spriteX = spriteXSub;
+            spriteY = spriteYSub;
+            facingDirection = facingDirectionSub;
+            fadeOutFrameCounter = 0;
+            alienModeActive = 0;
+            alienModeTicks = 0;
+            alienKnockCooldown = 0;
+            spriteIndex = 3;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 1;
+        }
+        break;
     default:
         break;
     }
@@ -5080,6 +5350,12 @@ void ApplyEnvironmentActionChange(int arg_0)
 void ProcessDebugWindowActionChange(WPARAM arg_0)
 {
     ufoBeamHeight = 0;
+    ufoBeamHeightSub = 0;
+    alienTransformPending = 0;
+    alienModeActive = 0;
+    alienModeTicks = 0;
+    alienKnockCooldown = 0;
+    fadeOutFrameCounter = 0;
     StopPlayingSound();
     DestroySubwindow();
     switch (arg_0) {
@@ -5172,6 +5448,9 @@ void ProcessDebugWindowActionChange(WPARAM arg_0)
         break;
     case 29:
         subWindowState = 69;
+        break;
+    case 30:
+        subWindowState = 155;
         break;
     default:
         break;
@@ -5425,10 +5704,18 @@ BOOL RenderUfoBeamAndPresentSubRenderTargets(HWND arg_0)
             }
         }
         if (ufoBeamMaskBrush == NULL) {
-            ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 255, 0));
+            if (alienTransformPending != 0) {
+                ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 64, 64));
+            } else {
+                ufoBeamMaskBrush = CreateSolidBrush(RGB(255, 255, 0));
+            }
         }
         if (ufoBeamPaintBrush == NULL) {
-            ufoBeamPaintBrush = CreateSolidBrush(RGB(128, 128, 0));
+            if (alienTransformPending != 0) {
+                ufoBeamPaintBrush = CreateSolidBrush(RGB(160, 0, 0));
+            } else {
+                ufoBeamPaintBrush = CreateSolidBrush(RGB(128, 128, 0));
+            }
         }
         var_E = CreateCompatibleDC(var_2);
         SelectObject(var_E, ufoBeamRenderTarget);
