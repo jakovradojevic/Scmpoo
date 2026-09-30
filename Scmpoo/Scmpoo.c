@@ -59,7 +59,9 @@ resourceinfo resourceList[32] = { /* Resource list. Normal 101-111, alien 112-12
     {119, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {120, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {121, 1, {{NULL, NULL}, 0, 0, 0, 0}},
-    {122, 1, {{NULL, NULL}, 0, 0, 0, 0}}
+    {122, 1, {{NULL, NULL}, 0, 0, 0, 0}},
+    {123, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* VR cursor graze, bite stages 0-1. */
+    {124, 1, {{NULL, NULL}, 0, 0, 0, 0}} /* VR cursor graze, bite stages 2-3. */
 };
 resourceinfo flippedResourceList[32] = {0}; /* Resource list storing flipped images. */
 WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "Gravity always on" disabled). */
@@ -82,7 +84,7 @@ WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "G
     11, 7, 17, 20,
     13, 58, 15, 45,
     35, 53, 43, 47,
-    45, 47, 49, 49
+    45, 164, 49, 49
 };
 WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gravity always on" enabled). */
     11, 11, 7, 7,
@@ -104,7 +106,7 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     11, 7, 17, 20,
     13, 58, 15, 65,
     35, 53, 43, 75,
-    45, 47, 49, 49
+    45, 164, 49, 49
 };
 WORD specialActionTable[8] = { /* Special action table. */
     116, 121, 126, 147,
@@ -144,8 +146,14 @@ WORD sneezeAnimationFrames[13] = { /* Sneeze animation. */
 WORD amazedAnimationFrames[6] = { /* Amazed animation. */
     50, 51, 50, 51, 3, 0
 };
-WORD eatAnimationFrames[35] = { /* Eat animation. */
+WORD eatAnimationFrames[35] = { /* Eat animation (flowers). */
     58, 150, 60, 61, 60, 61, 60, 61, 58, 151, 60, 61, 60, 61, 60, 61, 2, 58, 152, 60, 61, 60, 61, 60, 61, 58, 153, 60, 61, 60, 61, 60, 61, 3, 0
+};
+/* Markers in cursorGrazeAnimationFrames: bite the prop down to stage 1-3, or swallow the rest. */
+#define CURSOR_GRAZE_BITE_1 1001
+#define CURSOR_GRAZE_BITE_GONE 1004
+WORD cursorGrazeAnimationFrames[35] = { /* Graze spinning VR cursor prop (123.bmp/124.bmp, sprite 352 + stage * 8 + spin). */
+    58, 1001, 60, 61, 60, 61, 60, 61, 58, 1002, 60, 61, 60, 61, 60, 61, 2, 58, 1003, 60, 61, 60, 61, 60, 61, 58, 1004, 60, 61, 60, 61, 60, 61, 3, 0
 };
 WORD burnAnimationFrames[34] = { /* Burn animation. */
     134, 134, 134, 134, 134, 134, 134, 134, 135, 136, 137, 138, 137, 138, 137, 138, 137, 138, 137, 138, 139, 140, 141, 142, 143, 144, 145, 144, 145, 144, 145, 144, 145, 0
@@ -192,6 +200,7 @@ WORD spinAnimationFrames[8] = { /* Spin animation. 0-3: face, 4-7: back */
 #define sneezeAnimationFrames sneezeAnimationFrames
 #define amazedAnimationFrames amazedAnimationFrames
 #define eatAnimationFrames eatAnimationFrames
+#define cursorGrazeAnimationFrames cursorGrazeAnimationFrames
 #define burnAnimationFrames burnAnimationFrames
 #define rollOverAnimationFrames rollOverAnimationFrames
 #define getUpAnimationFramesLeft getUpAnimationFramesLeft
@@ -436,6 +445,9 @@ WORD alienTransformPending = 0; /* UFO beam-up will return alien sheep? */
 WORD alienModeActive = 0; /* Temporary aggressive alien mode. */
 int alienModeTicks = 0; /* Remaining ticks in alien mode. */
 int alienKnockCooldown = 0; /* Frames until next alien knock. */
+WORD systemCursorHiddenForGraze = 0; /* ShowCursor(FALSE) while sheep grazes the cursor. */
+int cursorGrazeStage = 0; /* Bite stage of the cursor prop, 0 (full) to 3. */
+int cursorGrazeSpinFrame = 0; /* Spin frame of the cursor prop, 0-7. */
 int knownInstanceCount = 0; /* Known instance count. */
 UINT gravityAlwaysEnabled = 0U; /* Configuration: Gravity always on */
 HBRUSH ufoBeamMaskBrush = NULL; /* UFO beam mask colour brush. */
@@ -524,6 +536,8 @@ LRESULT CALLBACK ScreenMateSubWindowProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ConfigDialogProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK DebugDialogProc(HWND, UINT, WPARAM, LPARAM);
 void CreateSubwindow(void);
+void HideSystemCursorForGraze(void);
+void RestoreSystemCursorAfterGraze(void);
 void DestroySubwindow(void);
 void PlaceWindowTopmostPosition(HWND);
 void PlaceWindowTopAnother(HWND, HWND);
@@ -1726,9 +1740,11 @@ BOOL CALLBACK DebugDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
         if (wParam == IDOK || wParam == IDCANCEL) {
             EndDialog(hDlg, (int)wParam);
         }
-        if (((wParam >= 1002 && wParam <= 1031) || wParam == 1036) && IsDlgButtonChecked(hDlg, (int)wParam) != 0U) {
+        if (((wParam >= 1002 && wParam <= 1031) || wParam == 1036 || wParam == 1037) && IsDlgButtonChecked(hDlg, (int)wParam) != 0U) {
             if (wParam == 1036) {
                 ProcessDebugWindowActionChange(30);
+            } else if (wParam == 1037) {
+                ProcessDebugWindowActionChange(31);
             } else {
                 ProcessDebugWindowActionChange(wParam - 1002);
             }
@@ -1777,9 +1793,28 @@ void CreateSubwindow(void)
     }
 }
 
+/* Hide the real system cursor while the sheep grazes a cursor prop. */
+void HideSystemCursorForGraze(void)
+{
+    if (systemCursorHiddenForGraze == 0) {
+        ShowCursor(FALSE);
+        systemCursorHiddenForGraze = 1;
+    }
+}
+
+/* Restore the system cursor after a graze (or on abort). */
+void RestoreSystemCursorAfterGraze(void)
+{
+    if (systemCursorHiddenForGraze != 0) {
+        ShowCursor(TRUE);
+        systemCursorHiddenForGraze = 0;
+    }
+}
+
 /* Destroy subwindow. */
 void DestroySubwindow(void)
 {
+    RestoreSystemCursorAfterGraze();
     if (knownInstanceWindows[8] != NULL) {
         DestroyWindow(knownInstanceWindows[8]);
         knownInstanceWindows[8] = NULL;
@@ -5314,6 +5349,112 @@ stateLoopContinue:
             subWindowState = 1;
         }
         break;
+    case 164:
+        /* Run toward the mouse cursor, then graze it. */
+        {
+            POINT cursorPt;
+            GetCursorPos(&cursorPt);
+            if (cursorPt.x < spriteX + 20) {
+                facingDirection = 1;
+            } else {
+                facingDirection = -1;
+            }
+        }
+        animationFrameCounter = 36;
+        spriteIndex = 4;
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        subWindowState = 165;
+        framePeriodCounter = 0;
+        break;
+    case 165:
+        if (framePeriodCounter++ < 1) {
+            break;
+        }
+        framePeriodCounter = 0;
+        {
+            POINT cursorPt;
+            int dist;
+            GetCursorPos(&cursorPt);
+            if (cursorPt.x < spriteX + 20) {
+                facingDirection = 1;
+            } else {
+                facingDirection = -1;
+            }
+            spriteX -= facingDirection * 16;
+            if (spriteX < -40) {
+                spriteX = -40;
+            }
+            if (spriteX > screenWidth) {
+                spriteX = screenWidth;
+            }
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            dist = cursorPt.x - (spriteX + 20);
+            if (dist < 0) {
+                dist = -dist;
+            }
+            animationFrameCounter -= 1;
+            if (dist < 48 || animationFrameCounter <= 0) {
+                subWindowState = 166;
+                break;
+            }
+        }
+        HandleOutOfViewOrTopPosition(1);
+        break;
+    case 166:
+        /* Graze VR cursor prop (separate from flower eat). */
+        animationFrameCounter = 0;
+        subWindowState = 167;
+        CreateSubwindow();
+        facingDirectionSub = facingDirection;
+        spriteYSub = spriteY;
+        cursorGrazeStage = 0;
+        cursorGrazeSpinFrame = 0;
+        spriteIndexSub = 352;
+        HideSystemCursorForGraze();
+        /* The prop must sit on the mouth side: its bitten edge faces the sheep. */
+        if (facingDirection > 0) {
+            spriteXSub = spriteX - 40;
+        } else {
+            spriteXSub = spriteX + 40;
+        }
+        UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        screenMateOnTopOfSubwindow = 1;
+        PlaceWindowTopAnother(knownInstanceWindows[8], selfInstanceWindowHandle);
+        break;
+    case 167:
+        if (knownInstanceWindows[8] != NULL) {
+            cursorGrazeSpinFrame = (cursorGrazeSpinFrame + 1) % 8;
+            spriteIndexSub = 352 + cursorGrazeStage * 8 + cursorGrazeSpinFrame;
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        }
+        if (framePeriodCounter++ < 2) {
+            break;
+        }
+        framePeriodCounter = 0;
+        spriteIndex = cursorGrazeAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 2) {
+            spriteX -= facingDirection * 8;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            break;
+        }
+        if (spriteIndex >= CURSOR_GRAZE_BITE_1 && spriteIndex <= CURSOR_GRAZE_BITE_GONE) {
+            if (spriteIndex == CURSOR_GRAZE_BITE_GONE) {
+                DestroySubwindow();
+            } else if (spriteIndex - CURSOR_GRAZE_BITE_1 + 1 > cursorGrazeStage) {
+                cursorGrazeStage = spriteIndex - CURSOR_GRAZE_BITE_1 + 1;
+            }
+            spriteIndex = cursorGrazeAnimationFrames[animationFrameCounter];
+            animationFrameCounter += 1;
+        }
+        if (spriteIndex == 0) {
+            DestroySubwindow();
+            subWindowState = 1;
+            break;
+        }
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        break;
     default:
         break;
     }
@@ -5451,6 +5592,9 @@ void ProcessDebugWindowActionChange(WPARAM arg_0)
         break;
     case 30:
         subWindowState = 155;
+        break;
+    case 31:
+        subWindowState = 164;
         break;
     default:
         break;
