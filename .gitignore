@@ -6,6 +6,14 @@ Scmpoo/build/
 # Packaged executables
 dist/
 
+# Scratch images from sprite tooling
+docs/images/ani_frame_*.png
+docs/images/cursor_cell_*.png
+docs/images/flower_cell_*.png
+docs/images/flower_sheet_*.png
+docs/images/eat_sprites_check.png
+docs/images/cursor_graze_preview_strip.png
+
 # Python
 __pycache__/
 *.pyc
