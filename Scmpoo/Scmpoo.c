@@ -5,6 +5,11 @@
 
 #define STRICT
 
+/* UpdateLayeredWindow requires Windows 2000 or later. */
+#if defined(_WIN32) && !defined(_WIN32_WINNT)
+#define _WIN32_WINNT 0x0500
+#endif
+
 #include <stdlib.h>
 #include <time.h>
 #include <Windows.h>
@@ -73,19 +78,19 @@ WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "G
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    13, 58, 15, 45,
-    35, 53, 43, 47,
-    45, 164, 49, 49
+    17, 20, 17, 20,
+    17, 20, 17, 20,
+    17, 20, 53, 53,
+    53, 164, 164, 164,
+    58, 58, 58, 45,
+    45, 45, 43, 43,
+    43, 62, 62, 62,
+    65, 65, 65, 69,
+    69, 69, 13, 13,
+    13, 51, 51, 51,
+    15, 15, 35, 35,
+    47, 47, 49, 49,
+    75, 75, 9, 9
 };
 WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gravity always on" enabled). */
     11, 11, 7, 7,
@@ -95,19 +100,19 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    11, 7, 17, 20,
-    13, 58, 15, 65,
-    35, 53, 43, 75,
-    45, 164, 49, 49
+    17, 20, 17, 20,
+    17, 20, 17, 20,
+    17, 20, 53, 53,
+    53, 164, 164, 164,
+    58, 58, 58, 45,
+    45, 45, 43, 43,
+    43, 62, 62, 62,
+    65, 65, 65, 69,
+    69, 69, 13, 13,
+    13, 51, 51, 51,
+    15, 15, 35, 35,
+    47, 47, 49, 49,
+    75, 75, 9, 9
 };
 WORD specialActionTable[8] = { /* Special action table. */
     116, 121, 126, 147,
@@ -1309,9 +1314,6 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
     }
     currentInstance = hInstance;
-    if (FindWindow("ScreenMatePoo", "Screen Mate") != NULL) {
-        preventSpecialActions = 1;
-    }
 #ifdef _WIN32
     /* In 32-bit Windows, popup window is now in the taskbar by default. Additional code is needed to hide the popup window from taskbar while keeping it in the Alt+Tab list. */
     var_2E.style = 0;
@@ -1333,7 +1335,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return 0;
     }
     /* Set the visible window to be owned by the hidden top-level window. */
-    var_2 = CreateWindowEx(0L, "ScreenMatePoo", "Screen Mate", WS_POPUP, 0, 0, 0, 0, ownerWindowHandle, NULL, hInstance, NULL);
+    var_2 = CreateWindowEx(WS_EX_LAYERED, "ScreenMatePoo", "Screen Mate", WS_POPUP, 0, 0, 0, 0, ownerWindowHandle, NULL, hInstance, NULL);
 #else
     var_2 = CreateWindowEx(0L, "ScreenMatePoo", "Screen Mate", WS_POPUP, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
 #endif
@@ -1806,7 +1808,7 @@ void CreateSubwindow(void)
     }
 #ifdef _WIN32
     /* Set the visible window to be owned by the hidden top-level window. */
-    knownInstanceWindows[8] = CreateWindowEx(0L, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, ownerWindowHandle, NULL, currentInstance, NULL);
+    knownInstanceWindows[8] = CreateWindowEx(WS_EX_LAYERED, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, ownerWindowHandle, NULL, currentInstance, NULL);
 #else
     knownInstanceWindows[8] = CreateWindowEx(0L, "ScreenMatePooSub", "ScreenMate Sub", WS_POPUP, 0, 0, 0, 0, NULL, NULL, currentInstance, NULL);
 #endif
@@ -2020,6 +2022,145 @@ void SaveConfigurationsFile(void)
     SaveIndividualConfigurationFile("Stray", "GForce", gravityAlwaysEnabled, "scmate.ini");
 }
 
+#ifdef _WIN32
+/* Under desktop composition the screen can't be captured reliably as a background, so windows are layered and carry per-pixel alpha. */
+typedef struct layeredsurface {
+    HBITMAP bitmap;
+    DWORD * bits;
+    int width;
+    int height;
+} layeredsurface;
+
+layeredsurface layeredSurfaceMain = {NULL, NULL, 0, 0};
+layeredsurface layeredSurfaceSub = {NULL, NULL, 0, 0};
+
+/* Make sure the 32-bit surface is at least the requested size. */
+BOOL EnsureLayeredSurface(layeredsurface * surface, int width, int height)
+{
+    BITMAPINFO info;
+    void * bits;
+    if (surface->bitmap != NULL && surface->width >= width && surface->height >= height) {
+        return TRUE;
+    }
+    width = max(width, surface->width);
+    height = max(height, surface->height);
+    if (surface->bitmap != NULL) {
+        DeleteObject(surface->bitmap);
+        surface->bitmap = NULL;
+    }
+    ZeroMemory(&info, sizeof(info));
+    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    info.bmiHeader.biWidth = width;
+    info.bmiHeader.biHeight = -height;
+    info.bmiHeader.biPlanes = 1;
+    info.bmiHeader.biBitCount = 32;
+    info.bmiHeader.biCompression = BI_RGB;
+    surface->bitmap = CreateDIBSection(NULL, &info, DIB_RGB_COLORS, &bits, NULL, 0);
+    if (surface->bitmap == NULL) {
+        surface->bits = NULL;
+        surface->width = 0;
+        surface->height = 0;
+        return FALSE;
+    }
+    surface->bits = (DWORD *)bits;
+    surface->width = width;
+    surface->height = height;
+    return TRUE;
+}
+
+/* Release the 32-bit surface. */
+void ReleaseLayeredSurface(layeredsurface * surface)
+{
+    if (surface->bitmap != NULL) {
+        DeleteObject(surface->bitmap);
+    }
+    surface->bitmap = NULL;
+    surface->bits = NULL;
+    surface->width = 0;
+    surface->height = 0;
+}
+
+/* Compose a masked sprite (and the UFO beam below it, if any) with alpha and show it on a layered window. */
+void PresentLayeredSprite(HWND window, layeredsurface * surface, int x, int y, HBITMAP colour, HBITMAP mask, int sourceX, int sourceY, int width, int height, int beamHeight, BOOL alienBeam)
+{
+    HDC surfaceDC;
+    HDC spriteDC;
+    HGDIOBJ previousSurfaceBitmap;
+    HGDIOBJ previousSpriteBitmap;
+    POINT destination;
+    POINT source;
+    SIZE size;
+    BLENDFUNCTION blend;
+    DWORD beamPixel;
+    DWORD * pixel;
+    DWORD * maskPixel;
+    int totalHeight;
+    int beamWidth;
+    int row;
+    int column;
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    totalHeight = height + beamHeight;
+    /* The mask is staged in the rows below the visible area. */
+    if (!EnsureLayeredSurface(surface, width, totalHeight + height)) {
+        return;
+    }
+    surfaceDC = CreateCompatibleDC(NULL);
+    spriteDC = CreateCompatibleDC(NULL);
+    previousSurfaceBitmap = SelectObject(surfaceDC, surface->bitmap);
+    PatBlt(surfaceDC, 0, 0, width, totalHeight + height, BLACKNESS);
+    previousSpriteBitmap = SelectObject(spriteDC, colour);
+    BitBlt(surfaceDC, 0, 0, width, height, spriteDC, sourceX, sourceY, SRCCOPY);
+    if (mask != NULL) {
+        SelectObject(spriteDC, mask);
+        SetTextColor(surfaceDC, RGB(0, 0, 0));
+        SetBkColor(surfaceDC, RGB(255, 255, 255));
+        BitBlt(surfaceDC, 0, totalHeight, width, height, spriteDC, sourceX, sourceY, SRCCOPY);
+    }
+    SelectObject(spriteDC, previousSpriteBitmap);
+    GdiFlush();
+    for (row = 0; row < height; row++) {
+        pixel = surface->bits + row * surface->width;
+        maskPixel = surface->bits + (totalHeight + row) * surface->width;
+        for (column = 0; column < width; column++) {
+            DWORD colourValue = pixel[column] & 0x00FFFFFF;
+            DWORD maskValue = mask != NULL ? maskPixel[column] & 0x00FFFFFF : 0;
+            if (maskValue != 0 && colourValue == 0) {
+                pixel[column] = 0;
+            } else {
+                pixel[column] = colourValue | 0xFF000000;
+            }
+        }
+    }
+    if (beamHeight > 0) {
+        /* Premultiplied ARGB: yellow tractor beam, or red while abducting into an alien. */
+        beamPixel = alienBeam ? 0x90780000 : 0x80807400;
+        beamWidth = min(width, 40);
+        for (row = height; row < totalHeight; row++) {
+            pixel = surface->bits + row * surface->width;
+            for (column = 0; column < width; column++) {
+                pixel[column] = column < beamWidth ? beamPixel : 0;
+            }
+        }
+    }
+    destination.x = x;
+    destination.y = y;
+    source.x = 0;
+    source.y = 0;
+    size.cx = width;
+    size.cy = totalHeight;
+    blend.BlendOp = AC_SRC_OVER;
+    blend.BlendFlags = 0;
+    blend.SourceConstantAlpha = 255;
+    blend.AlphaFormat = AC_SRC_ALPHA;
+    UpdateLayeredWindow(window, NULL, &destination, &size, surfaceDC, &source, 0, &blend, ULW_ALPHA);
+    SelectObject(surfaceDC, previousSurfaceBitmap);
+    DeleteDC(spriteDC);
+    DeleteDC(surfaceDC);
+}
+#endif
+
 /* Initialize bitmaps. */
 BOOL InitializeBitmapsMain(HWND arg_0)
 {
@@ -2070,6 +2211,9 @@ void ReleaseBitmaps()
         DeleteObject(ufoBeamColorBitmap);
         ufoBeamColorBitmap = NULL;
     }
+#ifdef _WIN32
+    ReleaseLayeredSurface(&layeredSurfaceMain);
+#endif
 }
 
 /* Update window position and sprite to be actually used. */
@@ -2101,6 +2245,7 @@ void ClearWindow(HWND arg_0)
 /* Render sprite with double buffering. */
 void RenderSpriteDoubleBuffering(HWND arg_0)
 {
+#ifndef _WIN32
     HDC var_2;
     HDC var_4;
     HDC var_6;
@@ -2114,12 +2259,22 @@ void RenderSpriteDoubleBuffering(HWND arg_0)
     int var_1A;
     int var_1C;
     int var_1E;
+#endif
     if (renderOrUpdateWindowFlag != 0) {
         return;
     }
     if (screenXPreviousFrame == screenXCurrentFrame && screenYPreviousFrame == screenYCurrentFrame && spriteColourBitmapPreviousFrame == spriteColourBitmapMain && spriteXInResourceImagePreviousFrame == spriteXInResourceImageCurrentFrame && ufoBeamHeight == 0) {
         return;
     }
+#ifdef _WIN32
+    updateAreaRectXCurrentFrame = screenXCurrentFrame;
+    updateAreaRectYCurrentFrame = screenYCurrentFrame;
+    updateAreaRectWidthCurrentFrame = spriteWidthCurrentFrame;
+    updateAreaRectHeightCurrentFrame = spriteHeightCurrentFrame;
+    if (spriteColourBitmapMain != NULL) {
+        PresentLayeredSprite(arg_0, &layeredSurfaceMain, screenXCurrentFrame, screenYCurrentFrame, spriteColourBitmapMain, spriteMaskBitmapMain, spriteXInResourceImageCurrentFrame, spriteYInResourceImageCurrentFrame, spriteWidthCurrentFrame, spriteHeightCurrentFrame, ufoBeamHeight, alienTransformPending != 0);
+    }
+#else
     currentSpriteFramebufferIndex ^= 1;
     var_2 = GetDC(NULL);
     SelectPalette(var_2, windowPaletteInUse, FALSE);
@@ -2184,6 +2339,7 @@ void RenderSpriteDoubleBuffering(HWND arg_0)
     }
     DeleteDC(var_4);
     DeleteDC(var_6);
+#endif
     updateAreaRectXPreviousFrame = updateAreaRectXCurrentFrame;
     updateAreaRectYPreviousFrame = updateAreaRectYCurrentFrame;
     updateAreaRectWidthPreviousFrame = updateAreaRectWidthCurrentFrame;
@@ -2195,7 +2351,9 @@ void RenderSpriteDoubleBuffering(HWND arg_0)
     spriteColourBitmapPreviousFrame = spriteColourBitmapMain;
     spriteXInResourceImagePreviousFrame = spriteXInResourceImageCurrentFrame;
     spriteYInResourceImagePreviousFrameUnused = spriteYInResourceImageCurrentFrame;
+#ifndef _WIN32
     ReleaseDC(NULL, var_2);
+#endif
 }
 
 /* Render UFO beam (if any) and present render targets onto window. */
@@ -3104,7 +3262,7 @@ stateLoopContinue:
             subWindowState = 85;
             break;
         }
-        if (rand() % 40 == 5 && gravityEnabled == 0 && preventSpecialActions == 0) {
+        if (rand() % 20 == 5 && gravityEnabled == 0 && preventSpecialActions == 0) {
             subWindowState = 4;
             break;
         }
@@ -3140,7 +3298,7 @@ stateLoopContinue:
             subWindowState = 7;
         }
         if (spriteX > screenWidth || spriteX < -40 || spriteY < -40 || spriteY > screenHeight) {
-            if (rand() % 10 == 0 && preventSpecialActions == 0) {
+            if (rand() % 5 == 0 && preventSpecialActions == 0) {
                 subWindowState = 6;
                 break;
             }
@@ -5861,6 +6019,9 @@ void ReleaseBitmaps2()
     DeleteObject(doubleBufferSub[0]);
     DeleteObject(doubleBufferSub[1]);
     DeleteObject(spriteRenderTargetSub);
+#ifdef _WIN32
+    ReleaseLayeredSurface(&layeredSurfaceSub);
+#endif
 }
 
 /* Update window position and sprite to be actually used (sub). */
@@ -5895,9 +6056,10 @@ void ClearWindow2(HWND arg_0)
 /* Render sprite with double buffering (with fade out effect) (sub). */
 void RenderSpriteDoubleBufferingFadeOutEffect(HWND arg_0)
 {
-    HDC var_2;
     HDC var_4;
     HDC var_6;
+#ifndef _WIN32
+    HDC var_2;
     int var_C;
     int var_E;
     int var_10;
@@ -5908,12 +6070,44 @@ void RenderSpriteDoubleBufferingFadeOutEffect(HWND arg_0)
     int var_1A;
     int var_1C;
     int var_1E;
+#endif
     if (renderOrUpdateWindowFlagSub != 0) {
         return;
     }
     if (screenXSubPreviousFrame == screenXSubCurrentFrame && screenYSubPreviousFrame == screenYSubCurrentFrame && spriteColourBitmapSubPreviousFrame == spriteColourBitmapSubCurrentFrame && spriteXInResourceImageSubPreviousFrame == spriteXInResourceImageSubCurrentFrame && fadeOutFrameCounter == 0 && ufoBeamHeightSub == 0) {
         return;
     }
+#ifdef _WIN32
+    updateAreaRectXSubCurrentFrame = screenXSubCurrentFrame;
+    updateAreaRectYSubCurrentFrame = screenYSubCurrentFrame;
+    updateAreaRectWidthSubCurrentFrame = spriteWidthSubCurrentFrame;
+    updateAreaRectHeightSubCurrentFrame = spriteHeightSubCurrentFrame;
+    if (spriteColourBitmapSubCurrentFrame != NULL) {
+        if (spriteMaskBitmapSubCurrentFrame != NULL && fadeOutFrameCounter != 0) {
+            var_4 = CreateCompatibleDC(NULL);
+            var_6 = CreateCompatibleDC(NULL);
+            if (fadeOutFrameCounter == 1) {
+                SelectObject(var_4, spriteMaskBitmapSubCurrentFrame);
+                SelectObject(var_6, fadeOutMaskBitmapSub);
+                BitBlt(var_6, 0, 0, 40, 40, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCCOPY);
+                SelectObject(var_4, spriteColourBitmapSubCurrentFrame);
+                SelectObject(var_6, fadeOutColourBitmapSub);
+                BitBlt(var_6, 0, 0, 40, 40, var_4, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, SRCCOPY);
+            }
+            SelectObject(var_4, fadeOutMaskBitmapSub);
+            SelectObject(var_6, spriteListSub[172].bitmaps[0]);
+            BitBlt(var_4, fadeOutFrameCounter - 1, fadeOutFrameCounter - 1, 41 - fadeOutFrameCounter, 40, var_6, spriteListSub[172].x, 0, SRCPAINT);
+            SelectObject(var_4, fadeOutColourBitmapSub);
+            SelectObject(var_6, spriteListSub[172].bitmaps[1]);
+            BitBlt(var_4, fadeOutFrameCounter - 1, fadeOutFrameCounter - 1, 41 - fadeOutFrameCounter, 40, var_6, spriteListSub[172].x, 0, SRCAND);
+            DeleteDC(var_4);
+            DeleteDC(var_6);
+            PresentLayeredSprite(arg_0, &layeredSurfaceSub, screenXSubCurrentFrame, screenYSubCurrentFrame, fadeOutColourBitmapSub, fadeOutMaskBitmapSub, 0, 0, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, ufoBeamHeightSub, alienTransformPending != 0);
+        } else {
+            PresentLayeredSprite(arg_0, &layeredSurfaceSub, screenXSubCurrentFrame, screenYSubCurrentFrame, spriteColourBitmapSubCurrentFrame, spriteMaskBitmapSubCurrentFrame, spriteXInResourceImageSubCurrentFrame, spriteYInResourceImageSubCurrentFrame, spriteWidthSubCurrentFrame, spriteHeightSubCurrentFrame, ufoBeamHeightSub, alienTransformPending != 0);
+        }
+    }
+#else
     currentSpriteFramebufferIndexSub ^= 1;
     var_2 = GetDC(NULL);
     SelectPalette(var_2, windowPaletteInUse, FALSE);
@@ -6000,6 +6194,7 @@ void RenderSpriteDoubleBufferingFadeOutEffect(HWND arg_0)
     }
     DeleteDC(var_4);
     DeleteDC(var_6);
+#endif
     updateAreaRectXSubPreviousFrame = updateAreaRectXSubCurrentFrame;
     updateAreaRectYSubPreviousFrame = updateAreaRectYSubCurrentFrame;
     updateAreaRectWidthSubPreviousFrame = updateAreaRectWidthSubCurrentFrame;
@@ -6011,7 +6206,9 @@ void RenderSpriteDoubleBufferingFadeOutEffect(HWND arg_0)
     spriteColourBitmapSubPreviousFrame = spriteColourBitmapSubCurrentFrame;
     spriteXInResourceImageSubPreviousFrame = spriteXInResourceImageSubCurrentFrame;
     spriteYInResourceImageSubPreviousFrameUnused = spriteYInResourceImageSubCurrentFrame;
+#ifndef _WIN32
     ReleaseDC(NULL, var_2);
+#endif
 }
 
 /* Render UFO beam (if any) and present render targets onto window (sub). */
