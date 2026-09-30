@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <Windows.h>
+#include <CommCtrl.h>
 #include <MMSystem.h>
 #include <ShellAPI.h>
 
@@ -1283,6 +1284,10 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     HWND var_2;
     MSG var_14;
     WNDCLASS var_2E;
+    INITCOMMONCONTROLSEX icc;
+    icc.dwSize = sizeof(icc);
+    icc.dwICC = ICC_STANDARD_CLASSES;
+    InitCommonControlsEx(&icc);
     if (hPrevInstance == NULL) {
         var_2E.style = CS_DBLCLKS;
         var_2E.lpfnWndProc = ScreenMateMainWindowProc;
@@ -1760,24 +1765,39 @@ BOOL CALLBACK ConfigDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 /* Debug window callback. */
 BOOL CALLBACK DebugDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    static const char *debugActionNames[32] = {
+        "Normal", "Run", "Walk", "Handstand", "Pee-pee", "Sleep", "Blink", "Turn",
+        "Collision", "Pee", "Yawn", "Bleat", "Scared", "Surprised", "Eat", "Sit",
+        "Sneeze", "Burning", "Merry 1", "Merry 2", "Merry 3", "UFO 1", "UFO 2", "UFO 3",
+        "Rolling", "Blush", "Slide", "Fall", "Jump", "Spin", "Alien", "Mushroom"
+    };
+    int i;
+    int selectedAction;
+    WORD controlId;
+    WORD notifyCode;
+
     switch (uMsg) {
     case WM_INITDIALOG:
-        CheckRadioButton(hDlg, 1002, 1019, 1002);
+        for (i = 0; i < 32; i++) {
+            SendDlgItemMessage(hDlg, 1040, LB_ADDSTRING, 0, (LPARAM)debugActionNames[i]);
+        }
+        SendDlgItemMessage(hDlg, 1040, LB_SETCURSEL, 0, 0);
         return TRUE;
     case WM_COMMAND:
-        if (wParam == IDOK || wParam == IDCANCEL) {
-            EndDialog(hDlg, (int)wParam);
+        controlId = LOWORD(wParam);
+        notifyCode = HIWORD(wParam);
+        if (controlId == IDOK || controlId == IDCANCEL) {
+            EndDialog(hDlg, (int)controlId);
+            return TRUE;
         }
-        if (((wParam >= 1002 && wParam <= 1031) || wParam == 1036 || wParam == 1037) && IsDlgButtonChecked(hDlg, (int)wParam) != 0U) {
-            if (wParam == 1036) {
-                ProcessDebugWindowActionChange(30);
-            } else if (wParam == 1037) {
-                ProcessDebugWindowActionChange(31);
-            } else {
-                ProcessDebugWindowActionChange(wParam - 1002);
+        if (controlId == 1040 && notifyCode == LBN_SELCHANGE) {
+            selectedAction = (int)SendDlgItemMessage(hDlg, 1040, LB_GETCURSEL, 0, 0);
+            if (selectedAction >= 0) {
+                ProcessDebugWindowActionChange((WPARAM)selectedAction);
             }
+            return TRUE;
         }
-        switch (wParam) {
+        switch (controlId) {
         case 1032:
             MoveWindowOffset(0, -20);
             break;
