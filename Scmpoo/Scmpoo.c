@@ -61,7 +61,8 @@ resourceinfo resourceList[32] = { /* Resource list. Normal 101-111, alien 112-12
     {121, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {122, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {123, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* VR cursor graze, bite stages 0-1. */
-    {124, 1, {{NULL, NULL}, 0, 0, 0, 0}} /* VR cursor graze, bite stages 2-3. */
+    {124, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* VR cursor graze, bite stages 2-3. */
+    {125, 1, {{NULL, NULL}, 0, 0, 0, 0}} /* 108 upside down, pupils split (acid trip). */
 };
 resourceinfo flippedResourceList[32] = {0}; /* Resource list storing flipped images. */
 WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "Gravity always on" disabled). */
@@ -448,6 +449,23 @@ int alienKnockCooldown = 0; /* Frames until next alien knock. */
 WORD systemCursorHiddenForGraze = 0; /* ShowCursor(FALSE) while sheep grazes the cursor. */
 int cursorGrazeStage = 0; /* Bite stage of the cursor prop, 0 (full) to 3. */
 int cursorGrazeSpinFrame = 0; /* Spin frame of the cursor prop, 0-7. */
+WORD acidModeActive = 0; /* Acid trip: alien sheets with cycling horn/eye colours. */
+int acidColourIndex = 0; /* Current entry of acidColours. */
+int acidTicks = 0; /* Tick counter within the current acid phase. */
+int acidBaseY = 0; /* spriteY before the bounce phase. */
+RGBQUAD FAR * spritePaletteOverride = NULL; /* Horn shades 8/10/12 and pupil 40, applied by LoadSpriteImagesAndStoreHandles. */
+/* {bright, mid, dark} horn shades per VRCURSOR colour; pupils use the bright one. */
+RGBQUAD acidColours[9][4] = {
+    {{0, 0, 255, 0}, {0, 0, 170, 0}, {0, 0, 96, 0}, {0, 0, 255, 0}},
+    {{0, 255, 255, 0}, {0, 170, 170, 0}, {0, 96, 96, 0}, {0, 255, 255, 0}},
+    {{0, 255, 0, 0}, {0, 170, 0, 0}, {0, 96, 0, 0}, {0, 255, 0, 0}},
+    {{255, 0, 0, 0}, {170, 0, 0, 0}, {96, 0, 0, 0}, {255, 0, 0, 0}},
+    {{255, 0, 255, 0}, {170, 0, 170, 0}, {96, 0, 96, 0}, {255, 0, 255, 0}},
+    {{0, 128, 128, 0}, {0, 96, 96, 0}, {0, 56, 56, 0}, {0, 160, 160, 0}},
+    {{128, 0, 128, 0}, {96, 0, 96, 0}, {56, 0, 56, 0}, {160, 0, 160, 0}},
+    {{128, 0, 0, 0}, {96, 0, 0, 0}, {56, 0, 0, 0}, {160, 0, 0, 0}},
+    {{0, 128, 0, 0}, {0, 96, 0, 0}, {0, 56, 0, 0}, {0, 160, 0, 0}}
+};
 int knownInstanceCount = 0; /* Known instance count. */
 UINT gravityAlwaysEnabled = 0U; /* Configuration: Gravity always on */
 HBRUSH ufoBeamMaskBrush = NULL; /* UFO beam mask colour brush. */
@@ -572,6 +590,12 @@ void StopPlayingSound(void);
 void PlaySoundName(LPCSTR);
 void PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(int, UINT, WORD);
 BOOL GenerateSpritesFromLoadedResourceImages(HDC);
+void LinkSheetSprites(int);
+void ReloadAcidSheets(void);
+void ApplyAcidColour(int);
+void RestoreAcidColours(void);
+void AdvanceAcidTick(void);
+void AcidRollStep(int);
 void ReleaseResourceImages(void);
 void TurnAroundWhenApproachingScreenBorderOtherwise120Probability(void);
 void FlagControlledCollisionTurnAround(BOOL);
@@ -1634,6 +1658,8 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         }
         KillTimer(hWnd, 1U);
         StopPlayingSound();
+        spritePaletteOverride = NULL;
+        acidModeActive = 0;
         ReleaseBitmaps();
         ReleaseResourceImages();
         DeleteObject(windowPaletteInUse);
@@ -1883,6 +1909,13 @@ BOOL LoadSpriteImagesAndStoreHandles(HDC arg_0, spriteinfo * arg_2, int arg_4, i
             var_1A = NULL;
         } else {
             DecompressBitmapImage(var_10, var_C);
+        }
+        if (spritePaletteOverride != NULL) {
+            RGBQUAD FAR * palette = (RGBQUAD FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10);
+            palette[8] = spritePaletteOverride[0];
+            palette[10] = spritePaletteOverride[1];
+            palette[12] = spritePaletteOverride[2];
+            palette[40] = spritePaletteOverride[3];
         }
         var_4 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + GetPaletteSize(var_10));
         var_8 = (void FAR *)((BYTE FAR *)var_10 + *(WORD FAR *)var_10 + GetColourIndexFirstPixel(var_10) * sizeof(RGBQUAD));
@@ -2638,11 +2671,30 @@ void PlaySoundResourceIdAdditionalFlagsWhenOptionCryEnabled(int arg_0, UINT arg_
     }
 }
 
+/* Point the 16 unflipped and 16 flipped sprite entries of a sheet at its loaded bitmaps. */
+void LinkSheetSprites(int sheet)
+{
+    int cell;
+    for (cell = 0; cell < 16; cell += 1) {
+        spriteListSub[sheet * 16 + cell].bitmaps[0] = resourceList[sheet].info.bitmaps[0];
+        spriteListSub[sheet * 16 + cell].bitmaps[1] = resourceList[sheet].info.bitmaps[1];
+        spriteListSub[sheet * 16 + cell].width = 40;
+        spriteListSub[sheet * 16 + cell].height = 40;
+        spriteListSub[sheet * 16 + cell].x = cell * 40;
+        spriteListSub[sheet * 16 + cell].y = 0;
+        spriteListSub[sheet * 16 + cell + 512].bitmaps[0] = flippedResourceList[sheet].info.bitmaps[0];
+        spriteListSub[sheet * 16 + cell + 512].bitmaps[1] = flippedResourceList[sheet].info.bitmaps[1];
+        spriteListSub[sheet * 16 + cell + 512].width = 40;
+        spriteListSub[sheet * 16 + cell + 512].height = 40;
+        spriteListSub[sheet * 16 + cell + 512].x = (15 - cell) * 40;
+        spriteListSub[sheet * 16 + cell + 512].y = 0;
+    }
+}
+
 /* Generate sprites from loaded resource images. */
 BOOL GenerateSpritesFromLoadedResourceImages(HDC arg_0)
 {
     int var_2;
-    int var_4;
     for (var_2 = 0; var_2 < 32; var_2 += 1) {
         if (resourceList[var_2].resource == 0) {
             break;
@@ -2653,22 +2705,50 @@ BOOL GenerateSpritesFromLoadedResourceImages(HDC arg_0)
         if (!LoadSpriteImagesAndStoreHandles(arg_0, &flippedResourceList[var_2].info, resourceList[var_2].resource, -3)) {
             return FALSE;
         }
-        for (var_4 = 0; var_4 < 16; var_4 += 1) {
-            spriteListSub[var_2 * 16 + var_4].bitmaps[0] = resourceList[var_2].info.bitmaps[0];
-            spriteListSub[var_2 * 16 + var_4].bitmaps[1] = resourceList[var_2].info.bitmaps[1];
-            spriteListSub[var_2 * 16 + var_4].width = 40;
-            spriteListSub[var_2 * 16 + var_4].height = 40;
-            spriteListSub[var_2 * 16 + var_4].x = var_4 * 40;
-            spriteListSub[var_2 * 16 + var_4].y = 0;
-            spriteListSub[var_2 * 16 + var_4 + 512].bitmaps[0] = flippedResourceList[var_2].info.bitmaps[0];
-            spriteListSub[var_2 * 16 + var_4 + 512].bitmaps[1] = flippedResourceList[var_2].info.bitmaps[1];
-            spriteListSub[var_2 * 16 + var_4 + 512].width = 40;
-            spriteListSub[var_2 * 16 + var_4 + 512].height = 40;
-            spriteListSub[var_2 * 16 + var_4 + 512].x = (15 - var_4) * 40;
-            spriteListSub[var_2 * 16 + var_4 + 512].y = 0;
-        }
+        LinkSheetSprites(var_2);
     }
     return TRUE;
+}
+
+/* Sheets redrawn with acid colours: 112.bmp (spin), 119.bmp (roll), 125.bmp (upside-down roll). */
+int acidSheets[3] = {11, 18, 24};
+
+/* Reload the acid sheets with the current spritePaletteOverride and redraw the current frame. */
+void ReloadAcidSheets(void)
+{
+    HDC dc;
+    int i;
+    int sheet;
+    dc = GetDC(selfInstanceWindowHandle);
+    for (i = 0; i < 3; i += 1) {
+        sheet = acidSheets[i];
+        ReleaseSpriteImages(&resourceList[sheet].info);
+        ReleaseSpriteImages(&flippedResourceList[sheet].info);
+        LoadSpriteImagesAndStoreHandles(dc, &resourceList[sheet].info, resourceList[sheet].resource, -1);
+        LoadSpriteImagesAndStoreHandles(dc, &flippedResourceList[sheet].info, resourceList[sheet].resource, -3);
+        LinkSheetSprites(sheet);
+    }
+    ReleaseDC(selfInstanceWindowHandle, dc);
+    UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+}
+
+/* Switch horns and eyes of the acid sheets to acidColours[colour]. */
+void ApplyAcidColour(int colour)
+{
+    acidColourIndex = colour % 9;
+    spritePaletteOverride = acidColours[acidColourIndex];
+    ReloadAcidSheets();
+}
+
+/* Put the original colours back on the acid sheets and leave acid mode. */
+void RestoreAcidColours(void)
+{
+    if (acidModeActive == 0 && spritePaletteOverride == NULL) {
+        return;
+    }
+    spritePaletteOverride = NULL;
+    acidModeActive = 0;
+    ReloadAcidSheets();
 }
 
 /* Release resource images. */
@@ -2778,7 +2858,7 @@ void UpdateMainWindowSprite(int arg_0, int arg_2, int arg_4)
 {
     SetWindowWord(selfInstanceWindowHandle, 0, (short)spriteX);
     SetWindowWord(selfInstanceWindowHandle, 2, (short)spriteY);
-    if (alienModeActive != 0) {
+    if (alienModeActive != 0 || acidModeActive != 0) {
         int flip = (arg_4 >= 512) ? 512 : 0;
         int i = arg_4 - flip;
         i = AggressiveSpriteIndex(i);
@@ -2986,6 +3066,9 @@ void UpdateSpriteStateOnTimer(void)
     }
     if (chimeEnabled != 0) {
         ProcessChime();
+    }
+    if (acidModeActive != 0 && (subWindowState < 169 || subWindowState > 174)) {
+        RestoreAcidColours();
     }
     if (alienModeActive != 0
         && subWindowState != 155
@@ -5450,14 +5533,131 @@ stateLoopContinue:
         }
         if (spriteIndex == 0) {
             DestroySubwindow();
-            subWindowState = 1;
+            animationFrameCounter = 0;
+            framePeriodCounter = 0;
+            acidTicks = 0;
+            subWindowState = 168;
             break;
         }
         UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         break;
+    case 168:
+        /* After the mushroom: scared twice, normal colours. */
+        if (framePeriodCounter++ < 1) {
+            break;
+        }
+        framePeriodCounter = 0;
+        spriteIndex = amazedAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            animationFrameCounter = 0;
+            if (++acidTicks < 2) {
+                break;
+            }
+            subWindowState = 169;
+            break;
+        }
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        break;
+    case 169:
+        alienModeActive = 0;
+        acidModeActive = 1;
+        acidTicks = 0;
+        acidBaseY = spriteY;
+        facingDirection = 1;
+        ApplyAcidColour(0);
+        subWindowState = 170;
+        break;
+    case 170:
+        /* Spin in place, twice the normal speed. */
+        spriteIndex = spinAnimationFrames[acidTicks % 8];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        AdvanceAcidTick();
+        if (acidTicks >= 16) {
+            acidTicks = 0;
+            subWindowState = 171;
+        }
+        break;
+    case 171:
+        /* Flip left/right while bouncing. */
+        {
+            static const int bounce[4] = {0, -6, -10, -6};
+            if ((acidTicks & 1) == 0) {
+                facingDirection = -facingDirection;
+            }
+            spriteY = acidBaseY + bounce[acidTicks % 4];
+            spriteIndex = 3;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        }
+        AdvanceAcidTick();
+        if (acidTicks >= 16) {
+            spriteY = acidBaseY;
+            acidTicks = 0;
+            subWindowState = 172;
+        }
+        break;
+    case 172:
+        /* Roll. */
+        AcidRollStep(rollAnimationFrames[acidTicks % 8]);
+        AdvanceAcidTick();
+        if (acidTicks >= 12) {
+            acidTicks = 0;
+            facingDirection = -facingDirection;
+            subWindowState = 173;
+        }
+        break;
+    case 173:
+        /* Roll back upside down (125.bmp = 108.bmp flipped vertically). */
+        AcidRollStep(384 + rollAnimationFrames[acidTicks % 8] - 112);
+        AdvanceAcidTick();
+        if (acidTicks >= 12) {
+            acidTicks = 0;
+            animationFrameCounter = 0;
+            subWindowState = 174;
+        }
+        break;
+    case 174:
+        /* Dizzy blinks, then back to normal. */
+        AdvanceAcidTick();
+        if ((acidTicks & 1) != 0) {
+            break;
+        }
+        spriteIndex = blinkAnimationFrames[0][animationFrameCounter];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        if (++animationFrameCounter >= 8) {
+            RestoreAcidColours();
+            spriteIndex = 3;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 1;
+        }
+        break;
     default:
         break;
     }
+}
+
+/* One acid tick: the horn and eye colour moves on every second tick. */
+void AdvanceAcidTick(void)
+{
+    acidTicks += 1;
+    if ((acidTicks & 1) == 0) {
+        ApplyAcidColour(acidColourIndex + 1);
+    }
+}
+
+/* Move one roll step, bouncing off the screen edges. */
+void AcidRollStep(int sprite)
+{
+    spriteX -= facingDirection * 8;
+    if (spriteX < 0) {
+        spriteX = 0;
+        facingDirection = -1;
+    } else if (spriteX > screenWidth - 40) {
+        spriteX = screenWidth - 40;
+        facingDirection = 1;
+    }
+    spriteIndex = sprite;
+    UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
 }
 
 /* Environment-affected action change, controlled by a flag. */
@@ -5499,6 +5699,7 @@ void ProcessDebugWindowActionChange(WPARAM arg_0)
     fadeOutFrameCounter = 0;
     StopPlayingSound();
     DestroySubwindow();
+    RestoreAcidColours();
     switch (arg_0) {
     case 0:
         subWindowState = 1;

@@ -13,6 +13,8 @@ docs/images/flower_cell_*.png
 docs/images/flower_sheet_*.png
 docs/images/eat_sprites_check.png
 docs/images/cursor_graze_preview_strip.png
+docs/images/acid_sheet_check.png
+docs/images/acid_trip_preview_strip.png
 
 # Python
 __pycache__/
