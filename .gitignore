@@ -1,0 +1,11 @@
+# CMake / CLion build output
+cmake-build-*/
+build/
+Scmpoo/build/
+
+# Packaged executables
+dist/
+
+# Python
+__pycache__/
+*.pyc
