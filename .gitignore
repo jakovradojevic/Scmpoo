@@ -20,3 +20,6 @@ docs/images/acid_trip_preview_strip.png
 __pycache__/
 *.pyc
 tools/_trance_preview.mp3
+docs/images/ref_*.png
+docs/images/ball_*_preview.png
+tools/_112_strip.png

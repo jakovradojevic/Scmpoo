@@ -68,7 +68,9 @@ resourceinfo resourceList[32] = { /* Resource list. Normal 101-111, alien 112-12
     {122, 1, {{NULL, NULL}, 0, 0, 0, 0}},
     {123, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* VR cursor graze, bite stages 0-1. */
     {124, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* VR cursor graze, bite stages 2-3. */
-    {125, 1, {{NULL, NULL}, 0, 0, 0, 0}} /* 108 upside down, pupils split (acid trip). */
+    {125, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* 108 upside down, pupils split (acid trip). */
+    {126, 1, {{NULL, NULL}, 0, 0, 0, 0}}, /* Football spin frames. */
+    {127, 1, {{NULL, NULL}, 0, 0, 0, 0}} /* Basketball spin frames. */
 };
 resourceinfo flippedResourceList[32] = {0}; /* Resource list storing flipped images. */
 WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "Gravity always on" disabled). */
@@ -82,7 +84,7 @@ WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "G
     17, 20, 17, 20,
     17, 20, 17, 20,
     17, 20, 53, 53,
-    53, 164, 164, 164,
+    53, 164, 175, 11,
     58, 58, 58, 45,
     45, 45, 43, 43,
     43, 62, 62, 62,
@@ -104,7 +106,7 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     17, 20, 17, 20,
     17, 20, 17, 20,
     17, 20, 53, 53,
-    53, 164, 164, 164,
+    53, 164, 175, 11,
     58, 58, 58, 45,
     45, 45, 43, 43,
     43, 62, 62, 62,
@@ -115,9 +117,10 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     47, 47, 49, 49,
     75, 75, 9, 9
 };
-WORD specialActionTable[8] = { /* Special action table. */
+WORD specialActionTable[9] = { /* Special action table. */
     116, 121, 126, 147,
-    128, 135, 142, 155
+    128, 135, 142, 155,
+    175
 };
 int facingDirection = 1; /* Facing direction. 1 = left, -1 = right */
 int facingDirectionSub = 1; /* Facing direction (sub). 1 = left, -1 = right */
@@ -459,6 +462,26 @@ WORD acidModeActive = 0; /* Acid trip: alien sheets with cycling horn/eye colour
 int acidColourIndex = 0; /* Current entry of acidColours. */
 int acidTicks = 0; /* Tick counter within the current acid phase. */
 int acidBaseY = 0; /* spriteY before the bounce phase. */
+#define BALL_TYPE_FOOTBALL 0
+#define BALL_TYPE_BASKETBALL 1
+#define BALL_SPRITE_FOOTBALL 400 /* resourceList sheet 25 (126.bmp) * 16 */
+#define BALL_SPRITE_BASKETBALL 416 /* resourceList sheet 26 (127.bmp) * 16 */
+HWND ballWindowHandle = NULL; /* Shared ball window owned by this instance, or NULL. */
+int ballType = BALL_TYPE_FOOTBALL;
+int ballX = 0;
+int ballY = 0;
+int ballVx = 0;
+int ballVy = 0;
+int ballFloorY = 0;
+int ballLifeTicks = 0;
+int ballSpinFrame = 0;
+int ballSfxCooldown = 0;
+int ballKickCooldown = 0;
+int ballDragging = 0; /* User is dragging the ball; physics paused until release. */
+int ballDragGrabX = 0; /* Cursor offset inside the ball sprite when grab started. */
+int ballDragGrabY = 0;
+int ballDragLastX = 0; /* Last cursor screen X while dragging (for throw velocity). */
+int ballDragLastY = 0;
 RGBQUAD FAR * spritePaletteOverride = NULL; /* Horn shades 8/10/12 and pupil 40, applied by LoadSpriteImagesAndStoreHandles. */
 /* {bright, mid, dark} horn shades per VRCURSOR colour; pupils use the bright one. */
 RGBQUAD acidColours[9][4] = {
@@ -557,12 +580,28 @@ int PASCAL WinMain(HINSTANCE, HINSTANCE, LPSTR, int);
 void SetCursorPositionChangedFlag(void);
 LRESULT CALLBACK ScreenMateMainWindowProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK ScreenMateSubWindowProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK ScreenMateBallWindowProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ConfigDialogProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK DebugDialogProc(HWND, UINT, WPARAM, LPARAM);
 void CreateSubwindow(void);
 void HideSystemCursorForGraze(void);
 void RestoreSystemCursorAfterGraze(void);
 void DestroySubwindow(void);
+HWND FindScreenMateBallWindow(void);
+BOOL CreateBallWindow(void);
+void DestroyBallWindow(void);
+void PublishBallPose(void);
+void PresentBallSprite(void);
+void ApplyBallKick(int);
+void PlayBallHitSound(void);
+void PlayBallPopSound(void);
+void UpdateBallPhysics(void);
+int GetBallFloorY(void);
+void KeepBallTopmost(void);
+void BroadcastBallPopScare(void);
+void BeginBallPopScareLocal(void);
+BOOL IsInterruptibleForBallScare(int);
+BOOL TryBeginBallCharge(void);
 void PlaceWindowTopmostPosition(HWND);
 void PlaceWindowTopAnother(HWND, HWND);
 BOOL LoadSpriteImagesAndStoreHandles(HDC, spriteinfo *, int, int);
@@ -1318,6 +1357,21 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             return 0;
         }
     }
+    if (hPrevInstance == NULL) {
+        var_2E.style = 0;
+        var_2E.lpfnWndProc = ScreenMateBallWindowProc;
+        var_2E.cbClsExtra = 0;
+        var_2E.cbWndExtra = 8;
+        var_2E.hInstance = hInstance;
+        var_2E.hIcon = NULL;
+        var_2E.hCursor = LoadCursor(NULL, IDC_ARROW);
+        var_2E.hbrBackground = NULL;
+        var_2E.lpszMenuName = NULL;
+        var_2E.lpszClassName = "ScreenMatePooBall";
+        if (RegisterClass(&var_2E) == 0) {
+            return 0;
+        }
+    }
     currentInstance = hInstance;
 #ifdef _WIN32
     /* In 32-bit Windows, popup window is now in the taskbar by default. Additional code is needed to hide the popup window from taskbar while keeping it in the Alt+Tab list. */
@@ -1541,6 +1595,15 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
                 subWindowState = 65;
             }
         }
+        if (wParam == 4) {
+            /* Ball kick from another sheep (owner applies impulse). */
+            if (ballWindowHandle != NULL) {
+                ApplyBallKick((int)(short)lParam);
+            }
+        }
+        if (wParam == 5) {
+            BeginBallPopScareLocal();
+        }
         return 0;
     case WM_PAINT:
         if (doNotClearWindowOnPaint != 0) {
@@ -1663,6 +1726,7 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         if (knownInstanceWindows[8] != NULL) {
             DestroySubwindow();
         }
+        DestroyBallWindow();
         KillTimer(hWnd, 1U);
         StopPlayingSound();
         spritePaletteOverride = NULL;
@@ -1765,11 +1829,12 @@ BOOL CALLBACK ConfigDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 /* Debug window callback. */
 BOOL CALLBACK DebugDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    static const char *debugActionNames[32] = {
+    static const char *debugActionNames[33] = {
         "Normal", "Run", "Walk", "Handstand", "Pee-pee", "Sleep", "Blink", "Turn",
         "Collision", "Pee", "Yawn", "Bleat", "Scared", "Surprised", "Eat", "Sit",
         "Sneeze", "Burning", "Merry 1", "Merry 2", "Merry 3", "UFO 1", "UFO 2", "UFO 3",
-        "Rolling", "Blush", "Slide", "Fall", "Jump", "Spin", "Alien", "Mushroom"
+        "Rolling", "Blush", "Slide", "Fall", "Jump", "Spin", "Alien", "Mushroom",
+        "Sport"
     };
     int i;
     int selectedAction;
@@ -1778,7 +1843,7 @@ BOOL CALLBACK DebugDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
     switch (uMsg) {
     case WM_INITDIALOG:
-        for (i = 0; i < 32; i++) {
+        for (i = 0; i < 33; i++) {
             SendDlgItemMessage(hDlg, 1040, LB_ADDSTRING, 0, (LPARAM)debugActionNames[i]);
         }
         SendDlgItemMessage(hDlg, 1040, LB_SETCURSEL, 0, 0);
@@ -2053,6 +2118,7 @@ typedef struct layeredsurface {
 
 layeredsurface layeredSurfaceMain = {NULL, NULL, 0, 0};
 layeredsurface layeredSurfaceSub = {NULL, NULL, 0, 0};
+layeredsurface layeredSurfaceBall = {NULL, NULL, 0, 0};
 
 /* Make sure the 32-bit surface is at least the requested size. */
 BOOL EnsureLayeredSurface(layeredsurface * surface, int width, int height)
@@ -2181,6 +2247,515 @@ void PresentLayeredSprite(HWND window, layeredsurface * surface, int x, int y, H
 }
 #endif
 
+/* --- Shared sports ball (football / basketball) --- */
+
+LRESULT CALLBACK ScreenMateBallWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    POINT cursor;
+    int nx;
+    int ny;
+
+    switch (uMsg) {
+    case WM_ERASEBKGND:
+        return 1;
+    case WM_SETCURSOR:
+        SetCursor(LoadCursor(NULL, IDC_HAND));
+        return 1;
+    case WM_LBUTTONDOWN:
+        if (ballWindowHandle != hWnd) {
+            break;
+        }
+        SetCapture(hWnd);
+        GetCursorPos(&cursor);
+        ballDragGrabX = cursor.x - ballX;
+        ballDragGrabY = cursor.y - ballY;
+        if (ballDragGrabX < 0) {
+            ballDragGrabX = 0;
+        }
+        if (ballDragGrabX > 40) {
+            ballDragGrabX = 40;
+        }
+        if (ballDragGrabY < 0) {
+            ballDragGrabY = 0;
+        }
+        if (ballDragGrabY > 40) {
+            ballDragGrabY = 40;
+        }
+        ballDragLastX = cursor.x;
+        ballDragLastY = cursor.y;
+        ballVx = 0;
+        ballVy = 0;
+        ballDragging = 1;
+        SetWindowWord(hWnd, 4, 1);
+        KeepBallTopmost();
+        return 0;
+    case WM_MOUSEMOVE:
+        if (ballDragging == 0 || ballWindowHandle != hWnd) {
+            break;
+        }
+        if ((wParam & MK_LBUTTON) == 0) {
+            break;
+        }
+        GetCursorPos(&cursor);
+        nx = cursor.x - ballDragGrabX;
+        ny = cursor.y - ballDragGrabY;
+        /* Throw impulse from cursor delta this move. */
+        ballVx = cursor.x - ballDragLastX;
+        ballVy = cursor.y - ballDragLastY;
+        ballDragLastX = cursor.x;
+        ballDragLastY = cursor.y;
+        if (nx < 0) {
+            nx = 0;
+        }
+        if (nx > screenWidth - 40) {
+            nx = screenWidth - 40;
+        }
+        if (ny < -40) {
+            ny = -40;
+        }
+        if (ny > ballFloorY) {
+            ny = ballFloorY;
+        }
+        ballX = nx;
+        ballY = ny;
+        ballSpinFrame = (ballSpinFrame + 1) & 7;
+        PublishBallPose();
+        PresentBallSprite();
+        return 0;
+    case WM_LBUTTONUP:
+    case WM_CAPTURECHANGED:
+        if (ballDragging == 0 || ballWindowHandle != hWnd) {
+            break;
+        }
+        if (uMsg == WM_LBUTTONUP) {
+            ReleaseCapture();
+        }
+        /* Clamp throw so a flick feels lively but not teleport-fast. */
+        if (ballVx > 36) {
+            ballVx = 36;
+        }
+        if (ballVx < -36) {
+            ballVx = -36;
+        }
+        if (ballVy > 28) {
+            ballVy = 28;
+        }
+        if (ballVy < -36) {
+            ballVy = -36;
+        }
+        ballDragging = 0;
+        SetWindowWord(hWnd, 4, 0);
+        PublishBallPose();
+        PresentBallSprite();
+        return 0;
+    case WM_DESTROY:
+        if (ballWindowHandle == hWnd) {
+            ballWindowHandle = NULL;
+        }
+        ballDragging = 0;
+#ifdef _WIN32
+        ReleaseLayeredSurface(&layeredSurfaceBall);
+#endif
+        return 0;
+    default:
+        break;
+    }
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+HWND FindScreenMateBallWindow(void)
+{
+    HWND wnd;
+    UINT cmd;
+    char title[64];
+    int scanned;
+
+    wnd = GetDesktopWindow();
+    cmd = GW_CHILD;
+    scanned = 0;
+    while ((wnd = GetWindow(wnd, cmd)) != NULL && scanned < 128) {
+        cmd = GW_HWNDNEXT;
+        if ((GetWindowLong(wnd, GWL_STYLE) & WS_VISIBLE) == 0) {
+            scanned += 1;
+            continue;
+        }
+        GetWindowText(wnd, title, 32);
+        if (lstrcmp(title, "Screen Mate Ball") == 0) {
+            return wnd;
+        }
+        scanned += 1;
+    }
+    return NULL;
+}
+
+void PublishBallPose(void)
+{
+    if (ballWindowHandle == NULL) {
+        return;
+    }
+    SetWindowWord(ballWindowHandle, 0, (WORD)(short)ballX);
+    SetWindowWord(ballWindowHandle, 2, (WORD)(short)ballY);
+}
+
+/* Desktop floor for the ball: work-area bottom (just above the taskbar). */
+int GetBallFloorY(void)
+{
+    RECT work;
+    int floorY;
+
+    if (SystemParametersInfo(SPI_GETWORKAREA, 0, &work, 0)) {
+        floorY = work.bottom - 40;
+    } else {
+        floorY = screenHeight - 40;
+    }
+    if (floorY < 0) {
+        floorY = 0;
+    }
+    return floorY;
+}
+
+/* Keep the ball above ordinary windows so sheep don't headbutt "empty air". */
+void KeepBallTopmost(void)
+{
+    if (ballWindowHandle == NULL) {
+        return;
+    }
+    SetWindowPos(ballWindowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+}
+
+void PresentBallSprite(void)
+{
+    int sprite;
+    int cell;
+#ifdef _WIN32
+    if (ballWindowHandle == NULL) {
+        return;
+    }
+    cell = ballSpinFrame & 7;
+    sprite = (ballType == BALL_TYPE_BASKETBALL) ? (BALL_SPRITE_BASKETBALL + cell) : (BALL_SPRITE_FOOTBALL + cell);
+    if (spriteListSub[sprite].bitmaps[0] == NULL) {
+        return;
+    }
+    PresentLayeredSprite(
+        ballWindowHandle,
+        &layeredSurfaceBall,
+        ballX,
+        ballY,
+        spriteListSub[sprite].bitmaps[0],
+        spriteListSub[sprite].bitmaps[1],
+        spriteListSub[sprite].x,
+        spriteListSub[sprite].y,
+        40,
+        40,
+        0,
+        FALSE);
+#endif
+}
+
+void PlayBallHitSound(void)
+{
+    if (ballSfxCooldown > 0) {
+        return;
+    }
+    if (ballType == BALL_TYPE_BASKETBALL) {
+        PlaySoundResourceIdAdditionalFlags(113, 0U, 0);
+    } else {
+        PlaySoundResourceIdAdditionalFlags(112, 0U, 0);
+    }
+    ballSfxCooldown = 3;
+}
+
+void PlayBallPopSound(void)
+{
+    PlaySoundResourceIdAdditionalFlags(114, 0U, 0);
+}
+
+void ApplyBallKick(int dir)
+{
+    int jitter;
+    if (ballWindowHandle == NULL || ballDragging != 0) {
+        return;
+    }
+    if (GetWindowWord(ballWindowHandle, 4) != 0) {
+        return;
+    }
+    if (dir == 0) {
+        dir = (rand() & 1) ? 1 : -1;
+    }
+    jitter = (rand() % 5) - 2;
+    if (ballType == BALL_TYPE_BASKETBALL) {
+        ballVx = -dir * (14 + (rand() & 7)) + jitter;
+        ballVy = -(18 + (rand() & 7));
+    } else {
+        ballVx = -dir * (22 + (rand() & 7)) + jitter;
+        ballVy = -(8 + (rand() & 5));
+    }
+    PlayBallHitSound();
+    ballKickCooldown = 4;
+}
+
+BOOL CreateBallWindow(void)
+{
+    if (FindScreenMateBallWindow() != NULL) {
+        return FALSE;
+    }
+    if (ballWindowHandle != NULL) {
+        return FALSE;
+    }
+    ballType = (rand() & 1) ? BALL_TYPE_BASKETBALL : BALL_TYPE_FOOTBALL;
+    ballX = spriteX - facingDirection * 48;
+    if (ballX < 0) {
+        ballX = 0;
+    }
+    if (ballX > screenWidth - 40) {
+        ballX = screenWidth - 40;
+    }
+    ballFloorY = GetBallFloorY();
+    ballY = ballFloorY;
+    ballVx = -facingDirection * 6;
+    ballVy = -10;
+    ballSpinFrame = 0;
+    ballSfxCooldown = 0;
+    ballKickCooldown = 0;
+    ballDragging = 0;
+    /* At least 1 minute, up to ~3 minutes at 108ms/tick. */
+    ballLifeTicks = 556 + rand() % 1112;
+#ifdef _WIN32
+    ballWindowHandle = CreateWindowEx(
+        WS_EX_LAYERED | WS_EX_TOOLWINDOW,
+        "ScreenMatePooBall",
+        "Screen Mate Ball",
+        WS_POPUP,
+        0,
+        0,
+        0,
+        0,
+        ownerWindowHandle,
+        NULL,
+        currentInstance,
+        NULL);
+#else
+    ballWindowHandle = CreateWindowEx(
+        0L,
+        "ScreenMatePooBall",
+        "Screen Mate Ball",
+        WS_POPUP,
+        0,
+        0,
+        0,
+        0,
+        NULL,
+        NULL,
+        currentInstance,
+        NULL);
+#endif
+    if (ballWindowHandle == NULL) {
+        return FALSE;
+    }
+    SetWindowLongPtr(ballWindowHandle, GWLP_USERDATA, (LONG_PTR)selfInstanceWindowHandle);
+    ShowWindow(ballWindowHandle, SW_SHOWNA);
+    SetWindowWord(ballWindowHandle, 4, 0);
+    PublishBallPose();
+    PresentBallSprite();
+    KeepBallTopmost();
+    return TRUE;
+}
+
+void DestroyBallWindow(void)
+{
+    ballDragging = 0;
+    if (ballWindowHandle != NULL) {
+        DestroyWindow(ballWindowHandle);
+        ballWindowHandle = NULL;
+    }
+#ifdef _WIN32
+    ReleaseLayeredSurface(&layeredSurfaceBall);
+#endif
+    ballLifeTicks = 0;
+    ballVx = 0;
+    ballVy = 0;
+}
+
+void BroadcastBallPopScare(void)
+{
+    int i;
+    BeginBallPopScareLocal();
+    for (i = 0; i < 8; i += 1) {
+        if (knownInstanceWindows[i] != NULL && knownInstanceWindows[i] != selfInstanceWindowHandle) {
+            SendMessage(knownInstanceWindows[i], WM_USER, (WPARAM)5, 0);
+        }
+    }
+}
+
+BOOL IsInterruptibleForBallScare(int state)
+{
+    if (state >= 116 && state <= 163) {
+        return FALSE; /* merry / UFO / alien setpieces */
+    }
+    if (state >= 164 && state <= 174) {
+        return FALSE; /* mushroom / acid */
+    }
+    if (state >= 175 && state <= 179) {
+        return FALSE; /* already in sport / scare */
+    }
+    if (state == 53 || state == 54) {
+        return FALSE; /* flower eat */
+    }
+    if (alienModeActive != 0 || acidModeActive != 0 || alienTransformPending != 0) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void BeginBallPopScareLocal(void)
+{
+    if (!IsInterruptibleForBallScare(subWindowState)) {
+        return;
+    }
+    DestroySubwindow();
+    ufoBeamHeight = 0;
+    ufoBeamHeightSub = 0;
+    animationFrameCounter = 0;
+    framePeriodCounter = 0;
+    acidTicks = 0;
+    subWindowState = 178;
+}
+
+void UpdateBallPhysics(void)
+{
+    int gravity;
+    int restitution;
+    int friction;
+    int drag;
+    int bounced;
+
+    if (ballWindowHandle == NULL) {
+        return;
+    }
+    if (!IsWindow(ballWindowHandle)) {
+        ballWindowHandle = NULL;
+        return;
+    }
+    if (ballSfxCooldown > 0) {
+        ballSfxCooldown -= 1;
+    }
+    if (ballKickCooldown > 0) {
+        ballKickCooldown -= 1;
+    }
+    /* While the user holds the ball, pause sim (gravity resumes on release). */
+    if (ballDragging != 0 || GetWindowWord(ballWindowHandle, 4) != 0) {
+        ballFloorY = GetBallFloorY();
+        PublishBallPose();
+        PresentBallSprite();
+        KeepBallTopmost();
+        return;
+    }
+    ballFloorY = GetBallFloorY();
+    if (--ballLifeTicks <= 0) {
+        PlayBallPopSound();
+        BroadcastBallPopScare();
+        DestroyBallWindow();
+        return;
+    }
+
+    if (ballType == BALL_TYPE_BASKETBALL) {
+        gravity = 3;
+        restitution = 80; /* percent */
+        friction = 92;
+        drag = 98;
+    } else {
+        gravity = 2;
+        restitution = 50;
+        friction = 82;
+        drag = 99;
+    }
+
+    ballVy += gravity;
+    ballVx = ballVx * drag / 100;
+    ballVy = ballVy * drag / 100;
+    ballX += ballVx;
+    ballY += ballVy;
+    bounced = 0;
+
+    if (ballX < 0) {
+        ballX = 0;
+        ballVx = -ballVx * restitution / 100;
+        bounced = 1;
+    } else if (ballX > screenWidth - 40) {
+        ballX = screenWidth - 40;
+        ballVx = -ballVx * restitution / 100;
+        bounced = 1;
+    }
+    if (ballY >= ballFloorY) {
+        ballY = ballFloorY;
+        if (ballVy > 0) {
+            if (ballVy >= 4) {
+                bounced = 1;
+            }
+            ballVy = -ballVy * restitution / 100;
+            ballVx = ballVx * friction / 100;
+            if (ballVy > -3 && ballVy < 3) {
+                ballVy = 0;
+            }
+        }
+    }
+    if (ballY < -40) {
+        ballY = -40;
+        ballVy = -ballVy * restitution / 100;
+    }
+    if (bounced != 0 && (ballVy <= -4 || ballVy >= 4 || ballVx <= -6 || ballVx >= 6)) {
+        PlayBallHitSound();
+    }
+    if (ballVx > 2 || ballVx < -2) {
+        ballSpinFrame = (ballSpinFrame + ((ballVx > 0) ? 1 : 7)) & 7;
+    } else if (ballVy < -2 || ballVy > 2) {
+        ballSpinFrame = (ballSpinFrame + 1) & 7;
+    }
+    PublishBallPose();
+    PresentBallSprite();
+    KeepBallTopmost();
+}
+
+BOOL TryBeginBallCharge(void)
+{
+    HWND ball;
+    short bx;
+    short by;
+    int dx;
+    int dy;
+
+    if (!IsInterruptibleForBallScare(subWindowState)) {
+        return FALSE;
+    }
+    if (subWindowState >= 175 && subWindowState <= 177) {
+        return FALSE;
+    }
+    ball = FindScreenMateBallWindow();
+    if (ball == NULL) {
+        return FALSE;
+    }
+    if (GetWindowWord(ball, 4) != 0) {
+        return FALSE; /* User is dragging it. */
+    }
+    bx = (short)GetWindowWord(ball, 0);
+    by = (short)GetWindowWord(ball, 2);
+    dx = (bx + 20) - (spriteX + 20);
+    if (dx < 0) {
+        dx = -dx;
+    }
+    dy = by - spriteY;
+    if (dy < 0) {
+        dy = -dy;
+    }
+    if (dx > 120 || dy > 80) {
+        return FALSE;
+    }
+    animationFrameCounter = 40;
+    framePeriodCounter = 0;
+    subWindowState = 176;
+    return TRUE;
+}
+
 /* Initialize bitmaps. */
 BOOL InitializeBitmapsMain(HWND arg_0)
 {
@@ -2233,6 +2808,7 @@ void ReleaseBitmaps()
     }
 #ifdef _WIN32
     ReleaseLayeredSurface(&layeredSurfaceMain);
+    ReleaseLayeredSurface(&layeredSurfaceBall);
 #endif
 }
 
@@ -3245,6 +3821,13 @@ void UpdateSpriteStateOnTimer(void)
         PopulateKnownInstanceListSearchingVisibleWindowsNameMatch(selfInstanceWindowHandle);
         knownInstanceListUpdatePeriodCounter = 0;
     }
+    if (ballWindowHandle != NULL) {
+        UpdateBallPhysics();
+    }
+    if ((subWindowState == 1 || subWindowState == 2 || subWindowState == 8 || subWindowState == 11)
+        && TryBeginBallCharge()) {
+        goto stateLoopContinue;
+    }
     if (chimeEnabled != 0) {
         ProcessChime();
     }
@@ -3388,7 +3971,7 @@ stateLoopContinue:
         }
         break;
     case 6:
-        subWindowState = specialActionTable[rand() % 8];
+        subWindowState = specialActionTable[rand() % 9];
         break;
     case 7:
         collisionEnabled = 0;
@@ -5836,6 +6419,140 @@ stateLoopContinue:
             subWindowState = 1;
         }
         break;
+    case 175:
+        /* Sport: spawn a shared ball (if none) then charge. */
+        if (FindScreenMateBallWindow() == NULL) {
+            CreateBallWindow();
+        }
+        animationFrameCounter = 40;
+        framePeriodCounter = 0;
+        subWindowState = 176;
+        break;
+    case 176:
+        /* Charge toward the ball and headbutt it. */
+        {
+            HWND ball;
+            short bx;
+            short by;
+            int dist;
+            HWND owner;
+
+            ball = FindScreenMateBallWindow();
+            if (ball == NULL) {
+                subWindowState = 1;
+                break;
+            }
+            bx = (short)GetWindowWord(ball, 0);
+            by = (short)GetWindowWord(ball, 2);
+            if (bx + 20 < spriteX + 20) {
+                facingDirection = 1;
+            } else {
+                facingDirection = -1;
+            }
+            if (framePeriodCounter++ < 1) {
+                break;
+            }
+            framePeriodCounter = 0;
+            spriteX -= facingDirection * 16;
+            if (spriteX < -40) {
+                spriteX = -40;
+            }
+            if (spriteX > screenWidth) {
+                spriteX = screenWidth;
+            }
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            dist = (bx + 20) - (spriteX + 20);
+            if (dist < 0) {
+                dist = -dist;
+            }
+            animationFrameCounter -= 1;
+            if (dist <= 44 || animationFrameCounter <= 0) {
+                owner = (HWND)GetWindowLongPtr(ball, GWLP_USERDATA);
+                if (owner == NULL) {
+                    owner = selfInstanceWindowHandle;
+                }
+                if (owner == selfInstanceWindowHandle) {
+                    ApplyBallKick(facingDirection);
+                } else {
+                    SendMessage(owner, WM_USER, (WPARAM)4, (LPARAM)facingDirection);
+                }
+                animationFrameCounter = 0;
+                framePeriodCounter = 0;
+                subWindowState = 177;
+            }
+            HandleOutOfViewOrTopPosition(1);
+        }
+        break;
+    case 177:
+        /* Brief ram / recoil after the headbutt. */
+        if (framePeriodCounter++ < 1) {
+            break;
+        }
+        framePeriodCounter = 0;
+        spriteIndex = collisionAnimationFramesWithHeightOffset[animationFrameCounter < 3 ? animationFrameCounter : 2];
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        animationFrameCounter += 1;
+        if (animationFrameCounter >= 4) {
+            spriteX += facingDirection * 8;
+            UpdateMainWindowSprite(spriteX, spriteY, 3);
+            if (FindScreenMateBallWindow() != NULL && (rand() & 3) != 0) {
+                animationFrameCounter = 30;
+                framePeriodCounter = 0;
+                subWindowState = 176;
+            } else {
+                subWindowState = 1;
+            }
+        }
+        break;
+    case 178:
+        /* Ball popped: scared, then faint. */
+        if (framePeriodCounter++ < 1) {
+            break;
+        }
+        framePeriodCounter = 0;
+        spriteIndex = amazedAnimationFrames[animationFrameCounter];
+        animationFrameCounter += 1;
+        if (spriteIndex == 0) {
+            animationFrameCounter = 0;
+            if (++acidTicks < 2) {
+                break;
+            }
+            acidTicks = 0;
+            animationFrameCounter = 12;
+            spriteIndex = 66;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 179;
+            break;
+        }
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        break;
+    case 179:
+        /* Lie down briefly, then get up. */
+        if (framePeriodCounter++ < 1) {
+            break;
+        }
+        framePeriodCounter = 0;
+        if (animationFrameCounter > 0) {
+            animationFrameCounter -= 1;
+            spriteIndex = 66;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            break;
+        }
+        {
+            WORD * getUp = (facingDirection > 0) ? getUpAnimationFramesLeft : getUpAnimationFramesRight;
+            spriteIndex = getUp[acidTicks];
+            acidTicks += 1;
+            if (spriteIndex == 0) {
+                acidTicks = 0;
+                spriteIndex = 3;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 1;
+                break;
+            }
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        }
+        break;
     default:
         break;
     }
@@ -5904,6 +6621,7 @@ void ProcessDebugWindowActionChange(WPARAM arg_0)
     fadeOutFrameCounter = 0;
     StopPlayingSound();
     DestroySubwindow();
+    DestroyBallWindow();
     RestoreAcidColours();
     switch (arg_0) {
     case 0:
@@ -6001,6 +6719,9 @@ void ProcessDebugWindowActionChange(WPARAM arg_0)
         break;
     case 31:
         subWindowState = 164;
+        break;
+    case 32:
+        subWindowState = 175;
         break;
     default:
         break;
