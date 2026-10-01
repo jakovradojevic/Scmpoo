@@ -2924,6 +2924,9 @@ void RestoreAcidColours(void)
     if (acidModeActive == 0 && spritePaletteOverride == NULL) {
         return;
     }
+    if (acidModeActive != 0) {
+        StopPlayingSound();
+    }
     spritePaletteOverride = NULL;
     acidModeActive = 0;
     ReloadAcidSheets();
@@ -5611,15 +5614,33 @@ stateLoopContinue:
         }
         break;
     case 164:
-        /* Run toward the mouse cursor, then graze it. */
+        /* Spawn the mushroom at the cursor, then run to it and graze. */
         {
             POINT cursorPt;
             GetCursorPos(&cursorPt);
-            if (cursorPt.x < spriteX + 20) {
+            CreateSubwindow();
+            cursorGrazeStage = 0;
+            cursorGrazeSpinFrame = 0;
+            spriteIndexSub = 352;
+            /* Prop cells have ~7px empty at the bottom; nudge down so it sits on the ground. */
+            spriteYSub = spriteY + 6;
+            spriteXSub = cursorPt.x - 20;
+            if (spriteXSub < 0) {
+                spriteXSub = 0;
+            }
+            if (spriteXSub > screenWidth - 40) {
+                spriteXSub = screenWidth - 40;
+            }
+            HideSystemCursorForGraze();
+            if (spriteXSub + 20 < spriteX + 20) {
                 facingDirection = 1;
             } else {
                 facingDirection = -1;
             }
+            facingDirectionSub = facingDirection;
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+            screenMateOnTopOfSubwindow = 1;
+            PlaceWindowTopAnother(knownInstanceWindows[8], selfInstanceWindowHandle);
         }
         animationFrameCounter = 36;
         spriteIndex = 4;
@@ -5628,15 +5649,19 @@ stateLoopContinue:
         framePeriodCounter = 0;
         break;
     case 165:
+        /* Keep the mushroom spinning while the sheep runs toward it. */
+        if (knownInstanceWindows[8] != NULL) {
+            cursorGrazeSpinFrame = (cursorGrazeSpinFrame + 1) % 8;
+            spriteIndexSub = 352 + cursorGrazeSpinFrame;
+            UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        }
         if (framePeriodCounter++ < 1) {
             break;
         }
         framePeriodCounter = 0;
         {
-            POINT cursorPt;
             int dist;
-            GetCursorPos(&cursorPt);
-            if (cursorPt.x < spriteX + 20) {
+            if (spriteXSub + 20 < spriteX + 20) {
                 facingDirection = 1;
             } else {
                 facingDirection = -1;
@@ -5650,12 +5675,13 @@ stateLoopContinue:
             }
             spriteIndex = spriteIndex == 4 ? 5 : 4;
             UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
-            dist = cursorPt.x - (spriteX + 20);
+            /* Stop when the sheep is roughly mouth-adjacent to the mushroom. */
+            dist = (spriteXSub + 20) - (spriteX + 20);
             if (dist < 0) {
                 dist = -dist;
             }
             animationFrameCounter -= 1;
-            if (dist < 48 || animationFrameCounter <= 0) {
+            if (dist <= 48 || animationFrameCounter <= 0) {
                 subWindowState = 166;
                 break;
             }
@@ -5663,25 +5689,25 @@ stateLoopContinue:
         HandleOutOfViewOrTopPosition(1);
         break;
     case 166:
-        /* Graze VR cursor prop (separate from flower eat). */
+        /* Keep the mushroom where it spawned; park the sheep beside it to graze. */
         animationFrameCounter = 0;
-        subWindowState = 167;
-        CreateSubwindow();
+        framePeriodCounter = 0;
+        if (spriteXSub + 20 < spriteX + 20) {
+            facingDirection = 1;
+            spriteX = spriteXSub + 40;
+        } else {
+            facingDirection = -1;
+            spriteX = spriteXSub - 40;
+        }
         facingDirectionSub = facingDirection;
-        spriteYSub = spriteY;
         cursorGrazeStage = 0;
         cursorGrazeSpinFrame = 0;
         spriteIndexSub = 352;
-        HideSystemCursorForGraze();
-        /* The prop must sit on the mouth side: its bitten edge faces the sheep. */
-        if (facingDirection > 0) {
-            spriteXSub = spriteX - 40;
-        } else {
-            spriteXSub = spriteX + 40;
-        }
         UpdateSubWindowSprite(spriteXSub, spriteYSub, spriteIndexSub);
+        UpdateMainWindowSprite(spriteX, spriteY, 3);
         screenMateOnTopOfSubwindow = 1;
         PlaceWindowTopAnother(knownInstanceWindows[8], selfInstanceWindowHandle);
+        subWindowState = 167;
         break;
     case 167:
         if (knownInstanceWindows[8] != NULL) {
@@ -5714,6 +5740,7 @@ stateLoopContinue:
             animationFrameCounter = 0;
             framePeriodCounter = 0;
             acidTicks = 0;
+            PlaySoundResourceIdAdditionalFlags(111, SND_LOOP, 0);
             subWindowState = 168;
             break;
         }

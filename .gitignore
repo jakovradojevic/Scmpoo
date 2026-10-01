@@ -19,3 +19,4 @@ docs/images/acid_trip_preview_strip.png
 # Python
 __pycache__/
 *.pyc
+tools/_trance_preview.mp3
