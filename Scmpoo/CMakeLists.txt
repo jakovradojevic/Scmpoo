@@ -22,6 +22,7 @@ set(SCMPOO_RC_ASSETS
   "${CMAKE_CURRENT_SOURCE_DIR}/114.wav"
   "${CMAKE_CURRENT_SOURCE_DIR}/126.bmp"
   "${CMAKE_CURRENT_SOURCE_DIR}/127.bmp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Scmpoo.manifest"
 )
 if(MSVC)
   set_source_files_properties(Scmpoo.rc PROPERTIES OBJECT_DEPENDS "${SCMPOO_RC_ASSETS}")
@@ -35,7 +36,7 @@ if(MSVC)
   endif()
   target_link_libraries(Scmpoo kernel32.lib User32.lib Gdi32.lib shell32.lib WinMM.lib ComCtl32.lib)
   set_property(TARGET Scmpoo PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-  set_property(TARGET Scmpoo PROPERTY LINK_FLAGS "/level='requireAdministrator'")
+  set_property(TARGET Scmpoo PROPERTY LINK_FLAGS "/level='asInvoker'")
   set_property(TARGET Scmpoo PROPERTY VS_DPI_AWARE "ON")
 elseif(MINGW)
   target_link_libraries(Scmpoo kernel32 user32 gdi32 shell32 winmm comctl32)

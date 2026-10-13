@@ -2159,16 +2159,45 @@ void ReleaseSpriteImages(spriteinfo * arg_0)
 }
 
 /* Read configuration from file. */
+char configFilePath[MAX_PATH] = "scmate.ini";
+
+void BuildConfigFilePath(void)
+{
+    char modulePath[MAX_PATH];
+    char *slash;
+    char *scan;
+    DWORD length;
+
+    length = GetModuleFileNameA(NULL, modulePath, MAX_PATH);
+    if (length == 0 || length >= MAX_PATH) {
+        lstrcpy(configFilePath, "scmate.ini");
+        return;
+    }
+    slash = NULL;
+    for (scan = modulePath; *scan != '\0'; scan += 1) {
+        if (*scan == '\\') {
+            slash = scan;
+        }
+    }
+    if (slash == NULL) {
+        lstrcpy(configFilePath, "scmate.ini");
+        return;
+    }
+    lstrcpy(slash + 1, "scmate.ini");
+    lstrcpy(configFilePath, modulePath);
+}
+
 void ReadConfigurationFile(void)
 {
     unusedCa78 = 1;
     alwaysOnTopUnused = 0;
     chimeEnabled = 0U;
     cryEnabled = 0U;
-    cryEnabled = GetPrivateProfileInt("Stray", "Sound", 0, "scmate.ini");
-    chimeEnabled = GetPrivateProfileInt("Stray", "Alarm", 0, "scmate.ini");
-    alwaysMovingEnabled = GetPrivateProfileInt("Stray", "NoSleep", 0, "scmate.ini");
-    gravityAlwaysEnabled = GetPrivateProfileInt("Stray", "GForce", 1, "scmate.ini");
+    BuildConfigFilePath();
+    cryEnabled = GetPrivateProfileInt("Stray", "Sound", 0, configFilePath);
+    chimeEnabled = GetPrivateProfileInt("Stray", "Alarm", 0, configFilePath);
+    alwaysMovingEnabled = GetPrivateProfileInt("Stray", "NoSleep", 0, configFilePath);
+    gravityAlwaysEnabled = GetPrivateProfileInt("Stray", "GForce", 1, configFilePath);
 }
 
 /* Save individual configuration to file. */
@@ -2182,10 +2211,11 @@ void SaveIndividualConfigurationFile(LPCSTR arg_0, LPCSTR arg_4, UINT arg_8, LPC
 /* Save configurations to file. */
 void SaveConfigurationsFile(void)
 {
-    SaveIndividualConfigurationFile("Stray", "Sound", cryEnabled, "scmate.ini");
-    SaveIndividualConfigurationFile("Stray", "Alarm", chimeEnabled, "scmate.ini");
-    SaveIndividualConfigurationFile("Stray", "NoSleep", alwaysMovingEnabled, "scmate.ini");
-    SaveIndividualConfigurationFile("Stray", "GForce", gravityAlwaysEnabled, "scmate.ini");
+    BuildConfigFilePath();
+    SaveIndividualConfigurationFile("Stray", "Sound", cryEnabled, configFilePath);
+    SaveIndividualConfigurationFile("Stray", "Alarm", chimeEnabled, configFilePath);
+    SaveIndividualConfigurationFile("Stray", "NoSleep", alwaysMovingEnabled, configFilePath);
+    SaveIndividualConfigurationFile("Stray", "GForce", gravityAlwaysEnabled, configFilePath);
 }
 
 #ifdef _WIN32

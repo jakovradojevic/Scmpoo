@@ -66,7 +66,7 @@ A rarer action plants a mushroom at the cursor, hides the system pointer, and se
 
 ## Life with the orange
 
-[Orange](https://github.com/jakovradojevic/Orange) is a separate program. The two talk through `mate_protocol.h` (the same header in both trees) and a small hidden director window. Messages are `WM_USER`, so both processes have to run at the same integrity level. Scmpoo asks for administrator, so start Orange with **Run as administrator** as well.
+[Orange](https://github.com/jakovradojevic/Orange) is a separate program. The two talk through `mate_protocol.h` (the same header in both trees) and a small hidden director window. Messages are `WM_USER`, so both processes have to run at the same integrity level. Neither one asks for administrator.
 
 ### Floor
 
@@ -98,7 +98,7 @@ He reacts to visible windows (collisions, landing on top edges when gravity is o
 
 - **Drag** with left/right mouse to move him.
 - **Drop a file** on him to “eat” it (`.wav` plays).
-- **Left double-click** — settings (needs admin on Vista+ to write the `.ini` under the Windows directory).
+- **Left double-click** — settings. The `.ini` is written next to the executable.
 - **Right double-click** — exit.
 - **Ctrl+Shift+left double-click** — debug action picker.
 
