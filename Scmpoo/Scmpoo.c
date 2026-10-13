@@ -16,6 +16,7 @@
 #include <CommCtrl.h>
 #include <MMSystem.h>
 #include <ShellAPI.h>
+#include "mate_protocol.h"
 
 /* GetActiveWindow is made local to current thread in 32-bit Windows. The function of global scope is now GetForegroundWindow. */
 #ifdef _WIN32
@@ -99,14 +100,14 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
-    11, 11, 7, 7,
+    11, 11, 7, 53,
+    11, 75, 7, 47,
+    11, 43, 7, 51,
+    11, 175, 47, 75,
     17, 20, 17, 20,
     17, 20, 17, 20,
     17, 20, 53, 53,
-    53, 164, 175, 11,
+    53, 164, 175, 53,
     58, 58, 58, 45,
     45, 45, 43, 43,
     43, 62, 62, 62,
@@ -454,6 +455,9 @@ WORD alwaysOnTopUnused = 0; /* Always on top? (unused) */
 WORD alienTransformPending = 0; /* UFO beam-up will return alien sheep? */
 WORD alienModeActive = 0; /* Temporary aggressive alien mode. */
 int alienModeTicks = 0; /* Remaining ticks in alien mode. */
+int orangeHornTicks = 0; /* Ticks of orange-horn tint after eating a bloom. */
+HWND mateEatTarget = NULL; /* Orange window this sheep is walking toward. */
+HWND mateCarryTarget = NULL; /* Orange that hooked this sheep. */
 int alienKnockCooldown = 0; /* Frames until next alien knock. */
 WORD systemCursorHiddenForGraze = 0; /* ShowCursor(FALSE) while sheep grazes the cursor. */
 int cursorGrazeStage = 0; /* Bite stage of the cursor prop, 0 (full) to 3. */
@@ -1604,6 +1608,77 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         if (wParam == 5) {
             BeginBallPopScareLocal();
         }
+        if (wParam == MATE_MSG_CHIME) {
+            int hour;
+            if (chimeEnabled == 0 || remainingChimeTimes != 0) {
+                return 0;
+            }
+            if (!IsInterruptibleForBallScare(subWindowState)) {
+                return 0;
+            }
+            hour = (int)lParam;
+            DestroySubwindow();
+            dword_A834 = 0;
+            currentTimeHour = hour;
+            remainingChimeTimes = currentTimeHour + 1;
+            subWindowState = 81;
+            return 0;
+        }
+        if (wParam == MATE_MSG_APPROACH_EAT) {
+            int ox;
+            int oy;
+            int dx;
+            int dy;
+            if (!IsInterruptibleForBallScare(subWindowState)) {
+                return 0;
+            }
+            if (mateEatTarget != NULL && IsWindow(mateEatTarget)) {
+                return 0;
+            }
+            mateEatTarget = (HWND)lParam;
+            if (mateEatTarget == NULL || !IsWindow(mateEatTarget)) {
+                mateEatTarget = NULL;
+                return 0;
+            }
+            ox = (short)GetWindowWord(mateEatTarget, MATE_WORD_X);
+            oy = (short)GetWindowWord(mateEatTarget, MATE_WORD_Y);
+            dx = (ox + 20) - (spriteX + 20);
+            if (dx < 0) {
+                dx = -dx;
+            }
+            dy = oy - spriteY;
+            if (dy < 0) {
+                dy = -dy;
+            }
+            if (dy > 80) {
+                mateEatTarget = NULL;
+                return 0;
+            }
+            animationFrameCounter = 140;
+            framePeriodCounter = 0;
+            subWindowState = 180;
+            return 1;
+        }
+        if (wParam == MATE_MSG_CAUGHT) {
+            if (!IsInterruptibleForBallScare(subWindowState)) {
+                return 0;
+            }
+            if ((HWND)lParam == NULL || !IsWindow((HWND)lParam)) {
+                return 0;
+            }
+            mateCarryTarget = (HWND)lParam;
+            subWindowState = 182;
+            return 1;
+        }
+        if (wParam == MATE_MSG_DROP) {
+            if (subWindowState == 182) {
+                mateCarryTarget = NULL;
+                spriteIndex = 3;
+                UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+                subWindowState = 1;
+            }
+            return 0;
+        }
         return 0;
     case WM_PAINT:
         if (doNotClearWindowOnPaint != 0) {
@@ -1722,6 +1797,7 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         }
         break;
     case WM_DESTROY:
+        MateDirectorDetach(hWnd);
         NotifyOtherInstancesSelfDestruction(hWnd);
         if (knownInstanceWindows[8] != NULL) {
             DestroySubwindow();
@@ -2154,6 +2230,26 @@ BOOL EnsureLayeredSurface(layeredsurface * surface, int width, int height)
     return TRUE;
 }
 
+/* Magenta horn pixels become the orange peel: highlight, fruit, shadow. */
+static DWORD TintHornOrange(DWORD colour)
+{
+    int r = (int)((colour >> 16) & 0xFF);
+    int g = (int)((colour >> 8) & 0xFF);
+    int b = (int)(colour & 0xFF);
+    int rb = r > b ? r - b : b - r;
+
+    if (rb > 28 || r < 90 || b < 90 || g * 2 > r) {
+        return colour;
+    }
+    if (r > 220) {
+        return 0x00FFB02F; /* RGB(255, 176, 47) */
+    }
+    if (r > 150) {
+        return 0x00FF900F; /* RGB(255, 144, 15) */
+    }
+    return 0x00DF6000; /* RGB(223, 96, 0) */
+}
+
 /* Release the 32-bit surface. */
 void ReleaseLayeredSurface(layeredsurface * surface)
 {
@@ -2215,6 +2311,10 @@ void PresentLayeredSprite(HWND window, layeredsurface * surface, int x, int y, H
             if (maskValue != 0 && colourValue == 0) {
                 pixel[column] = 0;
             } else {
+                if (orangeHornTicks > 0 && window == selfInstanceWindowHandle
+                    && alienModeActive == 0 && acidModeActive == 0) {
+                    colourValue = TintHornOrange(colourValue);
+                }
                 pixel[column] = colourValue | 0xFF000000;
             }
         }
@@ -2385,7 +2485,7 @@ HWND FindScreenMateBallWindow(void)
         }
         scanned += 1;
     }
-    return NULL;
+    return MateFindToyOrange();
 }
 
 void PublishBallPose(void)
@@ -2397,17 +2497,12 @@ void PublishBallPose(void)
     SetWindowWord(ballWindowHandle, 2, (WORD)(short)ballY);
 }
 
-/* Desktop floor for the ball: work-area bottom (just above the taskbar). */
+/* Top of the ball sprite: feet on the desktop floor, one cell up. */
 int GetBallFloorY(void)
 {
-    RECT work;
     int floorY;
 
-    if (SystemParametersInfo(SPI_GETWORKAREA, 0, &work, 0)) {
-        floorY = work.bottom - 40;
-    } else {
-        floorY = screenHeight - 40;
-    }
+    floorY = MateDesktopFloor(ballX + 20, ballY + 40) - 40;
     if (floorY < 0) {
         floorY = 0;
     }
@@ -2601,6 +2696,12 @@ BOOL IsInterruptibleForBallScare(int state)
     if (state == 53 || state == 54) {
         return FALSE; /* flower eat */
     }
+    if (state == 180 || state == 181) {
+        return FALSE; /* walking to an orange bloom, or eating it */
+    }
+    if (state == 182) {
+        return FALSE; /* hooked on the orange's line */
+    }
     if (alienModeActive != 0 || acidModeActive != 0 || alienTransformPending != 0) {
         return FALSE;
     }
@@ -2747,7 +2848,8 @@ BOOL TryBeginBallCharge(void)
     if (dy < 0) {
         dy = -dy;
     }
-    if (dx > 120 || dy > 80) {
+    /* Same floor only. A high ball used to count as "close" and got kicked from below. */
+    if (dx > 120 || dy > 36) {
         return FALSE;
     }
     animationFrameCounter = 40;
@@ -3069,6 +3171,24 @@ BOOL IsWindowInKnownInstanceList(HWND arg_0)
     return FALSE;
 }
 
+/* Toy, bloom, and fishing already have their own sheep interaction. */
+static int OrangeRoleSkipsSheepBump(HWND wnd)
+{
+    char className[32];
+    int status;
+
+    if (wnd == NULL || !IsWindow(wnd)) {
+        return 0;
+    }
+    className[0] = 0;
+    GetClassName(wnd, className, 32);
+    if (lstrcmp(className, "Orange") != 0) {
+        return 0;
+    }
+    status = (int)GetWindowWord(wnd, MATE_WORD_STATUS);
+    return status == MATE_STATUS_TOY || status == MATE_STATUS_BLOOM || status == MATE_STATUS_FISH;
+}
+
 /* Find X-coordinate of possible collision with other instances. Return zero when no collision detected. */
 int FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetected(int arg_0, int arg_2, int arg_4, int arg_6)
 {
@@ -3079,6 +3199,9 @@ int FindXCoordinatePossibleCollisionOtherInstancesReturnZeroWhenNoCollisionDetec
     int var_A;
     for (var_2 = 0; var_2 < 8; var_2 += 1) {
         if (knownInstanceWindows[var_2] != NULL) {
+            if (OrangeRoleSkipsSheepBump(knownInstanceWindows[var_2])) {
+                continue;
+            }
             var_4 = (short)GetWindowWord(knownInstanceWindows[var_2], 0);
             var_8 = (short)GetWindowWord(knownInstanceWindows[var_2], 2);
             var_6 = var_4 + 40;
@@ -3367,9 +3490,12 @@ int FindYCoordinatePossibleLandingTopEdgeWhichVisibleWindow(HWND * arg_0, int ar
             }
         }
     }
-    if (arg_2 >= screenHeight && arg_4 <= screenHeight) {
-        *arg_0 = NULL;
-        return screenHeight;
+    {
+        int floorY = MateDesktopFloor((arg_6 + arg_8) / 2, arg_2);
+        if (arg_2 >= floorY && arg_4 <= floorY) {
+            *arg_0 = NULL;
+            return floorY;
+        }
     }
     return 0;
 }
@@ -3384,7 +3510,7 @@ int GetWindowTopYCoordinateIfItIsPossibleLandWindow(HWND arg_0, int arg_2, int a
             return var_8.top;
         }
     }
-    if (arg_2 > screenHeight) {
+    if (arg_2 > MateDesktopFloor((arg_6 + arg_8) / 2, arg_2)) {
         return -1;
     }
     return 0;
@@ -3589,6 +3715,8 @@ void ProcessChime(void)
                 subWindowState = 1;
             }
         }
+    } else if (MateDirectorPresent()) {
+        return;
     } else {
         if (timeCheckPeriodCounter++ < 10) {
             return;
@@ -3817,6 +3945,14 @@ void UpdateSpriteStateOnTimer(void)
     HWND var_8;
     RECT var_10;
     POINT var_14;
+    MateEnsureDirector(selfInstanceWindowHandle);
+    if (orangeHornTicks > 0) {
+        orangeHornTicks -= 1;
+        if (orangeHornTicks == 0) {
+            /* Same frame is not redrawn, so the last orange tint would stay on screen. */
+            spriteColourBitmapPreviousFrame = NULL;
+        }
+    }
     if (knownInstanceListUpdatePeriodCounter++ > 100) {
         PopulateKnownInstanceListSearchingVisibleWindowsNameMatch(selfInstanceWindowHandle);
         knownInstanceListUpdatePeriodCounter = 0;
@@ -3900,6 +4036,9 @@ stateLoopContinue:
             break;
         }
         subWindowState = normalActionTableGravityAlwaysOn[rand() % 80];
+        if (alienModeActive == 0 && preventSpecialActions == 0 && (rand() % 12) == 0) {
+            subWindowState = specialActionTable[rand() % 9];
+        }
         if (alienModeActive != 0 && rand() % 5 != 0) {
             subWindowState = 7;
         }
@@ -5237,7 +5376,7 @@ stateLoopContinue:
         yCoordinateMemory = spriteY;
         spriteX += horizontalSpeed;
         spriteY += verticalSpeed;
-        if (yCoordinateMemory > screenHeight) {
+        if (yCoordinateMemory > MateDesktopFloor(spriteX + 20, yCoordinateMemory + 40)) {
             UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
             subWindowState = 0;
             break;
@@ -6466,8 +6605,21 @@ stateLoopContinue:
             if (dist < 0) {
                 dist = -dist;
             }
-            animationFrameCounter -= 1;
-            if (dist <= 44 || animationFrameCounter <= 0) {
+            {
+                int ballDy = by - spriteY;
+                if (ballDy < 0) {
+                    ballDy = -ballDy;
+                }
+                animationFrameCounter -= 1;
+                if (dist > 36 || ballDy > 28) {
+                    if (animationFrameCounter <= 0) {
+                        subWindowState = 1;
+                    }
+                    HandleOutOfViewOrTopPosition(1);
+                    break;
+                }
+            }
+            if (dist <= 36) {
                 owner = (HWND)GetWindowLongPtr(ball, GWLP_USERDATA);
                 if (owner == NULL) {
                     owner = selfInstanceWindowHandle;
@@ -6550,6 +6702,135 @@ stateLoopContinue:
                 subWindowState = 1;
                 break;
             }
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        }
+        break;
+    case 180:
+        /* Walk to a blooming orange. The orange itself is the flower. */
+        {
+            short ox;
+            short oy;
+            int dist;
+            if (mateEatTarget == NULL || !IsWindow(mateEatTarget) ||
+                GetWindowWord(mateEatTarget, MATE_WORD_STATUS) != MATE_STATUS_BLOOM) {
+                MateDirectorDropJob(selfInstanceWindowHandle);
+                mateEatTarget = NULL;
+                subWindowState = 1;
+                break;
+            }
+            ox = (short)GetWindowWord(mateEatTarget, MATE_WORD_X);
+            oy = (short)GetWindowWord(mateEatTarget, MATE_WORD_Y);
+            (void)oy;
+            if (ox + 20 < spriteX + 20) {
+                facingDirection = 1;
+            } else {
+                facingDirection = -1;
+            }
+            if (framePeriodCounter++ < 1) {
+                break;
+            }
+            framePeriodCounter = 0;
+            spriteX -= facingDirection * 16;
+            if (spriteX < -40) {
+                spriteX = -40;
+            }
+            if (spriteX > screenWidth) {
+                spriteX = screenWidth;
+            }
+            spriteIndex = spriteIndex == 4 ? 5 : 4;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            dist = (ox + 20) - (spriteX + 20);
+            if (dist < 0) {
+                dist = -dist;
+            }
+            animationFrameCounter -= 1;
+            if (dist <= 36) {
+                animationFrameCounter = 0;
+                framePeriodCounter = 0;
+                subWindowState = 181;
+            } else if (animationFrameCounter <= 0) {
+                MateDirectorDropJob(selfInstanceWindowHandle);
+                mateEatTarget = NULL;
+                subWindowState = 1;
+            }
+        }
+        break;
+    case 181:
+        /* Same chew as the flower eat, without spawning Scmpoo's own flower prop. */
+        if (mateEatTarget == NULL || !IsWindow(mateEatTarget) ||
+            GetWindowWord(mateEatTarget, MATE_WORD_STATUS) != MATE_STATUS_BLOOM) {
+            MateDirectorDropJob(selfInstanceWindowHandle);
+            mateEatTarget = NULL;
+            subWindowState = 1;
+            break;
+        }
+        if (framePeriodCounter++ < 2) {
+            break;
+        }
+        framePeriodCounter = 0;
+        if (animationFrameCounter < 0 || animationFrameCounter >= 35) {
+            spriteIndex = 0;
+        } else {
+            spriteIndex = eatAnimationFrames[animationFrameCounter];
+        }
+        animationFrameCounter += 1;
+        if (spriteIndex == 2) {
+            spriteX -= facingDirection * 8;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            break;
+        }
+        if (spriteIndex >= 149 && spriteIndex <= 153) {
+            if (mateEatTarget != NULL && IsWindow(mateEatTarget)) {
+                SendMessageW(mateEatTarget, WM_USER, MATE_MSG_UNBLOOM, 0);
+            }
+            if (animationFrameCounter < 0 || animationFrameCounter >= 35) {
+                spriteIndex = 0;
+            } else {
+                spriteIndex = eatAnimationFrames[animationFrameCounter];
+            }
+            animationFrameCounter += 1;
+        }
+        if (spriteIndex == 0) {
+            SendMessageW(mateEatTarget, WM_USER, MATE_MSG_EATEN, 0);
+            if (alienModeActive == 0 && acidModeActive == 0 && alienTransformPending == 0) {
+                orangeHornTicks = MATE_HORN_TICKS;
+                spriteColourBitmapPreviousFrame = NULL;
+            }
+            mateEatTarget = NULL;
+            spriteIndex = 3;
+            UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+            subWindowState = 1;
+            break;
+        }
+        UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
+        break;
+    case 182:
+        /* Hung from the end of the line, arms up, until the orange lets go. */
+        {
+            short ox;
+            short oy;
+            int face;
+            if (mateCarryTarget == NULL || !IsWindow(mateCarryTarget) ||
+                GetWindowWord(mateCarryTarget, MATE_WORD_STATUS) != MATE_STATUS_FISH) {
+                mateCarryTarget = NULL;
+                subWindowState = 1;
+                break;
+            }
+            ox = (short)GetWindowWord(mateCarryTarget, MATE_WORD_X);
+            oy = (short)GetWindowWord(mateCarryTarget, MATE_WORD_Y);
+            face = (short)GetWindowWord(mateCarryTarget, MATE_WORD_HOOK_X);
+            spriteX = ox + face - 20;
+            spriteY = oy + (short)GetWindowWord(mateCarryTarget, MATE_WORD_HOOK_Y) - 6;
+            {
+                int floorTop = MateDesktopFloor(spriteX + 20, spriteY + 40);
+                if (spriteY + 40 > floorTop) {
+                    spriteY = floorTop - 40;
+                }
+            }
+            facingDirection = 1;
+            framePeriodCounter++;
+            /* 103.bmp cells 14 and 15: arms up, hung on the line. */
+            spriteIndex = ((framePeriodCounter / 4) & 1) ? 47 : 46;
             UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
         }
         break;
