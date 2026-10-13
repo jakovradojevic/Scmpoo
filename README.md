@@ -80,7 +80,7 @@ A real ball arriving during the toy minute ends the toy immediately and the oran
 
 ### Fishing
 
-Calm fishing is a rare random action. The flying cast is in the orange's Animations menu (and `Orange.exe --fish`). During that cast the orange hooks at most one nearby sheep, carries it from the red bobber, and lets go when the flight ends. The sheep plays the last two frames of `103.bmp` (arms up) and is kept above the taskbar for the whole carry.
+Calm fishing and the flying cast are both in the orange's random actions. The flying cast is the rarer of the two. `Orange.exe --fish` starts that cast immediately. During that cast the orange hooks at most one nearby sheep, carries it from the red bobber, and lets go when the flight ends. The sheep plays the last two frames of `103.bmp` (arms up) and is kept above the taskbar for the whole carry.
 
 ![Sheep hung on the bobber](docs/images/fishing_carry.png)
 
@@ -92,7 +92,7 @@ On the hour the director tells every registered mate. The orange, if idle, pause
 
 ## Usage
 
-Poe appears on the desktop and usually picks run or walk. Some actions play his voice. Special actions (including UFOs, alien abduction, the ball, and the mushroom) are rarer.
+Poe appears on the desktop and usually picks run or walk. Some actions play his voice. Every gesture from the debug list is also in the random pool. UFOs, Merry, burning, the alien, and the fall are the rarest slots. Turn and collision still happen on their own while he is moving.
 
 He reacts to visible windows (collisions, landing on top edges when gravity is on). Up to 8 instances can run at once; they can bump into each other.
 

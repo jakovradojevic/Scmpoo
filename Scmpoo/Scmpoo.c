@@ -74,7 +74,9 @@ resourceinfo resourceList[32] = { /* Resource list. Normal 101-111, alien 112-12
     {127, 1, {{NULL, NULL}, 0, 0, 0, 0}} /* Basketball spin frames. */
 };
 resourceinfo flippedResourceList[32] = {0}; /* Resource list storing flipped images. */
-WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "Gravity always on" disabled). */
+/* Walk and run still lead. The tail is every gesture that was not already
+   in this table: fall, the three Merrys, the three UFOs, burning, alien. */
+WORD normalActionTableGravityAlwaysOff[] = {
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
@@ -94,9 +96,11 @@ WORD normalActionTableGravityAlwaysOff[80] = { /* Normal action table (option "G
     13, 51, 51, 51,
     15, 15, 35, 35,
     47, 47, 49, 49,
-    75, 75, 9, 9
+    75, 75, 9, 9,
+    96, 116, 121, 126, 128, 135, 142, 147, 155
 };
-WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gravity always on" enabled). */
+/* Same tail, plus climb (85). With gravity always on, climb has no other entry. */
+WORD normalActionTableGravityAlwaysOn[] = {
     11, 11, 7, 7,
     11, 11, 7, 7,
     11, 11, 7, 7,
@@ -116,7 +120,8 @@ WORD normalActionTableGravityAlwaysOn[80] = { /* Normal action table (option "Gr
     13, 51, 51, 51,
     15, 15, 35, 35,
     47, 47, 49, 49,
-    75, 75, 9, 9
+    75, 75, 9, 9,
+    85, 96, 116, 121, 126, 128, 135, 142, 147, 155
 };
 WORD specialActionTable[9] = { /* Special action table. */
     116, 121, 126, 147,
@@ -4008,7 +4013,7 @@ stateLoopContinue:
             subWindowState = 4;
             break;
         }
-        subWindowState = normalActionTableGravityAlwaysOff[rand() % 80];
+        subWindowState = normalActionTableGravityAlwaysOff[rand() % (int)(sizeof(normalActionTableGravityAlwaysOff) / sizeof(normalActionTableGravityAlwaysOff[0]))];
         if (alienModeActive != 0 && rand() % 5 != 0) {
             /* Alien: chase/run most of the time. */
             subWindowState = 7;
@@ -4035,7 +4040,7 @@ stateLoopContinue:
             sleepTimeoutAction = 0;
             break;
         }
-        subWindowState = normalActionTableGravityAlwaysOn[rand() % 80];
+        subWindowState = normalActionTableGravityAlwaysOn[rand() % (int)(sizeof(normalActionTableGravityAlwaysOn) / sizeof(normalActionTableGravityAlwaysOn[0]))];
         if (alienModeActive == 0 && preventSpecialActions == 0 && (rand() % 12) == 0) {
             subWindowState = specialActionTable[rand() % 9];
         }
