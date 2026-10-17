@@ -98,9 +98,11 @@ He reacts to visible windows (collisions, landing on top edges when gravity is o
 
 - **Drag** with left/right mouse to move him.
 - **Drop a file** on him to “eat” it (`.wav` plays).
-- **Left double-click** — settings. The `.ini` is written next to the executable.
+- **Left double-click** — settings (crying, hourly chime, always move, gravity, always on top). The `.ini` is written next to the executable.
 - **Right double-click** — exit.
 - **Ctrl+Shift+left double-click** — debug action picker.
+
+**Always on top** (on by default) keeps Poe above other windows. Turn it off in settings if you want ordinary windows to cover him.
 
 ## Build from source
 

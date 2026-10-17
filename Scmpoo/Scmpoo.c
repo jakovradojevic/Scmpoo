@@ -456,7 +456,7 @@ windowinfo visibleWindowList[32] = {{NULL, {0, 0, 0, 0}, {0}}}; /* Currently vis
 
 #define visibleWindowList visibleWindowList
 WORD preventSpecialActions = 0; /* Prevent special actions? */
-WORD alwaysOnTopUnused = 0; /* Always on top? (unused) */
+WORD alwaysOnTopUnused = 1; /* Always on top (settings OnTop). */
 WORD alienTransformPending = 0; /* UFO beam-up will return alien sheep? */
 WORD alienModeActive = 0; /* Temporary aggressive alien mode. */
 int alienModeTicks = 0; /* Remaining ticks in alien mode. */
@@ -610,6 +610,7 @@ void KeepBallTopmost(void);
 void BroadcastBallPopScare(void);
 void BeginBallPopScareLocal(void);
 BOOL IsInterruptibleForBallScare(int);
+BOOL CanLeaveForBloom(int);
 BOOL TryBeginBallCharge(void);
 void PlaceWindowTopmostPosition(HWND);
 void PlaceWindowTopAnother(HWND, HWND);
@@ -1630,11 +1631,7 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
             return 0;
         }
         if (wParam == MATE_MSG_APPROACH_EAT) {
-            int ox;
-            int oy;
-            int dx;
-            int dy;
-            if (!IsInterruptibleForBallScare(subWindowState)) {
+            if (!CanLeaveForBloom(subWindowState)) {
                 return 0;
             }
             if (mateEatTarget != NULL && IsWindow(mateEatTarget)) {
@@ -1645,21 +1642,10 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
                 mateEatTarget = NULL;
                 return 0;
             }
-            ox = (short)GetWindowWord(mateEatTarget, MATE_WORD_X);
-            oy = (short)GetWindowWord(mateEatTarget, MATE_WORD_Y);
-            dx = (ox + 20) - (spriteX + 20);
-            if (dx < 0) {
-                dx = -dx;
-            }
-            dy = oy - spriteY;
-            if (dy < 0) {
-                dy = -dy;
-            }
-            if (dy > 80) {
-                mateEatTarget = NULL;
-                return 0;
-            }
-            animationFrameCounter = 140;
+            DestroySubwindow();
+            ufoBeamHeight = 0;
+            ufoBeamHeightSub = 0;
+            animationFrameCounter = 180;
             framePeriodCounter = 0;
             subWindowState = 180;
             return 1;
@@ -1791,11 +1777,11 @@ LRESULT CALLBACK ScreenMateMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         FreeProcInstance(proc);
         ClearWindow(hWnd);
         if (*(WORD *)var_122 != alwaysOnTopUnused) {
-            if (alwaysOnTopUnused != 0) {
-                SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-            } else {
-                SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+            PlaceWindowTopmostPosition(hWnd);
+            if (knownInstanceWindows[8] != NULL) {
+                PlaceWindowTopmostPosition(knownInstanceWindows[8]);
             }
+            KeepBallTopmost();
         }
         if (var_128 != gravityAlwaysEnabled && gravityAlwaysEnabled != 0) {
             ApplyEnvironmentActionChange(2);
@@ -1881,6 +1867,7 @@ BOOL CALLBACK ConfigDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
         SendDlgItemMessage(hDlg, 1002, BM_SETCHECK, (WPARAM)cryEnabled, 0);
         SendDlgItemMessage(hDlg, 1003, BM_SETCHECK, (WPARAM)alwaysMovingEnabled, 0);
         SendDlgItemMessage(hDlg, 1004, BM_SETCHECK, (WPARAM)gravityAlwaysEnabled, 0);
+        SendDlgItemMessage(hDlg, 1005, BM_SETCHECK, (WPARAM)alwaysOnTopUnused, 0);
         return TRUE;
     case WM_COMMAND:
         if (wParam == IDRETRY) {
@@ -1892,6 +1879,7 @@ BOOL CALLBACK ConfigDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
             cryEnabled = IsDlgButtonChecked(hDlg, 1002);
             alwaysMovingEnabled = IsDlgButtonChecked(hDlg, 1003);
             gravityAlwaysEnabled = IsDlgButtonChecked(hDlg, 1004);
+            alwaysOnTopUnused = IsDlgButtonChecked(hDlg, 1005);
             SaveConfigurationsFile();
         }
         if (wParam == IDABORT) {
@@ -2018,7 +2006,9 @@ void DestroySubwindow(void)
 /* Place window to topmost position. */
 void PlaceWindowTopmostPosition(HWND arg_0)
 {
-    if (alwaysOnTopUnused == 0) {
+    if (alwaysOnTopUnused != 0) {
+        SetWindowPos(arg_0, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+    } else {
         SetWindowPos(arg_0, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
         SetWindowPos(arg_0, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
     }
@@ -2190,7 +2180,6 @@ void BuildConfigFilePath(void)
 void ReadConfigurationFile(void)
 {
     unusedCa78 = 1;
-    alwaysOnTopUnused = 0;
     chimeEnabled = 0U;
     cryEnabled = 0U;
     BuildConfigFilePath();
@@ -2198,6 +2187,7 @@ void ReadConfigurationFile(void)
     chimeEnabled = GetPrivateProfileInt("Stray", "Alarm", 0, configFilePath);
     alwaysMovingEnabled = GetPrivateProfileInt("Stray", "NoSleep", 0, configFilePath);
     gravityAlwaysEnabled = GetPrivateProfileInt("Stray", "GForce", 1, configFilePath);
+    alwaysOnTopUnused = (WORD)GetPrivateProfileInt("Stray", "OnTop", 1, configFilePath);
 }
 
 /* Save individual configuration to file. */
@@ -2216,6 +2206,7 @@ void SaveConfigurationsFile(void)
     SaveIndividualConfigurationFile("Stray", "Alarm", chimeEnabled, configFilePath);
     SaveIndividualConfigurationFile("Stray", "NoSleep", alwaysMovingEnabled, configFilePath);
     SaveIndividualConfigurationFile("Stray", "GForce", gravityAlwaysEnabled, configFilePath);
+    SaveIndividualConfigurationFile("Stray", "OnTop", alwaysOnTopUnused, configFilePath);
 }
 
 #ifdef _WIN32
@@ -2550,7 +2541,12 @@ void KeepBallTopmost(void)
     if (ballWindowHandle == NULL) {
         return;
     }
-    SetWindowPos(ballWindowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+    if (alwaysOnTopUnused != 0) {
+        SetWindowPos(ballWindowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+    } else {
+        SetWindowPos(ballWindowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+        SetWindowPos(ballWindowHandle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+    }
 }
 
 void PresentBallSprite(void)
@@ -2736,6 +2732,18 @@ BOOL IsInterruptibleForBallScare(int state)
     }
     if (state == 182) {
         return FALSE; /* hooked on the orange's line */
+    }
+    if (alienModeActive != 0 || acidModeActive != 0 || alienTransformPending != 0) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+/* A blooming orange outranks a gesture. Alien, acid, and an eat already in progress still win. */
+BOOL CanLeaveForBloom(int state)
+{
+    if (state == 53 || state == 54 || state == 180 || state == 181 || state == 182) {
+        return FALSE;
     }
     if (alienModeActive != 0 || acidModeActive != 0 || alienTransformPending != 0) {
         return FALSE;
@@ -4015,6 +4023,10 @@ void UpdateSpriteStateOnTimer(void)
         }
     }
 stateLoopContinue:
+    if (subWindowState != 180 && subWindowState != 181 && mateEatTarget != NULL) {
+        MateDirectorDropJob(selfInstanceWindowHandle);
+        mateEatTarget = NULL;
+    }
     switch (subWindowState) {
     case 0:
         gravityEnabled = 0;
@@ -6755,35 +6767,53 @@ stateLoopContinue:
             }
             ox = (short)GetWindowWord(mateEatTarget, MATE_WORD_X);
             oy = (short)GetWindowWord(mateEatTarget, MATE_WORD_Y);
-            (void)oy;
-            if (ox + 20 < spriteX + 20) {
-                facingDirection = 1;
-            } else {
-                facingDirection = -1;
+            dist = (ox + 20) - (spriteX + 20);
+            {
+                int dy = oy - spriteY;
+                int adx = dist < 0 ? -dist : dist;
+                int ady = dy < 0 ? -dy : dy;
+                if (dist < 0) {
+                    facingDirection = 1;
+                } else if (dist > 0) {
+                    facingDirection = -1;
+                }
+                if (adx <= 36 && ady <= 36) {
+                    animationFrameCounter = 0;
+                    framePeriodCounter = 0;
+                    subWindowState = 181;
+                    break;
+                }
+                if (framePeriodCounter++ < 1) {
+                    break;
+                }
+                framePeriodCounter = 0;
+                if (adx > 16) {
+                    spriteX += dist > 0 ? 16 : -16;
+                } else {
+                    spriteX += dist;
+                }
+                if (ady > 16) {
+                    spriteY += dy > 0 ? 16 : -16;
+                } else {
+                    spriteY += dy;
+                }
             }
-            if (framePeriodCounter++ < 1) {
-                break;
-            }
-            framePeriodCounter = 0;
-            spriteX -= facingDirection * 16;
             if (spriteX < -40) {
                 spriteX = -40;
             }
             if (spriteX > screenWidth) {
                 spriteX = screenWidth;
             }
+            {
+                int floorTop = MateDesktopFloor(spriteX + 20, spriteY + 40);
+                if (spriteY + 40 > floorTop) {
+                    spriteY = floorTop - 40;
+                }
+            }
             spriteIndex = spriteIndex == 4 ? 5 : 4;
             UpdateMainWindowSprite(spriteX, spriteY, spriteIndex);
-            dist = (ox + 20) - (spriteX + 20);
-            if (dist < 0) {
-                dist = -dist;
-            }
             animationFrameCounter -= 1;
-            if (dist <= 36) {
-                animationFrameCounter = 0;
-                framePeriodCounter = 0;
-                subWindowState = 181;
-            } else if (animationFrameCounter <= 0) {
+            if (animationFrameCounter <= 0) {
                 MateDirectorDropJob(selfInstanceWindowHandle);
                 mateEatTarget = NULL;
                 subWindowState = 1;
